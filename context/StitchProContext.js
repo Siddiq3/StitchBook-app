@@ -27,7 +27,7 @@ import {
 const StitchProContext = createContext(null);
 
 const SUBSCRIPTION_REQUIRED_MESSAGE =
-"Your free trial has expired. Take a subscription to continue using StitchBook.";
+"Your StitchBook plan is not active.";
 
 export const useStitchPro = () => {
   const ctx = useContext(StitchProContext);
@@ -301,12 +301,6 @@ export const StitchProProvider = ({ children }) => {
     }
   }, []);
 
-  const createSubscription = async () => {
-    throw new Error(
-      "Open the Subscription screen to complete secure in-app payment."
-    );
-  };
-
   const checkSubscriptionActive = async () => {
     try {
       const res = await subscriptionApi.checkActive();
@@ -317,17 +311,6 @@ export const StitchProProvider = ({ children }) => {
     }
   };
 
-  const updateSubscriptionStatus = async (id, status) => {
-    try {
-      const res = await subscriptionApi.updateStatus(id, status);
-      const subscription = res.data?.data || res.data;
-      set({ subscription });
-      return subscription;
-    } catch (err) {
-
-      throw err;
-    }
-  };
 
   const isSubscriptionRequiredError = (err) => {
     const details = err.response?.data?.error;
@@ -1145,9 +1128,7 @@ export const StitchProProvider = ({ children }) => {
         subscription: state.subscription,
         subscriptionLoading: state.subscriptionLoading,
         fetchSubscription,
-        createSubscription,
         checkSubscriptionActive,
-        updateSubscriptionStatus,
 
         // Staff
         fetchStaff,

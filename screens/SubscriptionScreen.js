@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   View,
   ScrollView,
@@ -6,8 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   TouchableOpacity,
-  AppState,
-  Linking } from
+  AppState } from
 'react-native';
 import { format, parseISO } from 'date-fns';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -15,43 +14,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { MotiView } from 'moti';
 import { useStitchPro } from '../context/StitchProContext';
 import { useToast } from '../context/ToastContext';
-import { subscriptionApi } from '../services/api';
 import ScreenHeader from '../components/ScreenHeader';
 import AppButton from '../components/AppButton';
 import { colors123, fonts, radius, spacing, shadows } from '../utils/theme';import { useLanguage } from "../context/LanguageContext";
-
-const PLAN_CONFIG = {
-  basic: {
-    amount: 299,
-    display: 'INR 299/Monthly',
-    planType: 'basic',
-    label: 'Basic',
-    caption: 'Owner-only access for small shops',
-    badge: '',
-    staffText: '1 owner login',
-    features: ['Customers + orders', 'Measurements', 'Payments + bills', 'No staff login']
-  },
-  team: {
-    amount: 399,
-    display: 'INR 399/Monthly',
-    planType: 'team',
-    label: 'Team',
-    caption: 'For owner with cutter/stitcher access',
-    badge: 'Most useful',
-    staffText: 'Owner + 2 staff users',
-    features: ['Everything in Basic', '2 staff app logins', 'Cutting/Stitching assignment', 'Staff work status']
-  },
-  pro: {
-    amount: 599,
-    display: 'INR 599/Monthly',
-    planType: 'pro',
-    label: 'Pro',
-    caption: 'For busier shops with a small team',
-    badge: 'Best for teams',
-    staffText: 'Owner + 5 staff users',
-    features: ['Everything in Team', '5 staff app logins', 'Staff earnings tracking', 'Production dashboard']
-  }
-};
 
 const PLAN_FEATURES = [
 'Order Management',
@@ -166,7 +131,6 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
     fetchSubscription
   } = useStitchPro();
   const { showToast } = useToast();
-  const [openingPlan, setOpeningPlan] = useState('');
   const styles = getSubscriptionStyles(); // Get styles from lazy-evaluated cache
 
   useEffect(() => {
@@ -203,14 +167,6 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
     return 'Your free trial has ended';
   }, [subscriptionData, trialMeta.remainingDays]);
 
-  const offerDaysLeft = useMemo(() => {
-    if (!subscriptionData?.trialEndDate) return 0;
-    const offerEndDate = new Date(subscriptionData.trialEndDate);
-    const today = new Date();
-    const diff = Math.ceil((offerEndDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-    return diff > 0 ? diff : 0;
-  }, [subscriptionData]);
-
   const activePlanName = subscriptionData?.planType ?
   PLAN_TYPE_LABEL[subscriptionData.planType] || subscriptionData.planType :
   'Basic Plan';
@@ -228,7 +184,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
       return {
         eyebrow: 'Free trial',
         title: trialText,
-        description: 'Your shop tools stay open during trial. After web activation, refresh here to sync your plan.',
+        description: t("subscriptionTrialDescription"),
         icon: 'timer-sand'
       };
     }
@@ -237,7 +193,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
       return {
         eyebrow: 'Action needed',
         title: 'Trial completed',
-        description: 'Subscription activation is handled on the StitchBook web account. Return here and refresh after activation.',
+        description: t("subscriptionInactiveDescription"),
         icon: 'lock-alert-outline'
       };
     }
@@ -245,7 +201,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
     return {
       eyebrow: 'Subscription',
       title: 'Subscription status',
-      description: 'View plan details here. Payments are handled on the StitchBook web account and synced automatically.',
+      description: t("subscriptionDefaultDescription"),
       icon: 'shield-lock-outline'
     };
   }, [
@@ -254,6 +210,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
   isTrial,
   isTrialExpired,
   subscriptionData?.daysRemaining,
+  t,
   trialText]
   );
 
@@ -269,40 +226,6 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
     }
   };
 
-  const getUpgradeErrorMessage = (err) => {
-    const responseData = err.response?.data;
-    return responseData?.error?.message ||
-    responseData?.message ||
-    err.message ||
-    'Unable to open subscription page';
-  };
-
-  const handleTakeSubscriptionPress = async (planKey = 'basic') => {
-    if (openingPlan) return;
-
-    setOpeningPlan(planKey);
-    try {
-      const response = await subscriptionApi.createUpgradeSession(planKey);
-      const upgradeUrl = response.data?.data?.upgradeUrl || response.data?.upgradeUrl;
-
-      if (!upgradeUrl) {
-        throw new Error(t("auto_unable_to_create_subscription_page_link"));
-      }
-
-      const canOpen = await Linking.canOpenURL(upgradeUrl);
-      if (!canOpen) {
-        throw new Error(t("auto_unable_to_open_subscription_page"));
-      }
-
-      await Linking.openURL(upgradeUrl);
-      showToast(t("auto_opening_subscription_page"), 'success');
-    } catch (err) {
-      showToast(getUpgradeErrorMessage(err), 'error');
-    } finally {
-      setOpeningPlan('');
-    }
-  };
-
   const renderFeatureItem = (label, active) =>
   <View key={label} style={styles.featureTile}>
       <MaterialCommunityIcons
@@ -314,66 +237,6 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
     </View>;
 
 
-  const renderPlanCard = (planKey) => {
-    const plan = PLAN_CONFIG[planKey];
-
-    return (
-      <MotiView
-        key={planKey}
-        animate={{ opacity: 1, translateY: 0 }}
-        from={{ opacity: 0, translateY: 14 }}
-        transition={{ delay: planKey === 'team' ? 80 : planKey === 'pro' ? 130 : 30, duration: 280, type: 'timing' }}
-        style={[
-        styles.planCard,
-        planKey === 'team' && styles.planCardRecommended]
-        }>
-        
-        {plan.badge ?
-        <View style={styles.planTopBadge}>
-            <MaterialCommunityIcons name="star-four-points" size={13} color={colors123.text} />
-            <Text style={styles.planTopBadgeText}>{plan.badge}</Text>
-          </View> :
-        null}
-        <View style={styles.planHeader}>
-          <View style={styles.planNameGroup}>
-            <Text style={styles.planLabel}>{plan.label}</Text>
-            <Text style={styles.planCaption}>
-              {plan.caption}
-            </Text>
-          </View>
-          <View style={styles.planPriceBlock}>
-            <Text style={styles.planAmount}>{t("auto_inr")}{plan.amount}</Text>
-            <Text style={styles.planCycle}>per month</Text>
-          </View>
-        </View>
-        {plan.staffText ?
-        <View style={styles.planStaffRow}>
-            <MaterialCommunityIcons name="account-group-outline" size={14} color={colors123.primary} />
-            <Text style={styles.planSavings}>{plan.staffText}</Text>
-          </View> :
-        null}
-        <View style={styles.planDivider} />
-        <View style={styles.planMiniFeatures}>
-          {plan.features.map((item) =>
-          <View key={`${planKey}-${item}`} style={styles.planMiniFeature}>
-              <MaterialCommunityIcons name="check" size={14} color={colors123.success} />
-              <Text style={styles.planMiniFeatureText}>{item}</Text>
-            </View>
-          )}
-        </View>
-        <AppButton
-          disabled={Boolean(openingPlan)}
-          icon="credit-card-outline"
-          label={openingPlan === planKey ? 'Opening Subscription Page...' : `Take ${plan.label}`}
-          loading={openingPlan === planKey}
-          onPress={() => handleTakeSubscriptionPress(planKey)}
-          style={styles.planButton}
-          variant={planKey === 'team' ? 'accent' : 'primary'} />
-        
-      </MotiView>);
-
-  };
-
   return (
     <ScrollView
       style={styles.container}
@@ -381,9 +244,9 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
       showsVerticalScrollIndicator={false}>
       
       <ScreenHeader
-        eyebrow="Billing"
+        eyebrow="Account"
         title={t("auto_subscription")}
-        subtitle={t("auto_pick_the_plan_that_keeps_your_tailoring_work")} />
+        subtitle={t("subscriptionScreenSubtitle")} />
       
 
       {subscriptionLoading && !subscriptionData ?
@@ -417,12 +280,12 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
           <Text style={styles.heroDescription}>{heroMeta.description}</Text>
           <View style={styles.heroStatsRow}>
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatLabel}>Basic</Text>
-              <Text style={styles.heroStatValue}>{t("auto_inr")}{PLAN_CONFIG.basic.amount}</Text>
+              <Text style={styles.heroStatLabel}>{t("auto_plan")}</Text>
+              <Text style={styles.heroStatValue}>{isTrial ? t("freeTrial") : activePlanName}</Text>
             </View>
             <View style={styles.heroStat}>
-              <Text style={styles.heroStatLabel}>Team</Text>
-              <Text style={styles.heroStatValue}>{t("auto_inr")}{PLAN_CONFIG.team.amount}</Text>
+              <Text style={styles.heroStatLabel}>{t("auto_days_remaining")}</Text>
+              <Text style={styles.heroStatValue}>{isActive ? subscriptionData?.daysRemaining ?? '-' : isTrial ? trialMeta.remainingDays : 0}</Text>
             </View>
           </View>
         </LinearGradient>
@@ -506,18 +369,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
           
           </View>
           <Text style={styles.expiredTitle}>{t("auto_your_10_day_free_trial_is_completed")}</Text>
-          <Text style={styles.expiredText}>{t("auto_your_trial_is_expired_activate_a_plan_from_t")}
-
-        </Text>
-          <AppButton
-          icon="credit-card-outline"
-          label={t("auto_take_subscription")}
-          loading={openingPlan === 'basic'}
-          disabled={Boolean(openingPlan)}
-          onPress={() => handleTakeSubscriptionPress('basic')}
-          style={styles.openBillingButton}
-          variant="primary" />
-        
+          <Text style={styles.expiredText}>{t("subscriptionExpiredDetails")}</Text>
           <AppButton
           icon="refresh"
           label={t("auto_refresh_subscription_status")}
@@ -595,30 +447,10 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
             
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.webBillingTitle}>{t("auto_web_billing_only")}</Text>
-              <Text style={styles.webBillingText}>{t("auto_billing_stays_on_the_stitchpro_web_account_t")}
-
-            </Text>
+              <Text style={styles.webBillingTitle}>{t("subscriptionStatusInfoTitle")}</Text>
+              <Text style={styles.webBillingText}>{t("subscriptionStatusInfoText")}</Text>
             </View>
           </View>
-
-          <Text style={styles.sectionTitle}>{t("auto_available_plans")}</Text>
-          <Text style={styles.sectionSubtitle}>{t("auto_review_plan_pricing_here_plan_activation_hap")}
-
-        </Text>
-          <View style={styles.planList}>
-            {Object.keys(PLAN_CONFIG).map(renderPlanCard)}
-          </View>
-
-          <AppButton
-          icon="credit-card-outline"
-          label={t("auto_take_subscription")}
-          loading={Boolean(openingPlan)}
-          disabled={Boolean(openingPlan)}
-          onPress={() => handleTakeSubscriptionPress('basic')}
-          style={styles.openBillingButton}
-          variant="primary" />
-        
 
           <AppButton
           icon="refresh"
@@ -634,16 +466,6 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
             {PLAN_FEATURES.map((feature) => renderFeatureItem(feature, true))}
           </View>
 
-          {offerDaysLeft > 0 ?
-        <View style={styles.offerBanner}>
-              <MaterialCommunityIcons
-            name="bell-alert-outline"
-            size={18}
-            color={colors123.primary} />
-          
-              <Text style={styles.offerText}>{t("auto_offer_ends_in")}{offerDaysLeft}{t("auto_days_limited_period_offer")}</Text>
-            </View> :
-        null}
         </View> :
       null}
     </ScrollView>);
@@ -1007,12 +829,6 @@ const getSubscriptionStyles = () => {
         fontSize: 18,
         marginBottom: spacing.sm
       },
-      sectionSubtitle: {
-        fontFamily: fonts.regular,
-        color: colors123.textMuted,
-        fontSize: 14,
-        marginBottom: spacing.md
-      },
       featureGrid: {
         gap: 2,
         backgroundColor: colors123.surface
@@ -1077,128 +893,8 @@ const getSubscriptionStyles = () => {
         lineHeight: 20,
         color: colors123.textMuted
       },
-      planList: {
-        gap: spacing.sm
-      },
-      planCard: {
-        backgroundColor: colors123.surface,
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: colors123.borderLight,
-        padding: spacing.md,
-        ...shadows.card
-      },
-      planCardRecommended: {
-        borderColor: colors123.primary,
-        backgroundColor: '#F8FBFF'
-      },
-      planTopBadge: {
-        alignSelf: 'flex-start',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 5,
-        borderRadius: radius.pill,
-        paddingHorizontal: spacing.sm,
-        paddingVertical: 6,
-        backgroundColor: colors123.accent,
-        marginBottom: spacing.sm
-      },
-      planTopBadgeText: {
-        fontFamily: fonts.extrabold,
-        fontSize: 11,
-        color: colors123.text,
-        textTransform: 'uppercase'
-      },
-      planHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        gap: spacing.sm,
-        marginBottom: spacing.sm
-      },
-      planNameGroup: {
-        flex: 1
-      },
-      planLabel: {
-        fontFamily: fonts.extrabold,
-        fontSize: 18,
-        color: colors123.text
-      },
-      planCaption: {
-        marginTop: 4,
-        fontFamily: fonts.medium,
-        fontSize: 13,
-        color: colors123.textMuted
-      },
-      planPriceBlock: {
-        alignItems: 'flex-end',
-        minWidth: 92
-      },
-      planAmount: {
-        fontFamily: fonts.extrabold,
-        fontSize: 20,
-        color: colors123.primary,
-        textAlign: 'right',
-        flexShrink: 0
-      },
-      planCycle: {
-        marginTop: 2,
-        fontFamily: fonts.medium,
-        fontSize: 12,
-        color: colors123.textMuted
-      },
-      planStaffRow: {
-        alignSelf: 'flex-start',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 5,
-        paddingVertical: 4
-      },
-      planSavings: {
-        fontFamily: fonts.semibold,
-        color: colors123.primary,
-        fontSize: 12
-      },
-      planDivider: {
-        height: 1,
-        backgroundColor: colors123.borderLight,
-        marginVertical: spacing.sm
-      },
-      planMiniFeatures: {
-        gap: 7
-      },
-      planMiniFeature: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.xs
-      },
-      planMiniFeatureText: {
-        fontFamily: fonts.medium,
-        fontSize: 13,
-        color: colors123.textSecondary
-      },
-      planButton: {
-        marginTop: spacing.sm
-      },
       refreshButton: {
         marginTop: spacing.sm
-      },
-      openBillingButton: {
-        marginTop: spacing.md
-      },
-      offerBanner: {
-        marginTop: spacing.md,
-        padding: spacing.md,
-        backgroundColor: colors123.primarySoft,
-        borderRadius: radius.md,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm
-      },
-      offerText: {
-        fontFamily: fonts.semibold,
-        color: colors123.primary,
-        fontSize: 14
       }
     });
   }
