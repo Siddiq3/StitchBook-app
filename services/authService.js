@@ -1,0 +1,83 @@
+import { authApi } from './api';
+import { storage } from './storage';
+
+export const authService = {
+  loginWithFirebase: async (firebaseToken) => {
+    const res = await authApi.login(firebaseToken);
+    const { token, refreshToken, user } = res.data.data;
+    await storage.saveAuth(token, refreshToken, user);
+    return { token, refreshToken, user };
+  },
+
+  loginWithGoogle: async (idToken) => {
+    const res = await authApi.google(idToken);
+    const { token, refreshToken, user } = res.data.data;
+    await storage.saveAuth(token, refreshToken, user);
+    return { token, refreshToken, user };
+  },
+
+  loginWithMsg91Widget: async (accessToken) => {
+    const res = await authApi.msg91Widget(accessToken);
+    const { token, refreshToken, user } = res.data.data;
+    await storage.saveAuth(token, refreshToken, user);
+    return { token, refreshToken, user };
+  },
+
+  sendMsg91MobileOtp: async (identifier) => {
+    const res = await authApi.msg91MobileSendOtp(identifier);
+    return res.data.data;
+  },
+
+  loginWithMsg91MobileOtp: async (reqId, otp) => {
+    const res = await authApi.msg91MobileVerifyOtp(reqId, otp);
+    const { token, refreshToken, user } = res.data.data;
+    await storage.saveAuth(token, refreshToken, user);
+    return { token, refreshToken, user };
+  },
+
+  getAuthMethods: async () => {
+    const res = await authApi.methods();
+    return res.data.data;
+  },
+
+  linkGoogle: async (idToken) => {
+    const res = await authApi.linkGoogle(idToken);
+    const user = res.data.data?.user;
+    if (user) {
+      await storage.setUser(user);
+    }
+    return res.data.data;
+  },
+
+  linkMobileWithOtp: async (reqId, otp) => {
+    const res = await authApi.linkMobileVerifyOtp(reqId, otp);
+    const user = res.data.data?.user;
+    if (user) {
+      await storage.setUser(user);
+    }
+    return res.data.data;
+  },
+
+  linkMobileWithAccessToken: async (accessToken) => {
+    const res = await authApi.linkMobileAccessToken(accessToken);
+    const user = res.data.data?.user;
+    if (user) {
+      await storage.setUser(user);
+    }
+    return res.data.data;
+  },
+
+  restoreSession: async () => {
+    const [token, user, shop] = await Promise.all([
+      storage.getToken(),
+      storage.getUser(),
+      storage.getShop(),
+    ]);
+    if (!token || !user) return null;
+    return { token, user, shop };
+  },
+
+  logout: async () => {
+    await storage.clearAll();
+  },
+};

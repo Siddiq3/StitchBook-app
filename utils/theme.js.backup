@@ -1,0 +1,257 @@
+import { Dimensions, PixelRatio } from 'react-native';
+
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+
+export const colors123 = {
+  // Primary brand
+  primary:       '#6366F1',   // Indigo — main brand color
+  primaryLight:  '#EEF2FF',   // Light indigo bg
+  primaryDark:   '#4F46E5',   // Darker indigo for press states
+  accent:        '#8B5CF6',   // Purple accent
+
+  // Semantic
+  success:       '#10B981',   // Green
+  successLight:  '#D1FAE5',
+  warning:       '#F59E0B',   // Amber
+  warningLight:  '#FEF3C7',
+  danger:        '#EF4444',   // Red
+  dangerLight:   '#FEE2E2',
+  info:          '#3B82F6',   // Blue
+  infoLight:     '#DBEAFE',
+
+  // Neutrals (Slate scale)
+  text:          '#1E293B',   // slate-800 — primary text
+  textSecondary: '#475569',   // slate-600 — secondary text
+  textMuted:     '#94A3B8',   // slate-400 — placeholder/muted
+  border:        '#E2E8F0',   // slate-200 — card borders
+  borderLight:   '#F1F5F9',   // slate-100 — dividers
+  background:    '#F8FAFC',   // slate-50 — page background
+  surface:       '#FFFFFF',   // card/surface white
+  overlay:       'rgba(0,0,0,0.5)',
+
+  // Status badge backgrounds + text (exact pairs)
+  pendingBg:     '#FEF3C7',
+  pendingText:   '#92400E',
+  progressBg:    '#DBEAFE',
+  progressText:  '#1E40AF',
+  readyBg:       '#EDE9FE',
+  readyText:     '#5B21B6',
+  deliveredBg:   '#D1FAE5',
+  deliveredText: '#065F46',
+  urgentBg:      '#FEE2E2',
+  urgentText:    '#991B1B',
+
+  // Avatar colors123 (rotate through these)
+  avatarColors: [
+    '#6366F1','#8B5CF6','#EC4899','#14B8A6',
+    '#F59E0B','#10B981','#3B82F6','#EF4444',
+  ],
+
+  // Stat card colors123 (one per card)
+  statPrimary:  '#6366F1',
+  statSuccess:  '#10B981',
+  statWarning:  '#F59E0B',
+  statPurple:   '#8B5CF6',
+  statDanger:   '#EF4444',
+  statInfo:     '#3B82F6',
+};
+
+// Legacy color mapping for existing code compatibility
+export const colors123 = {
+  primary: colors123.primary,
+  primaryDark: colors123.primaryDark,
+  primarySoft: colors123.primaryLight,
+  secondary: colors123.accent,
+  success: colors123.success,
+  successSoft: colors123.successLight,
+  warning: colors123.warning,
+  warningSoft: colors123.warningLight,
+  info: colors123.info,
+  infoSoft: colors123.infoLight,
+  danger: colors123.danger,
+  dangerSoft: colors123.dangerLight,
+  background: colors123.background,
+  backgroundAccent: colors123.primaryLight,
+  surface: colors123.surface,
+  surfaceMuted: colors123.borderLight,
+  card: colors123.surface,
+  border: colors123.border,
+  borderStrong: colors123.border,
+  text: colors123.text,
+  textMuted: colors123.textMuted,
+  textSoft: colors123.textSecondary,
+  white: colors123.surface,
+  shadow: 'rgba(0,0,0,0.05)',
+  overlay: colors123.overlay,
+};
+
+export const FONTS = {
+  regular:    '400',
+  medium:     '500',
+  semibold:   '600',
+  bold:       '700',
+  extraBold:  '800',
+};
+
+export const SIZES = {
+  // Text sizes
+  xs:   11,
+  sm:   12,
+  base: 14,
+  md:   15,
+  lg:   16,
+  xl:   18,
+  xxl:  20,
+  xxxl: 22,
+  huge: 28,
+
+  // Spacing
+  xs2:  4,
+  xs3:  6,
+  sm2:  8,
+  sm3:  10,
+  md2:  12,
+  md3:  16,
+  lg2:  20,
+  lg3:  24,
+  xl2:  32,
+  xl3:  40,
+
+  // Radius
+  radiusSm:   8,
+  radiusMd:   12,
+  radiusLg:   16,
+  radiusXl:   20,
+  radiusFull: 999,
+
+  // Heights
+  inputH:     48,
+  buttonH:    52,
+  buttonHSm:  40,
+  tabBarH:    64,
+  headerH:    56,
+};
+
+// Legacy spacing mapping for existing code
+export const spacing = {
+  xxs: 4,
+  xs: 8,
+  sm: 12,
+  md: 16,
+  lg: 20,
+  xl: 24,
+  xxl: 32,
+};
+
+// Legacy radius mapping for existing code
+export const radius = {
+  sm: 12,
+  md: 16,
+  lg: 20,
+  xl: 24,
+  pill: 999,
+};
+
+// Legacy fonts mapping for existing code
+export const fonts = {
+  regular: '400',
+  medium: '500',
+  semibold: '600',
+  bold: '700',
+  extrabold: '800',
+};
+
+export const SHADOWS = {
+  sm: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  md: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  lg: {
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.10,
+    shadowRadius: 16,
+    elevation: 8,
+  },
+  colored: (color) => ({
+    shadowColor: color,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
+  }),
+};
+
+// Legacy shadows mapping
+export const shadows = {
+  card: SHADOWS.md,
+  soft: SHADOWS.sm,
+};
+
+// Responsive helpers
+export const wp = (percent) => (SCREEN_W * percent) / 100;
+export const hp = (percent) => (SCREEN_H * percent) / 100;
+
+export const normalize = (size) => {
+  const scale = SCREEN_W / 375;   // base iPhone 12
+  const newSize = size * scale;
+  return Math.round(PixelRatio.roundToNearestPixel(newSize));
+};
+
+export { SCREEN_W, SCREEN_H };
+
+export const navigationTheme = {
+  dark: false,
+  colors123: {
+    primary: colors123.primary,
+    background: colors123.background,
+    card: colors123.surface,
+    text: colors123.text,
+    border: colors123.border,
+    notification: colors123.danger,
+  },
+};
+
+export const statusToneMap = {
+  Pending: { bg: colors123.pendingBg, color: colors123.pendingText, border: colors123.warning },
+  "In Progress": { bg: colors123.progressBg, color: colors123.progressText, border: colors123.info },
+  Ready: { bg: colors123.readyBg, color: colors123.readyText, border: colors123.success },
+  Delivered: { bg: colors123.deliveredBg, color: colors123.deliveredText, border: colors123.text },
+};
+
+export function getStatusTone(status) {
+  return statusToneMap[status] || statusToneMap.Pending;
+}
+
+export function formatCurrency(amount) {
+  return `₹${Number(amount || 0).toLocaleString("en-IN")}`;
+}
+
+export function formatCompactCurrency(amount) {
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    notation: "compact",
+    maximumFractionDigits: 1,
+  }).format(Number(amount || 0));
+}
+
+export function getInitials(name = "") {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((chunk) => chunk[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}

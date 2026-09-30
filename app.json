@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "StitchBook",
+    "slug": "stitchbook-app",
+    "scheme": "com.stitchbook.app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#F5F7FA"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.stitchbook.app"
+    },
+    "android": {
+      "package": "com.stitchbook.app",
+      "compileSdkVersion": 36,
+      "targetSdkVersion": 36,
+      "buildToolsVersion": "36.0.0",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#1A56DB"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-web-browser",
+      "expo-secure-store"
+    ],
+    "extra": {
+      "apiBaseUrl": "https://stitchbook-backend.onrender.com/api",
+      "googleWebClientId": "420205337421-pu4177s2avp4nt19qhhtg1dbpl2tt4p6.apps.googleusercontent.com",
+      "googleAndroidClientId": "420205337421-thnobmhad3jrjahomfhkpp3h3omehj68.apps.googleusercontent.com",
+      "googleIosClientId": "",
+      "enableMobileOtpLogin": false,
+      "msg91WidgetId": "366662674a32393333363435",
+      "msg91WidgetTokenAuth": "521434T7vKB0UE6a1e8857P1"
+    }
+  }
+}

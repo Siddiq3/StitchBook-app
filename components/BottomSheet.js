@@ -1,0 +1,166 @@
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { colors123, fonts, radius, spacing } from "../utils/theme";
+
+export default function BottomSheet({
+  visible,
+  title,
+  subtitle,
+  children,
+  onClose,
+  scrollRef,
+}) {
+  const translateY = useRef(new Animated.Value(420)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (visible) {
+      Animated.parallel([
+        Animated.timing(opacity, {
+          toValue: 1,
+          duration: 180,
+          useNativeDriver: true,
+        }),
+        Animated.spring(translateY, {
+          toValue: 0,
+          damping: 22,
+          stiffness: 180,
+          mass: 0.9,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      translateY.setValue(420);
+      opacity.setValue(0);
+    }
+  }, [opacity, translateY, visible]);
+
+  return (
+    <Modal
+      animationType="none"
+      onRequestClose={onClose}
+      transparent
+      visible={visible}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.flex}
+      >
+        <Pressable onPress={onClose} style={styles.flex}>
+          <Animated.View style={[styles.overlay, { opacity }]} />
+        </Pressable>
+        <Animated.View
+          style={[
+            styles.sheet,
+            {
+              transform: [{ translateY }],
+            },
+          ]}
+        >
+          <SafeAreaView edges={["bottom"]}>
+            <View style={styles.grabber} />
+            <View style={styles.header}>
+              <View style={styles.headerCopy}>
+                <Text style={styles.title}>{title}</Text>
+                {subtitle ? (
+                  <Text style={styles.subtitle}>{subtitle}</Text>
+                ) : null}
+              </View>
+              <Pressable onPress={onClose} style={styles.closeButton}>
+                <MaterialCommunityIcons
+                  color={colors123.textMuted}
+                  name="close"
+                  size={20}
+                />
+              </Pressable>
+            </View>
+            <ScrollView
+              ref={scrollRef}
+              contentContainerStyle={styles.content}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              {children}
+            </ScrollView>
+          </SafeAreaView>
+        </Animated.View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: colors123.overlay,
+  },
+  sheet: {
+    backgroundColor: colors123.surface,
+    borderTopLeftRadius: radius.xl,
+    borderTopRightRadius: radius.xl,
+    maxHeight: "88%",
+    borderWidth: 1,
+    borderColor: colors123.border,
+  },
+  grabber: {
+    width: 42,
+    height: 5,
+    borderRadius: radius.pill,
+    backgroundColor: colors123.borderStrong,
+    alignSelf: "center",
+    marginTop: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  header: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.md,
+  },
+  headerCopy: {
+    flex: 1,
+  },
+  title: {
+    fontFamily: fonts.bold,
+    fontSize: 20,
+    color: colors123.text,
+  },
+  subtitle: {
+    marginTop: spacing.xs,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors123.textMuted,
+  },
+  closeButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors123.surfaceMuted,
+  },
+  content: {
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
+    paddingBottom: 100,
+    gap: spacing.md,
+  },
+});
