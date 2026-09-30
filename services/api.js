@@ -203,13 +203,10 @@ export const orderApi = {
 };
 
 // ── SUBSCRIPTION ─────────────────────
+// Read-only: plans are purchased on the website; the backend is the source of truth.
 export const subscriptionApi = {
   getStatus: () => api.get("/subscription/status"),
-  checkActive: () => api.post("/subscription/check-active"),
-  createUpgradeSession: (plan) =>
-  api.post("/subscription/create-upgrade-session", { plan }),
-  updateStatus: (id, status) =>
-  api.put(`/subscription/${id}/status`, { status })
+  checkActive: () => api.post("/subscription/check-active")
 };
 
 // ── MEASUREMENT ───────────────────────
