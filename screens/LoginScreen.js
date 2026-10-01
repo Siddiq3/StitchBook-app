@@ -1,3 +1,5 @@
+import { StatusBar } from "expo-status-bar";
+import { fonts } from "../utils/theme";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -10,13 +12,12 @@ import {
   Platform,
   ScrollView } from
 "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { MotiView } from "moti";
+import { MotiView } from "../components/AccessibleMotionView";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -272,23 +273,24 @@ export default function LoginScreen() {
       style={styles.container}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={SIZES.headerH}>
-      
+
+      <StatusBar style="light" />
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled">
-        
-        <LinearGradient
-          colors={[colors123.primaryDark, colors123.primary, "#1D7A5C"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={[
+
+        <View
+
+
+
+          style={[[
           styles.header,
           {
             paddingTop: insets.top + 28
-          }]
+          }], { backgroundColor: colors123.primary }]
           }>
-          
-          <View style={styles.headerGlow} />
+
+
           <View style={styles.headerTop}>
             <View style={styles.wordmarkWrap}>
               <Text style={styles.wordmarkText}>
@@ -297,7 +299,7 @@ export default function LoginScreen() {
               </Text>
             </View>
             <View style={styles.secureBadge}>
-              <Ionicons name="shield-checkmark" size={14} color={colors123.accent} />
+              <Ionicons name="shield-checkmark" size={14} color={colors123.surface} />
               <Text style={styles.secureBadgeText}>{t("secure")}</Text>
             </View>
           </View>
@@ -319,7 +321,7 @@ export default function LoginScreen() {
               <Text style={styles.trustText}>{t("payments")}</Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
 
         <MotiView
           from={{ opacity: 0, translateY: 18 }}
@@ -334,13 +336,13 @@ export default function LoginScreen() {
             paddingVertical: 24
           }]
           }>
-          
+
           <Text style={styles.title}>{t("welcomeBack")}</Text>
           <Text style={styles.subtitle}>
             {t("chooseLoginMethod")}
           </Text>
 
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[
               styles.googleButton,
               (!isGoogleConfigured || googleLoading) && styles.disabledButton
@@ -392,9 +394,9 @@ export default function LoginScreen() {
               styles.inputWrapper,
               error && { borderColor: colors123.danger, borderWidth: 1.5 }]
               }>
-              
+
               <Text style={styles.prefix}>+91</Text>
-              <TextInput
+              <TextInput accessibilityLabel={t("enterPhoneNumber")}
                 style={styles.input}
                 placeholder={t("enterPhoneNumber")}
                 placeholderTextColor={colors123.textMuted}
@@ -406,7 +408,7 @@ export default function LoginScreen() {
                 keyboardType="phone-pad"
                 maxLength={10}
                 editable={!otpSent} />
-              
+
             </View>
           </View>
 
@@ -419,8 +421,8 @@ export default function LoginScreen() {
                 styles.inputWrapper,
                 error && { borderColor: colors123.danger, borderWidth: 1.5 }]
                 }>
-                
-                  <TextInput
+
+                  <TextInput accessibilityLabel={t("enterOtp")}
                   style={styles.input}
                   placeholder={t("enterOtp")}
                   placeholderTextColor={colors123.textMuted}
@@ -431,13 +433,13 @@ export default function LoginScreen() {
                   }}
                   keyboardType="number-pad"
                   maxLength={6} />
-                
+
                 </View>
               </View>
 
               {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
               style={[
               styles.button,
               verifyLoading && { opacity: 0.7 },
@@ -445,45 +447,45 @@ export default function LoginScreen() {
               }
               onPress={handleVerifyOtp}
               disabled={verifyLoading}>
-              
+
                 {verifyLoading ?
               <ActivityIndicator color={colors123.surface} /> :
 
-              <LinearGradient
-                colors={[colors123.primary, colors123.primaryDark]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.buttonGradient}>
-                
+              <View
+
+
+
+                style={[styles.buttonGradient, { backgroundColor: colors123.primary }]}>
+
                     <Ionicons name="lock-open-outline" size={18} color={colors123.surface} />
                     <Text style={styles.buttonText}>{t("verifyOtp")}</Text>
-                  </LinearGradient>
+                  </View>
               }
               </TouchableOpacity>
 
               <View style={styles.otpActions}>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   style={styles.retryChip}
                   onPress={() => handleResendOtp(11)}
                   disabled={isLoading}>
                   <Ionicons name="chatbubble-ellipses-outline" size={14} color={colors123.primary} />
                   <Text style={styles.actionLink}>SMS</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   style={styles.retryChip}
                   onPress={() => handleResendOtp(12)}
                   disabled={isLoading}>
                   <Ionicons name="logo-whatsapp" size={14} color={colors123.success} />
                   <Text style={styles.actionLink}>WhatsApp</Text>
                 </TouchableOpacity>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                 onPress={() => {
                   setOtpSent(false);
                   setOtpReqId("");
                   setOtp("");
                   setError("");
                 }}>
-                
+
                   <Text style={styles.actionLink}>{t("changeNumber")}</Text>
                 </TouchableOpacity>
               </View>
@@ -492,7 +494,7 @@ export default function LoginScreen() {
           <>
               {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
               style={[
               styles.button,
               isLoading && { opacity: 0.7 },
@@ -500,19 +502,19 @@ export default function LoginScreen() {
               }
               onPress={handleSendOtp}
               disabled={isLoading}>
-              
+
                 {isLoading ?
               <ActivityIndicator color={colors123.surface} /> :
 
-              <LinearGradient
-                colors={[colors123.primary, colors123.primaryDark]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.buttonGradient}>
-                
+              <View
+
+
+
+                style={[styles.buttonGradient, { backgroundColor: colors123.primary }]}>
+
                     <Ionicons name="send-outline" size={18} color={colors123.surface} />
                     <Text style={styles.buttonText}>{t("sendOtp")}</Text>
-                  </LinearGradient>
+                  </View>
               }
               </TouchableOpacity>
             </>
@@ -535,11 +537,11 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 28
+    paddingBottom: 28,
   },
   header: {
     minHeight: 318,
@@ -547,7 +549,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 22,
     borderBottomLeftRadius: 34,
     borderBottomRightRadius: 34,
-    overflow: "hidden"
+    overflow: "hidden",
   },
   headerGlow: {
     position: "absolute",
@@ -556,30 +558,30 @@ const styles = StyleSheet.create({
     borderRadius: 105,
     right: -78,
     top: -54,
-    backgroundColor: "rgba(184,132,63,0.24)"
+    backgroundColor: "rgba(184,132,63,0.24)",
   },
   headerTop: {
     width: "100%",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 12
+    gap: 12,
   },
   wordmarkWrap: {
     minHeight: 42,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   wordmarkText: {
     fontSize: normalize(32),
     lineHeight: 40,
-    fontWeight: "900",
-    letterSpacing: 0
+    fontFamily: fonts.semibold,
+    letterSpacing: 0,
   },
   wordmarkStitch: {
-    color: "#071123"
+    color: colors123.surface,
   },
   wordmarkBook: {
-    color: "#F8FBFF"
+    color: colors123.surface,
   },
   secureBadge: {
     height: 34,
@@ -590,33 +592,33 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.16)",
     flexDirection: "row",
     alignItems: "center",
-    gap: 6
+    gap: 6,
   },
   secureBadgeText: {
     color: colors123.surface,
     fontSize: normalize(SIZES.xs),
-    fontWeight: "800"
+    fontFamily: fonts.semibold,
   },
   heroTitle: {
     marginTop: 34,
     color: colors123.surface,
     fontSize: normalize(27),
     lineHeight: 34,
-    fontWeight: "800",
-    maxWidth: 330
+    fontFamily: fonts.semibold,
+    maxWidth: 330,
   },
   headerTagline: {
     fontSize: normalize(SIZES.md),
     lineHeight: 23,
     color: "rgba(255,255,255,0.76)",
     marginTop: 12,
-    maxWidth: 330
+    maxWidth: 330,
   },
   trustRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 8,
-    marginTop: 22
+    marginTop: 22,
   },
   trustPill: {
     height: 34,
@@ -627,33 +629,33 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.14)",
     flexDirection: "row",
     alignItems: "center",
-    gap: 6
+    gap: 6,
   },
   trustText: {
     color: "rgba(255,255,255,0.88)",
     fontSize: normalize(SIZES.xs),
-    fontWeight: "800"
+    fontFamily: fonts.semibold,
   },
   form: {
     backgroundColor: colors123.surface,
-    borderRadius: 24,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    ...SHADOWS.lg
+    ...SHADOWS.none,
   },
   title: {
     fontSize: normalize(24),
-    fontWeight: "800",
+    fontFamily: fonts.semibold,
     color: colors123.text,
-    marginBottom: 4
+    marginBottom: 4,
   },
   subtitle: {
     fontSize: normalize(SIZES.md),
     color: colors123.textSecondary,
-    marginBottom: 24
+    marginBottom: 24,
   },
   inputContainer: {
-    marginBottom: 18
+    marginBottom: 18,
   },
   methodHeader: {
     flexDirection: "row",
@@ -664,7 +666,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.primarySoft,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    marginBottom: 18
+    marginBottom: 18,
   },
   methodIcon: {
     width: 38,
@@ -672,63 +674,63 @@ const styles = StyleSheet.create({
     borderRadius: 19,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors123.surface
+    backgroundColor: colors123.surface,
   },
   methodCopy: {
-    flex: 1
+    flex: 1,
   },
   methodTitle: {
     color: colors123.text,
     fontSize: normalize(SIZES.md),
-    fontWeight: "800"
+    fontFamily: fonts.semibold,
   },
   methodSubtitle: {
     marginTop: 3,
     color: colors123.textSecondary,
     fontSize: normalize(SIZES.xs),
-    lineHeight: 16
+    lineHeight: 16,
   },
   label: {
     fontSize: normalize(SIZES.sm),
-    fontWeight: "800",
+    fontFamily: fonts.semibold,
     color: colors123.textSecondary,
-    marginBottom: 8
+    marginBottom: 8,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
     borderColor: colors123.border,
-    borderRadius: 16,
+    borderRadius: 12,
     backgroundColor: colors123.surface,
     paddingHorizontal: 14,
-    height: 54
+    height: 54,
   },
   prefix: {
     fontSize: normalize(SIZES.md),
     color: colors123.textSecondary,
-    marginRight: 8
+    marginRight: 8,
   },
   input: {
     flex: 1,
     fontSize: normalize(SIZES.md),
-    color: colors123.text
+    color: colors123.text,
   },
   errorText: {
     fontSize: normalize(SIZES.xs),
     color: colors123.danger,
     marginTop: -12,
-    marginBottom: 12
+    marginBottom: 12,
   },
   button: {
-    borderRadius: 16,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     height: SIZES.buttonH,
     marginBottom: 16,
     overflow: "hidden",
     backgroundColor: colors123.primary,
-    ...SHADOWS.md
+    ...SHADOWS.md,
   },
   buttonGradient: {
     width: "100%",
@@ -736,16 +738,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 9
+    gap: 9,
   },
   buttonText: {
     color: colors123.surface,
     fontSize: normalize(SIZES.md),
-    fontWeight: "800"
+    fontFamily: fonts.semibold,
   },
   googleButton: {
     height: SIZES.buttonH,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors123.border,
     backgroundColor: colors123.surface,
@@ -754,46 +756,46 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 10,
     marginBottom: 10,
-    ...SHADOWS.sm
+    ...SHADOWS.sm,
   },
   googleButtonText: {
     color: colors123.text,
     fontSize: normalize(SIZES.md),
-    fontWeight: "800"
+    fontFamily: fonts.semibold,
   },
   disabledButton: {
-    opacity: 0.62
+    opacity: 0.62,
   },
   configHint: {
     fontSize: normalize(SIZES.xs),
     color: colors123.textMuted,
     textAlign: "center",
     marginBottom: 14,
-    lineHeight: 18
+    lineHeight: 18,
   },
   dividerRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    marginBottom: 18
+    marginBottom: 18,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: colors123.borderLight
+    backgroundColor: colors123.borderLight,
   },
   dividerText: {
     fontSize: normalize(SIZES.xs),
-    fontWeight: "800",
+    fontFamily: fonts.semibold,
     color: colors123.textMuted,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   otpActions: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginTop: -4,
-    marginBottom: 14
+    marginBottom: 14,
   },
   retryChip: {
     flexDirection: "row",
@@ -802,38 +804,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 7,
     borderRadius: 999,
-    backgroundColor: colors123.primarySoft
+    backgroundColor: colors123.primarySoft,
   },
   actionLink: {
     color: colors123.primary,
     fontSize: normalize(SIZES.sm),
-    fontWeight: "700"
-  },
-  securityNote: {
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 14,
-    backgroundColor: colors123.successSoft,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 7
-  },
-  devHint: {
-    fontSize: normalize(SIZES.xs),
-    color: colors123.deliveredText,
-    fontWeight: "700",
-    textAlign: "center",
-    flexShrink: 1
+    fontFamily: fonts.bold,
   },
   footer: {
     marginTop: 32,
     alignItems: "center",
-    paddingHorizontal: 24
+    paddingHorizontal: 24,
   },
   footerText: {
     fontSize: normalize(SIZES.xs),
     color: colors123.textMuted,
-    textAlign: "center"
-  }
+    textAlign: "center",
+  },
 });

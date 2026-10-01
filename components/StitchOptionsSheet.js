@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  Alert,
-} from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomSheet from "./BottomSheet";
 import AppButton from "./AppButton";
@@ -301,115 +294,115 @@ let cachedStyles = null;
 const getStyles = () => {
   if (!cachedStyles) {
     cachedStyles = StyleSheet.create({
-      container: {
-        flex: 1,
-      },
-      content: {
-        padding: spacing.lg,
-      },
-      noConfigContainer: {
-        padding: spacing.xl,
-        alignItems: "center",
-      },
-      noConfigText: {
-        fontSize: 16,
-        color: colors123.textSoft,
-        textAlign: "center",
-        marginTop: spacing.md,
-      },
-      section: {
-        marginBottom: spacing.lg,
-      },
-      sectionTitle: {
-        fontSize: 16,
-        fontFamily: fonts.semibold,
-        color: colors123.text,
-        marginBottom: spacing.md,
-      },
-      optionsScroll: {
-        marginHorizontal: -spacing.lg,
-        paddingHorizontal: spacing.lg,
-      },
-      optionChip: {
-        backgroundColor: colors123.surface,
-        borderRadius: radius.lg,
-        paddingHorizontal: spacing.md,
-        paddingVertical: spacing.sm,
-        marginRight: spacing.sm,
-        borderWidth: 1,
-        borderColor: colors123.border,
-      },
-      optionChipSelected: {
-        backgroundColor: colors123.primary,
-        borderColor: colors123.primary,
-      },
-      optionText: {
-        fontSize: 14,
-        color: colors123.text,
-        fontFamily: fonts.medium,
-      },
-      optionTextSelected: {
-        color: colors123.white,
-      },
-      counterContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: colors123.surface,
-        borderRadius: radius.lg,
-        padding: spacing.sm,
-      },
-      counterButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
-        backgroundColor: colors123.background,
-        alignItems: "center",
-        justifyContent: "center",
-        borderWidth: 1,
-        borderColor: colors123.border,
-      },
-      counterValue: {
-        fontSize: 18,
-        fontFamily: fonts.semibold,
-        color: colors123.text,
-        marginHorizontal: spacing.lg,
-        minWidth: 30,
-        textAlign: "center",
-      },
-      toggleContainer: {
-        flexDirection: "row",
-        gap: spacing.sm,
-      },
-      toggleChip: {
-        flex: 1,
-        backgroundColor: colors123.surface,
-        borderRadius: radius.lg,
-        paddingVertical: spacing.md,
-        alignItems: "center",
-        borderWidth: 1,
-        borderColor: colors123.border,
-      },
-      toggleChipSelected: {
-        backgroundColor: colors123.primary,
-        borderColor: colors123.primary,
-      },
-      toggleText: {
-        fontSize: 16,
-        fontFamily: fonts.medium,
-        color: colors123.text,
-      },
-      toggleTextSelected: {
-        color: colors123.white,
-      },
-      actions: {
-        marginTop: spacing.xl,
-        marginBottom: spacing.lg,
-      },
-      saveButton: {
-        marginTop: spacing.md,
-      },
-    });
+  container: {
+    flex: 1,
+  },
+  content: {
+    padding: spacing.lg,
+  },
+  noConfigContainer: {
+    padding: spacing.xl,
+    alignItems: "center",
+  },
+  noConfigText: {
+    fontSize: 16,
+    color: colors123.textSoft,
+    textAlign: "center",
+    marginTop: spacing.md,
+  },
+  section: {
+    marginBottom: spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontFamily: fonts.semibold,
+    color: colors123.text,
+    marginBottom: spacing.md,
+  },
+  optionsScroll: {
+    marginHorizontal: -spacing.lg,
+    paddingHorizontal: spacing.lg,
+  },
+  optionChip: {
+    backgroundColor: colors123.surface,
+    borderRadius: radius.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    marginRight: spacing.sm,
+    borderWidth: 1,
+    borderColor: colors123.border,
+  },
+  optionChipSelected: {
+    backgroundColor: colors123.primary,
+    borderColor: colors123.primary,
+  },
+  optionText: {
+    fontSize: 14,
+    color: colors123.text,
+    fontFamily: fonts.medium,
+  },
+  optionTextSelected: {
+    color: colors123.white,
+  },
+  counterContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors123.surface,
+    borderRadius: radius.lg,
+    padding: spacing.sm,
+  },
+  counterButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: colors123.background,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: colors123.border,
+  },
+  counterValue: {
+    fontSize: 18,
+    fontFamily: fonts.semibold,
+    color: colors123.text,
+    marginHorizontal: spacing.lg,
+    minWidth: 30,
+    textAlign: "center",
+  },
+  toggleContainer: {
+    flexDirection: "row",
+    gap: spacing.sm,
+  },
+  toggleChip: {
+    flex: 1,
+    backgroundColor: colors123.surface,
+    borderRadius: radius.lg,
+    paddingVertical: spacing.md,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors123.border,
+  },
+  toggleChipSelected: {
+    backgroundColor: colors123.primary,
+    borderColor: colors123.primary,
+  },
+  toggleText: {
+    fontSize: 16,
+    fontFamily: fonts.medium,
+    color: colors123.text,
+  },
+  toggleTextSelected: {
+    color: colors123.white,
+  },
+  actions: {
+    marginTop: spacing.xl,
+    marginBottom: spacing.lg,
+  },
+  saveButton: {
+    marginTop: spacing.md,
+  },
+});
   }
   return cachedStyles;
 };

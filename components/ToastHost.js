@@ -6,15 +6,18 @@ import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
 
 const toneStyles = {
   success: {
-    backgroundColor: colors123.success,
+    backgroundColor: colors123.successLight,
+    color: colors123.success,
     icon: "check-circle",
   },
   error: {
-    backgroundColor: colors123.danger,
+    backgroundColor: colors123.dangerLight,
+    color: colors123.danger,
     icon: "alert-circle",
   },
   info: {
-    backgroundColor: colors123.primary,
+    backgroundColor: colors123.primaryLight,
+    color: colors123.primary,
     icon: "information",
   },
 };
@@ -85,11 +88,11 @@ export default function ToastHost({ toast, onHide }) {
         ]}
       >
         <MaterialCommunityIcons
-          color={colors123.surface}
+          color={tone.color}
           name={tone.icon}
           size={18}
         />
-        <Text style={styles.message}>{toast.message}</Text>
+        <Text accessibilityLiveRegion="polite" style={[styles.message, { color: tone.color }]}>{toast.message}</Text>
       </Animated.View>
     </View>
   );
@@ -109,7 +112,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingHorizontal: spacing.md,
     paddingVertical: 14,
-    ...shadows.card,
+    ...shadows.floating,
   },
   message: {
     flex: 1,

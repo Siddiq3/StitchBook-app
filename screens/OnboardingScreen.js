@@ -1,3 +1,4 @@
+import { fonts } from "../utils/theme";
 import React, { useState } from "react";
 import {
   View,
@@ -107,7 +108,7 @@ const OnboardingScreen = () => {
           {step === 1 && (
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>{t("askShopName")}</Text>
-              <TextInput
+              <TextInput accessibilityLabel={t("royalTailorsPlaceholder")}
                 style={[styles.input, errors.name && styles.inputError]}
                 placeholder={t("royalTailorsPlaceholder")}
                 placeholderTextColor={colors123.textSoft}
@@ -126,9 +127,9 @@ const OnboardingScreen = () => {
           {step === 2 && (
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>{t("addContactDetails")}</Text>
-              
+
               <Text style={styles.label}>{t("phoneNumber")}</Text>
-              <TextInput
+              <TextInput accessibilityLabel={t("enterPhoneNumber")}
                 style={[styles.input, errors.phone && styles.inputError]}
                 placeholder={t("enterPhoneNumber")}
                 placeholderTextColor={colors123.textSoft}
@@ -144,7 +145,7 @@ const OnboardingScreen = () => {
               )}
 
               <Text style={[styles.label, { marginTop: 16 }]}>{t("locationOptional")}</Text>
-              <TextInput
+              <TextInput accessibilityLabel={t("locationPlaceholder")}
                 style={styles.input}
                 placeholder={t("locationPlaceholder")}
                 placeholderTextColor={colors123.textSoft}
@@ -157,7 +158,7 @@ const OnboardingScreen = () => {
           {step === 3 && (
             <View style={styles.stepContent}>
               <Text style={styles.stepTitle}>{t("reviewShopDetails")}</Text>
-              
+
               <View style={styles.reviewCard}>
                 <View style={styles.reviewItem}>
                   <Text style={styles.reviewLabel}>{t("shopName")}</Text>
@@ -178,7 +179,7 @@ const OnboardingScreen = () => {
 
         <View style={styles.buttonContainer}>
           {step > 1 && (
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={styles.backLink}
               onPress={handleBack}
               disabled={loading}
@@ -187,7 +188,7 @@ const OnboardingScreen = () => {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={[
               styles.primaryButton,
               step === 1 && styles.primaryButtonFull,
@@ -223,7 +224,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 28,
     backgroundColor: colors123.primary,
     borderBottomLeftRadius: 34,
@@ -238,12 +239,12 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     color: `rgba(255, 255, 255, 0.78)`,
     marginTop: 18,
-    textAlign: 'center',
+    textAlign: "center",
   },
   progressContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: 32,
     gap: 8,
   },
@@ -258,7 +259,7 @@ const styles = StyleSheet.create({
   },
   stepContainer: {
     flex: 1,
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
     backgroundColor: colors123.surface,
     borderRadius: 24,
     borderWidth: 1,
@@ -271,14 +272,14 @@ const styles = StyleSheet.create({
   },
   stepTitle: {
     fontSize: normalize(18),
-    fontWeight: '700',
+    fontFamily: fonts.bold,
     color: colors123.text,
     marginBottom: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   label: {
     fontSize: normalize(SIZES.sm),
-    fontWeight: '600',
+    fontFamily: fonts.semibold,
     color: colors123.textSecondary,
     marginBottom: 8,
   },
@@ -325,18 +326,18 @@ const styles = StyleSheet.create({
   },
   reviewValue: {
     fontSize: normalize(SIZES.md),
-    fontWeight: '600',
+    fontFamily: fonts.semibold,
     color: colors123.text,
   },
   buttonContainer: {
     marginTop: 32,
     gap: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   backLink: {
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: 12,
     flex: 0.45,
     borderRadius: 16,
@@ -347,14 +348,14 @@ const styles = StyleSheet.create({
   backLinkText: {
     fontSize: normalize(SIZES.md),
     color: colors123.primary,
-    fontWeight: '600',
+    fontFamily: fonts.semibold,
   },
   primaryButton: {
     backgroundColor: colors123.primary,
     borderRadius: SIZES.radiusMd,
     paddingVertical: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     flex: 0.45,
   },
   primaryButtonFull: {
@@ -363,7 +364,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: colors123.surface,
     fontSize: normalize(SIZES.md),
-    fontWeight: '600',
+    fontFamily: fonts.semibold,
   },
   buttonDisabled: {
     opacity: 0.6,

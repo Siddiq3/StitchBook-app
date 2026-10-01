@@ -1,17 +1,6 @@
+import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  ActivityIndicator,
-  Modal,
-  TextInput,
-  FlatList,
-  Alert,
-  Linking } from
-"react-native";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, Linking } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { printToFileAsync } from "expo-print";
@@ -23,7 +12,7 @@ import { ORDER_STATUS_CONFIG, PAYMENT_METHODS } from "../services/outfitTypes";
 import { getWhatsAppTemplate, generateWhatsAppShareUrl } from "../services/whatsappTemplates";
 import api, { orderApi } from "../services/api";
 import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
-import AvatarCircle from "../components/AvatarCircle";
+
 import StatusBadge from "../components/StatusBadge";
 import AppButton from "../components/AppButton";
 import MeasurementFieldThumb from "../components/MeasurementFieldThumb";
@@ -253,22 +242,6 @@ export default function OrderDetail({ route, navigation }) {const { t } = useLan
     };
   };
 
-  const getStatusTone = (status) => {
-    switch (status) {
-      case "cutting":
-      case "in_progress":
-        return { backgroundColor: "#FEF3C7", borderColor: "#FCD34D", color: "#92400E" };
-      case "stitching":
-        return { backgroundColor: colors123.primarySoft, borderColor: colors123.primary, color: colors123.primaryDark };
-      case "ready":
-        return { backgroundColor: "#DCFCE7", borderColor: "#BBF7D0", color: "#166534" };
-      case "delivered":
-        return { backgroundColor: "#D1FAE5", borderColor: "#86EFAC", color: "#14532D" };
-      default:
-        return { backgroundColor: "#E2E8F0", borderColor: "#CBD5E1", color: "#334155" };
-    }
-  };
-
   const renderOrderTypeBadge = (type) => {
     const label = getOrderTypeLabel(type);
     if (!label) return null;
@@ -276,21 +249,6 @@ export default function OrderDetail({ route, navigation }) {const { t } = useLan
     return (
       <View style={[styles.typeBadge, { backgroundColor: tone.backgroundColor, borderColor: tone.borderColor }]}>
         <Text style={[styles.typeBadgeText, { color: tone.color }]}>{label}</Text>
-      </View>);
-
-  };
-
-  const renderStatusBadge = (status) => {
-    const tone = getStatusTone(status);
-    const label =
-    status === "pending" || status === "started" ? "New Order" :
-    status === "in_progress" || status === "cutting" ? "Cutting" :
-    status === "stitching" ? "Stitching" :
-    status === "delivered" ? "Delivered" :
-    status === "ready" ? "Ready" : "New Order";
-    return (
-      <View style={[styles.statusBadge, { backgroundColor: tone.backgroundColor, borderColor: tone.borderColor }]}>
-        <Text style={[styles.statusBadgeText, { color: tone.color }]}>{label}</Text>
       </View>);
 
   };
@@ -591,7 +549,6 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
   const handleDeleteOrder = () => {
     Alert.alert(t("auto_delete_order"), t("auto_are_you_sure_you_want_to_delete_this_order"),
 
-
     [
     {
       text: "Cancel",
@@ -608,7 +565,6 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
 
     );
   };
-
 
   const handleShareJobSheet = async () => {
     if (!orderDetail?.id) return;
@@ -790,7 +746,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={28} color={colors123.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t("auto_order_details")}</Text>
@@ -807,7 +763,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={28} color={colors123.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t("auto_order_details")}</Text>
@@ -828,27 +784,27 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")}
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-          
+
           <Ionicons name="chevron-back" size={28} color={colors123.primary} />
         </TouchableOpacity>
 
         <View style={styles.headerTitleContainer}>
           <Text style={styles.headerTitle}>{t("auto_order")}{order.id}</Text>
           <View style={styles.headerBadgeRow}>
-            {renderStatusBadge(order.status)}
+            <StatusBadge compact status={order.status} />
             {renderOrderTypeBadge(order.order_type || order.orderType)}
           </View>
         </View>
 
         <View style={styles.headerActions}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             onPress={handleShareJobSheet}
             disabled={jobSheetLoading}
             style={styles.headerActionButton}>
-            
+
             {jobSheetLoading ?
             <ActivityIndicator size="small" color={colors123.primary} /> :
 
@@ -857,7 +813,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
           </TouchableOpacity>
 
           {/* ✅ FIXED: Alert.alert array properly closed, header View properly closed */}
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             onPress={() => {
               Alert.alert(t("auto_order_options"), "", [
               {
@@ -871,7 +827,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               }]
               );
             }}>
-            
+
             <Ionicons name="ellipsis-vertical" size={24} color={colors123.primary} />
           </TouchableOpacity>
         </View>
@@ -941,7 +897,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   bodyType={getMeasurementBodyType(outfitType)}
                   label={key}
                   size={42} />
-                
+
                     <View style={styles.measurementRowCopy}>
                       <Text numberOfLines={2} style={styles.measurementLabel}>{key}</Text>
                       <Text style={styles.measurementValue}>{value}</Text>
@@ -959,20 +915,19 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
           }
         </View>
 
-
         {/* Status Pipeline */}
         <View style={styles.card}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
             <Text style={styles.cardTitle}>{t("auto_order_status")}</Text>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               onPress={handleOpenWhatsAppModal}
               style={styles.whatsappButton}>
-              
+
               <MaterialCommunityIcons name="whatsapp" size={18} color="white" />
               <Text style={styles.whatsappButtonText}>{t("auto_message")}</Text>
             </TouchableOpacity>
           </View>
-          
+
           <View style={styles.statusPipeline}>
             {["started", "cutting", "stitching", "ready", "delivered"].map(
               (status, index, arr) => {
@@ -995,7 +950,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                       currentStatus && styles.statusCircleActive,
                       isCompleted && styles.statusCircleCompleted]
                       }>
-                      
+
                       {isCompleted ?
                       <Ionicons name="checkmark" size={16} color="white" /> :
 
@@ -1015,7 +970,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                       styles.statusLabel,
                       currentStatus && styles.statusLabelActive]
                       }>
-                      
+
                       {status === 'started' ? 'New\nOrder' :
                       status === 'cutting' ? 'Cutting' :
                       status === 'stitching' ? 'Stitching' :
@@ -1046,22 +1001,22 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             </View>
             <MaterialCommunityIcons name="whatsapp" size={22} color="#128C4A" />
           </View>
-          <View style={styles.reminderGrid}>
+          <ResponsiveGrid style={styles.reminderGrid}>
             {[
             { key: "created", label: "Order created", icon: "clipboard-check-outline" },
             { key: "delivery", label: "Delivery reminder", icon: "truck-delivery-outline" },
             { key: "payment", label: "Payment reminder", icon: "credit-card-clock-outline" }].
             map((item) =>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               key={item.key}
               style={styles.reminderButton}
               onPress={() => handleOpenReminder(item.key)}>
-              
+
                 <MaterialCommunityIcons name={item.icon} size={17} color={colors123.primary} />
                 <Text style={styles.reminderButtonText}>{item.label}</Text>
               </TouchableOpacity>
             )}
-          </View>
+          </ResponsiveGrid>
         </View>
 
         {/* Items List */}
@@ -1103,11 +1058,11 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                     const label = role === "cutter" ? "Cutter" : "Stitcher";
                     const isCutter = role === "cutter";
                     return (
-                      <TouchableOpacity
+                      <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(hasAssigned) }}
                         key={role}
                         style={[styles.assignmentChip, hasAssigned && styles.assignmentChipActive]}
                         onPress={() => setAssignmentModal({ itemIndex: index, role })}>
-                        
+
                         <View style={[
                           styles.assignmentIconBox,
                           isCutter ? styles.cutterIconBox : styles.stitcherIconBox,
@@ -1118,7 +1073,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                           size={20}
                           color={hasAssigned ? colors123.surface : isCutter ? colors123.warning : colors123.primary} />
                         </View>
-                        
+
                           <View style={styles.assignmentCopy}>
                             <Text style={styles.assignmentRoleText}>
                               {label}
@@ -1126,7 +1081,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                           <Text
                           numberOfLines={2}
                           style={[styles.assignmentChipText, hasAssigned && styles.assignmentChipTextActive]}>
-                          
+
                               {hasAssigned ? assigned.name : isCutter ? "Not assigned for cutting" : "Not assigned for stitching"}
                           </Text>
                           </View>
@@ -1150,7 +1105,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
           </View>
 
           {order.measurement ?
-          <View style={[styles.card, styles.measurementCard]}>
+          <View style={styles.measurementCard}>
               <Text style={styles.cardTitle}>{t("auto_measurements")}</Text>
               <Text style={styles.measurementHeading}>
                 {order.measurement.outfitLabel ||
@@ -1158,21 +1113,21 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               order.measurement.outfitType ||
               "Measurement profile"}
               </Text>
-              <View style={styles.measurementGrid}>
+              <ResponsiveGrid style={styles.measurementGrid}>
                 {Object.entries(measurementData).map(([key, value]) =>
               <View key={key} style={styles.measurementTile}>
                     <MeasurementFieldThumb
                   bodyType={getMeasurementBodyType(outfitType)}
                   label={key}
                   size={40} />
-                
+
                     <View style={styles.measurementTileCopy}>
                       <Text numberOfLines={2} style={styles.measurementTileLabel}>{key}</Text>
                       <Text style={styles.measurementTileValue}>{value}</Text>
                     </View>
                   </View>
               )}
-              </View>
+              </ResponsiveGrid>
             </View> :
           null}
 
@@ -1195,14 +1150,14 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                 borderTopColor: colors123.border
               }]
               }>
-              
+
               <Text style={styles.balanceLabel}>{t("auto_balance_due")}</Text>
               <Text
                 style={[
                 styles.balanceValue,
                 balanceDue > 0 && styles.balanceValueWarning]
                 }>
-                
+
                 ₹{balanceDue}
               </Text>
             </View>
@@ -1214,14 +1169,14 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               onPress={handleShareOnWhatsApp}
               loading={whatsappLoading}
               style={styles.invoiceActionButton} />
-            
+
             <AppButton
               label={t("auto_copy_invoice_link")}
               variant="secondary"
               onPress={handleCopyInvoiceLink}
               loading={copyLoading}
               style={styles.invoiceActionButton} />
-            
+
           </View>
         </View>
 
@@ -1234,7 +1189,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             title={t("auto_record_payment")}
             onPress={() => setShowPaymentModal(true)}
             style={{ marginTop: spacing.md }} />
-          
+
           </View>
         }
 
@@ -1252,13 +1207,13 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               styles.activityItem,
               index !== activityLogs.length - 1 && styles.activityItemBorder]
               }>
-              
+
                   <View style={styles.activityIconContainer}>
                     <Ionicons
                   name={getActivityIcon(getActivityType(act))}
                   size={20}
                   color={colors123.primary} />
-                
+
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.activityText}>
@@ -1297,7 +1252,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   ""}
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => setAssignmentModal(null)}>
+              <TouchableOpacity accessibilityRole="button" onPress={() => setAssignmentModal(null)}>
                 <Ionicons name="close" size={28} color={colors123.text} />
               </TouchableOpacity>
             </View>
@@ -1309,7 +1264,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   name={assignmentModal.role === "cutter" ? "content-cut" : "needle"}
                   size={28}
                   color={colors123.textMuted} />
-                
+
                   <Text style={styles.emptyAssignmentTitle}>
                     No {assignmentModal.role === "cutter" ? "cutters" : "stitchers"} added
                   </Text>
@@ -1321,12 +1276,12 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               <View style={styles.staffPickList}>
                   {assignmentModal ?
                 staffByRole(assignmentModal.role).map((member) =>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   key={member.id}
                   disabled={assignmentSaving}
                   style={styles.staffPickRow}
                   onPress={() => handleAssignStaff(member)}>
-                  
+
                           <View style={styles.staffPickAvatar}>
                             <Text style={styles.staffPickAvatarText}>
                               {String(member.name || "?").slice(0, 1).toUpperCase()}
@@ -1357,12 +1312,12 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
         transparent
         animationType="slide"
         onRequestClose={() => setShowPaymentModal(false)}>
-        
+
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t("auto_record_payment")}</Text>
-              <TouchableOpacity onPress={() => setShowPaymentModal(false)}>
+              <TouchableOpacity accessibilityRole="button" onPress={() => setShowPaymentModal(false)}>
                 <Ionicons name="close" size={28} color={colors123.text} />
               </TouchableOpacity>
             </View>
@@ -1373,7 +1328,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                 <Text style={styles.label}>{t("auto_amount")}</Text>
                 <View style={styles.amountInputContainer}>
                   <Text style={styles.currencySymbol}>₹</Text>
-                  <TextInput
+                  <TextInput accessibilityLabel={String(balanceDue)}
                     style={styles.amountInput}
                     placeholder={String(balanceDue)}
                     keyboardType="decimal-pad"
@@ -1381,7 +1336,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                     onChangeText={(text) =>
                     setPaymentForm({ ...paymentForm, amount: text })
                     } />
-                  
+
                 </View>
                 <Text style={styles.helperText}>{t("auto_balance_due_2")}{balanceDue}</Text>
               </View>
@@ -1391,7 +1346,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                 <Text style={styles.label}>{t("auto_payment_method")}</Text>
                 <View style={styles.methodGrid}>
                   {PAYMENT_METHODS.map((method) =>
-                  <TouchableOpacity
+                  <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(paymentForm.method === method.id) }}
                     key={method.id}
                     style={[
                     styles.methodButton,
@@ -1400,14 +1355,14 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                     onPress={() =>
                     setPaymentForm({ ...paymentForm, method: method.id })
                     }>
-                    
+
                       <Text
                       style={[
                       styles.methodButtonText,
                       paymentForm.method === method.id &&
                       styles.methodButtonTextActive]
                       }>
-                      
+
                         {method.label.toUpperCase()}
                       </Text>
                     </TouchableOpacity>
@@ -1418,7 +1373,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               {/* Notes */}
               <View style={styles.formGroup}>
                 <Text style={styles.label}>{t("auto_notes_optional")}</Text>
-                <TextInput
+                <TextInput accessibilityLabel={t("auto_reference_number_bank_details_etc")}
                   style={styles.notesInput}
                   placeholder={t("auto_reference_number_bank_details_etc")}
                   value={paymentForm.notes}
@@ -1427,15 +1382,15 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   }
                   multiline
                   numberOfLines={3} />
-                
+
               </View>
             </ScrollView>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={styles.cancelButton}
                 onPress={() => setShowPaymentModal(false)}>
-                
+
                 <Text style={styles.cancelButtonText}>{t("auto_cancel")}</Text>
               </TouchableOpacity>
               <AppButton
@@ -1443,7 +1398,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                 onPress={handleRecordPayment}
                 disabled={paymentLoading}
                 style={{ flex: 1, marginLeft: spacing.md }} />
-              
+
             </View>
           </View>
         </View>
@@ -1455,12 +1410,12 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
         transparent={true}
         visible={showWhatsappModal}
         onRequestClose={() => setShowWhatsappModal(false)}>
-        
+
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>{t("auto_send_whatsapp_message")}</Text>
-              <TouchableOpacity onPress={() => setShowWhatsappModal(false)}>
+              <TouchableOpacity accessibilityRole="button" onPress={() => setShowWhatsappModal(false)}>
                 <Ionicons name="close" size={24} color={colors123.text} />
               </TouchableOpacity>
             </View>
@@ -1472,14 +1427,14 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               </View>
 
               <Text style={styles.modalLabel}>{t("auto_edit_message")}</Text>
-              <TextInput
+              <TextInput accessibilityLabel={t("auto_edit_your_whatsapp_message_here")}
                 style={styles.messageInput}
                 value={whatsappMessage}
                 onChangeText={setWhatsappMessage}
                 multiline
                 numberOfLines={8}
                 placeholder={t("auto_edit_your_whatsapp_message_here")} />
-              
+
 
               <View style={styles.infoBox}>
                 <MaterialCommunityIcons name="information" size={16} color={colors123.primary} />
@@ -1490,16 +1445,16 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             </ScrollView>
 
             <View style={styles.modalActions}>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={styles.cancelButton}
                 onPress={() => setShowWhatsappModal(false)}>
-                
+
                 <Text style={styles.cancelButtonText}>{t("auto_cancel")}</Text>
               </TouchableOpacity>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 onPress={handleSendWhatsApp}
                 style={styles.whatsappSendButton}>
-                
+
                 <MaterialCommunityIcons name="whatsapp" size={20} color="white" />
                 <Text style={styles.whatsappSendButtonText}>{t("auto_send_via_whatsapp")}</Text>
               </TouchableOpacity>
@@ -1514,7 +1469,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   header: {
     flexDirection: "row",
@@ -1524,16 +1479,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     backgroundColor: colors123.background,
     borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight
+    borderBottomColor: colors123.borderLight,
   },
   headerTitle: {
     fontSize: fonts.lg.fontSize,
-    fontWeight: "700",
-    color: colors123.text
+    fontFamily: fonts.bold,
+    color: colors123.text,
   },
   headerActions: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   },
   headerActionButton: {
     paddingHorizontal: spacing.sm,
@@ -1542,65 +1497,65 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     backgroundColor: colors123.surface,
-    marginRight: spacing.xs
+    marginRight: spacing.xs,
   },
   headerActionText: {
     fontSize: fonts.xs.fontSize,
-    fontWeight: "600",
-    color: colors123.primary
+    fontFamily: fonts.semibold,
+    color: colors123.primary,
   },
   headerTitleContainer: {
     flex: 1,
-    marginHorizontal: spacing.sm
+    marginHorizontal: spacing.sm,
   },
   headerBadgeRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.xs,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   statusBadge: {
     borderRadius: radius.pill,
     borderWidth: 1,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 4
+    paddingVertical: 4,
   },
   statusBadgeText: {
     fontFamily: fonts.semibold,
-    fontSize: fonts.xs.fontSize
+    fontSize: fonts.xs.fontSize,
   },
   typeBadge: {
     borderRadius: radius.pill,
     borderWidth: 1,
     paddingHorizontal: spacing.sm,
-    paddingVertical: 4
+    paddingVertical: 4,
   },
   typeBadgeText: {
     fontFamily: fonts.semibold,
-    fontSize: fonts.xs.fontSize
+    fontSize: fonts.xs.fontSize,
   },
   itemLabelRow: {
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
-    gap: spacing.xs
+    gap: spacing.xs,
   },
   invoiceActions: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: spacing.lg,
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   invoiceActionButton: {
-    flex: 1
+    flex: 1,
   },
   content: {
-    flex: 1
+    flex: 1,
   },
   contentScroll: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: spacing.xxl
+    paddingBottom: spacing.xxl,
   },
   card: {
     padding: spacing.lg,
@@ -1609,33 +1564,33 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    ...shadows.card
+    ...shadows.card,
   },
   cardTitle: {
     fontSize: fonts.base.fontSize,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
     color: colors123.text,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   cardSubtitle: {
     fontSize: fonts.sm.fontSize,
     color: colors123.textSoft,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   sectionHeaderRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
     gap: spacing.md,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   reminderGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   reminderButton: {
-    width: "47.5%",
+    width: "100%",
     minHeight: 48,
     flexDirection: "row",
     alignItems: "center",
@@ -1645,41 +1600,41 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     backgroundColor: colors123.surface,
     paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.sm
+    paddingVertical: spacing.sm,
   },
   reminderButtonText: {
     flex: 1,
     fontFamily: fonts.semibold,
     fontSize: 12,
-    color: colors123.text
+    color: colors123.text,
   },
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   label: {
     fontSize: fonts.xs.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.textSoft,
-    marginBottom: spacing.xs
+    marginBottom: spacing.xs,
   },
   value: {
     fontSize: fonts.base.fontSize,
-    fontWeight: "600",
-    color: colors123.text
+    fontFamily: fonts.semibold,
+    color: colors123.text,
   },
   divider: {
     height: 1,
     backgroundColor: colors123.border,
-    marginVertical: spacing.md
+    marginVertical: spacing.md,
   },
   statusPipeline: {
     flexDirection: "row",
     marginVertical: spacing.lg,
     alignItems: "flex-start",
-    marginBottom: spacing.lg
+    marginBottom: spacing.lg,
   },
   statusCircle: {
     width: 32,
@@ -1689,47 +1644,47 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   statusCircleActive: {
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   statusCircleCompleted: {
     backgroundColor: colors123.success,
-    borderColor: colors123.success
+    borderColor: colors123.success,
   },
   statusDot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors123.border
+    backgroundColor: colors123.border,
   },
   statusLine: {
     flex: 1,
     height: 2,
     backgroundColor: colors123.border,
-    marginHorizontal: spacing.xs
+    marginHorizontal: spacing.xs,
   },
   statusLineCompleted: {
-    backgroundColor: colors123.success
+    backgroundColor: colors123.success,
   },
   statusLabel: {
     fontSize: fonts.xs.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.textSoft,
     marginTop: spacing.xs,
-    textAlign: "center"
+    textAlign: "center",
   },
   statusLabelActive: {
     color: colors123.primary,
-    fontWeight: "700"
+    fontFamily: fonts.bold,
   },
   measurementMeta: {
     fontSize: fonts.xs.fontSize,
-    color: colors123.textSoft
+    color: colors123.textSoft,
   },
   measurementList: {
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   measurementRow: {
     flexDirection: "row",
@@ -1740,41 +1695,36 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors123.borderLight
+    borderColor: colors123.borderLight,
   },
   measurementRowCopy: {
     flex: 1,
-    minWidth: 0
+    minWidth: 0,
   },
   measurementLabel: {
     fontSize: fonts.xs.fontSize,
     color: colors123.textSoft,
-    textTransform: "capitalize"
+    textTransform: "capitalize",
   },
   measurementValue: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
     color: colors123.text,
-    marginTop: 2
-  },
-  moreText: {
-    marginTop: spacing.sm,
-    fontSize: fonts.xs.fontSize,
-    color: colors123.textSoft
+    marginTop: 2,
   },
   measurementHeading: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   measurementGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   measurementTile: {
-    width: "47.5%",
+    width: "100%",
     minHeight: 64,
     flexDirection: "row",
     alignItems: "center",
@@ -1783,65 +1733,52 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     padding: spacing.xs,
     borderWidth: 1,
-    borderColor: colors123.borderLight
+    borderColor: colors123.borderLight,
   },
   measurementTileCopy: {
     flex: 1,
-    minWidth: 0
+    minWidth: 0,
   },
   measurementTileLabel: {
     fontSize: fonts.xs.fontSize,
     color: colors123.textSoft,
     marginBottom: 2,
-    textTransform: "capitalize"
+    textTransform: "capitalize",
   },
   measurementTileValue: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "700",
-    color: colors123.text
+    fontFamily: fonts.bold,
+    color: colors123.text,
   },
   measurementCard: {
     marginBottom: spacing.md,
-    marginTop: spacing.md
+    marginTop: spacing.md,
   },
   itemsTable: {
     marginTop: spacing.md,
     marginBottom: spacing.lg,
-    gap: spacing.md
-  },
-  tableHeader: {
-    flexDirection: "row",
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight,
-    marginBottom: spacing.md
-  },
-  tableRow: {
-    flexDirection: "row",
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight
+    gap: spacing.md,
   },
   itemWorkCard: {
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    borderRadius: 18,
+    borderRadius: 16,
     backgroundColor: colors123.surface,
     padding: spacing.md,
-    ...shadows.soft
+    ...shadows.soft,
   },
   itemWorkHeader: {
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    gap: spacing.md
+    gap: spacing.md,
   },
   itemWorkTitleBlock: {
-    flex: 1
+    flex: 1,
   },
   itemMetaStack: {
     alignItems: "flex-end",
-    gap: 5
+    gap: 5,
   },
   itemMetaText: {
     overflow: "hidden",
@@ -1851,61 +1788,50 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     fontFamily: fonts.semibold,
     fontSize: fonts.xs.fontSize,
-    color: colors123.textSecondary
+    color: colors123.textSecondary,
   },
   itemPriceText: {
     fontFamily: fonts.extrabold,
     fontSize: fonts.sm.fontSize,
-    color: colors123.text
-  },
-  tableCell: {
-    fontSize: fonts.sm.fontSize,
-    fontWeight: "600",
     color: colors123.text,
-    textAlign: "right",
-    minWidth: 60
-  },
-  tableCellFlex: {
-    flex: 1,
-    textAlign: "left"
   },
   itemLabel: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "600",
-    color: colors123.text
+    fontFamily: fonts.semibold,
+    color: colors123.text,
   },
   itemFabric: {
     fontSize: fonts.xs.fontSize,
     color: colors123.textSoft,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   assignmentPanel: {
     marginTop: spacing.md,
-    borderRadius: 18,
-    backgroundColor: "#F8FAFC",
+    borderRadius: 16,
+    backgroundColor: colors123.background,
     padding: spacing.md,
     borderWidth: 1,
-    borderColor: colors123.borderLight
+    borderColor: colors123.borderLight,
   },
   assignmentHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   assignmentTitle: {
     fontFamily: fonts.extrabold,
     fontSize: fonts.sm.fontSize,
-    color: colors123.text
+    color: colors123.text,
   },
   assignmentSubtitle: {
     marginTop: 2,
     fontFamily: fonts.medium,
-    fontSize: 11,
-    color: colors123.textMuted
+    fontSize: 12,
+    color: colors123.textMuted,
   },
   assignmentRow: {
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   assignmentChip: {
     flexDirection: "row",
@@ -1915,46 +1841,46 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: 16,
     backgroundColor: colors123.surface,
-    padding: spacing.sm
+    padding: spacing.sm,
   },
   assignmentChipActive: {
     borderColor: colors123.primary,
-    backgroundColor: colors123.surface
+    backgroundColor: colors123.surface,
   },
   assignmentIconBox: {
     width: 42,
     height: 42,
     borderRadius: 14,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   cutterIconBox: {
-    backgroundColor: colors123.warningSoft
+    backgroundColor: colors123.warningSoft,
   },
   stitcherIconBox: {
-    backgroundColor: colors123.primarySoft
+    backgroundColor: colors123.primarySoft,
   },
   assignmentIconBoxActive: {
-    backgroundColor: colors123.primary
+    backgroundColor: colors123.primary,
   },
   assignmentCopy: {
     flex: 1,
-    minWidth: 0
+    minWidth: 0,
   },
   assignmentRoleText: {
     fontFamily: fonts.extrabold,
     fontSize: 13,
-    color: colors123.text
+    color: colors123.text,
   },
   assignmentChipText: {
     fontFamily: fonts.semibold,
-    fontSize: 11,
+    fontSize: 12,
     lineHeight: 15,
     color: colors123.textMuted,
-    marginTop: 3
+    marginTop: 3,
   },
   assignmentChipTextActive: {
-    color: colors123.textSecondary
+    color: colors123.textSecondary,
   },
   assignmentActionPill: {
     height: 32,
@@ -1965,59 +1891,59 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     flexDirection: "row",
     alignItems: "center",
-    gap: 3
+    gap: 3,
   },
   assignmentActionPillActive: {
     backgroundColor: colors123.primary,
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   assignmentActionText: {
     fontFamily: fonts.extrabold,
-    fontSize: 11,
-    color: colors123.primary
+    fontSize: 12,
+    color: colors123.primary,
   },
   assignmentActionTextActive: {
-    color: colors123.surface
+    color: colors123.surface,
   },
   totalsContainer: {
-    paddingTop: spacing.md
+    paddingTop: spacing.md,
   },
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
   },
   totalLabel: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "600",
-    color: colors123.text
+    fontFamily: fonts.semibold,
+    color: colors123.text,
   },
   totalValue: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "700",
-    color: colors123.text
+    fontFamily: fonts.bold,
+    color: colors123.text,
   },
   balanceLabel: {
     fontSize: fonts.base.fontSize,
-    fontWeight: "700",
-    color: colors123.text
+    fontFamily: fonts.bold,
+    color: colors123.text,
   },
   balanceValue: {
     fontSize: fonts.lg.fontSize,
-    fontWeight: "700",
-    color: colors123.success
+    fontFamily: fonts.bold,
+    color: colors123.success,
   },
   balanceValueWarning: {
-    color: colors123.warning
+    color: colors123.warning,
   },
   activityItem: {
     flexDirection: "row",
     alignItems: "flex-start",
-    paddingVertical: spacing.md
+    paddingVertical: spacing.md,
   },
   activityItemBorder: {
     borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight
+    borderBottomColor: colors123.borderLight,
   },
   activityIconContainer: {
     width: 32,
@@ -2026,39 +1952,39 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.primary + "15",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: spacing.md
+    marginRight: spacing.md,
   },
   activityText: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "600",
-    color: colors123.text
+    fontFamily: fonts.semibold,
+    color: colors123.text,
   },
   activityTime: {
     fontSize: fonts.xs.fontSize,
     color: colors123.textSoft,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   emptyText: {
     fontSize: fonts.sm.fontSize,
     color: colors123.textSoft,
     textAlign: "center",
-    paddingVertical: spacing.lg
+    paddingVertical: spacing.lg,
   },
   errorText: {
     fontSize: fonts.base.fontSize,
-    color: colors123.textSoft
+    color: colors123.textSoft,
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end"
+    justifyContent: "flex-end",
   },
   modalContent: {
     backgroundColor: colors123.background,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     paddingTop: spacing.lg,
-    maxHeight: "90%"
+    maxHeight: "90%",
   },
   modalHeader: {
     flexDirection: "row",
@@ -2067,25 +1993,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight
+    borderBottomColor: colors123.borderLight,
   },
   modalTitle: {
     fontSize: fonts.lg.fontSize,
-    fontWeight: "700",
-    color: colors123.text
+    fontFamily: fonts.bold,
+    color: colors123.text,
   },
   modalSubtitle: {
     marginTop: 3,
     fontSize: fonts.xs.fontSize,
-    fontWeight: "500",
-    color: colors123.textMuted
+    fontFamily: fonts.medium,
+    color: colors123.textMuted,
   },
   modalBody: {
     padding: spacing.lg,
-    maxHeight: "70%"
+    maxHeight: "70%",
   },
   staffPickList: {
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   staffPickRow: {
     flexDirection: "row",
@@ -2095,7 +2021,7 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: radius.lg,
     backgroundColor: colors123.surface,
-    padding: spacing.md
+    padding: spacing.md,
   },
   staffPickAvatar: {
     width: 42,
@@ -2103,23 +2029,23 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors123.primarySoft
+    backgroundColor: colors123.primarySoft,
   },
   staffPickAvatarText: {
     fontFamily: fonts.extrabold,
     fontSize: 16,
-    color: colors123.primary
+    color: colors123.primary,
   },
   staffPickName: {
     fontFamily: fonts.extrabold,
     fontSize: 14,
-    color: colors123.text
+    color: colors123.text,
   },
   staffPickPhone: {
     marginTop: 2,
     fontFamily: fonts.regular,
     fontSize: 12,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   emptyAssignmentBox: {
     alignItems: "center",
@@ -2127,13 +2053,13 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: radius.lg,
     backgroundColor: colors123.surface,
-    padding: spacing.lg
+    padding: spacing.lg,
   },
   emptyAssignmentTitle: {
     marginTop: spacing.sm,
     fontFamily: fonts.extrabold,
     fontSize: 15,
-    color: colors123.text
+    color: colors123.text,
   },
   emptyAssignmentText: {
     marginTop: spacing.xs,
@@ -2141,14 +2067,14 @@ const styles = StyleSheet.create({
     fontSize: 12,
     lineHeight: 18,
     textAlign: "center",
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   modalActions: {
     flexDirection: "row",
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: colors123.border
+    borderTopColor: colors123.border,
   },
   cancelButton: {
     flex: 1,
@@ -2156,42 +2082,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     borderRadius: radius.md,
-    alignItems: "center"
+    alignItems: "center",
   },
   cancelButtonText: {
     fontSize: fonts.base.fontSize,
-    fontWeight: "600",
-    color: colors123.text
+    fontFamily: fonts.semibold,
+    color: colors123.text,
   },
   whatsappButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#25D366',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#25D366",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
-    gap: spacing.xs
+    gap: spacing.xs,
   },
   whatsappButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: fonts.sm.fontSize,
-    fontWeight: '600'
+    fontFamily: fonts.semibold,
   },
   whatsappSendButton: {
     flex: 1,
-    flexDirection: 'row',
-    backgroundColor: '#25D366',
+    flexDirection: "row",
+    backgroundColor: "#25D366",
     paddingVertical: spacing.md,
     borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginLeft: spacing.md,
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   whatsappSendButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: fonts.base.fontSize,
-    fontWeight: '600'
+    fontFamily: fonts.semibold,
   },
   messagePreview: {
     backgroundColor: colors123.surface,
@@ -2199,12 +2125,12 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: radius.md,
     padding: spacing.md,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   messageText: {
     fontSize: fonts.sm.fontSize,
     color: colors123.text,
-    lineHeight: 20
+    lineHeight: 20,
   },
   messageInput: {
     borderWidth: 1,
@@ -2216,34 +2142,34 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     marginBottom: spacing.md,
     minHeight: 120,
-    textAlignVertical: 'top'
+    textAlignVertical: "top",
   },
   modalLabel: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: '600',
+    fontFamily: fonts.semibold,
     color: colors123.text,
-    marginBottom: spacing.sm
+    marginBottom: spacing.sm,
   },
   modalBody: {
-    padding: spacing.lg
+    padding: spacing.lg,
   },
   infoBox: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: colors123.surface,
     borderWidth: 1,
-    borderColor: colors123.primary + '30',
+    borderColor: colors123.primary + "30",
     borderRadius: radius.md,
     padding: spacing.md,
-    alignItems: 'flex-start',
-    gap: spacing.sm
+    alignItems: "flex-start",
+    gap: spacing.sm,
   },
   infoText: {
     flex: 1,
     fontSize: fonts.xs.fontSize,
-    color: colors123.textSoft
+    color: colors123.textSoft,
   },
   formGroup: {
-    marginBottom: spacing.lg
+    marginBottom: spacing.lg,
   },
   amountInputContainer: {
     flexDirection: "row",
@@ -2252,30 +2178,30 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: radius.md,
     backgroundColor: colors123.surface,
-    paddingHorizontal: spacing.md
+    paddingHorizontal: spacing.md,
   },
   currencySymbol: {
     fontSize: fonts.lg.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
-    marginRight: spacing.xs
+    marginRight: spacing.xs,
   },
   amountInput: {
     flex: 1,
     paddingVertical: spacing.md,
     fontSize: fonts.lg.fontSize,
-    fontWeight: "600",
-    color: colors123.text
+    fontFamily: fonts.semibold,
+    color: colors123.text,
   },
   helperText: {
     fontSize: fonts.xs.fontSize,
     color: colors123.textSoft,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   methodGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.md
+    gap: spacing.md,
   },
   methodButton: {
     flex: 1,
@@ -2286,19 +2212,19 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: radius.md,
     backgroundColor: colors123.surface,
-    alignItems: "center"
+    alignItems: "center",
   },
   methodButtonActive: {
     backgroundColor: colors123.primary,
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   methodButtonText: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "600",
-    color: colors123.text
+    fontFamily: fonts.semibold,
+    color: colors123.text,
   },
   methodButtonTextActive: {
-    color: "white"
+    color: "white",
   },
   notesInput: {
     paddingHorizontal: spacing.md,
@@ -2309,6 +2235,6 @@ const styles = StyleSheet.create({
     fontSize: fonts.base.fontSize,
     color: colors123.text,
     backgroundColor: colors123.surface,
-    textAlignVertical: "top"
-  }
+    textAlignVertical: "top",
+  },
 });

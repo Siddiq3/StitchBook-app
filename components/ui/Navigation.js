@@ -1,3 +1,4 @@
+import { fonts } from "../../utils/theme";
 /**
  * Production-ready Bottom Navigation Component
  * Tab bar for main navigation
@@ -233,7 +234,7 @@ export function Pagination({
 
 const styles = StyleSheet.create({
   tabBar: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: BRAND_COLORS.white,
     borderTopWidth: 1,
     borderTopColor: BRAND_COLORS.divider,
@@ -241,41 +242,41 @@ const styles = StyleSheet.create({
   },
   tab: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: SPACING.sm,
-    position: 'relative',
+    position: "relative",
   },
   activeTab: {
     backgroundColor: BRAND_COLORS.overlayLight,
   },
   tabContent: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   iconWrapper: {
-    position: 'relative',
+    position: "relative",
   },
   badge: {
-    position: 'absolute',
+    position: "absolute",
     right: -8,
     top: -4,
     backgroundColor: BRAND_COLORS.danger,
     borderRadius: RADIUS.full,
     minWidth: 20,
     height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderWidth: 2,
     borderColor: BRAND_COLORS.white,
   },
   badgeText: {
     color: BRAND_COLORS.white,
     fontSize: 10,
-    fontWeight: 'bold',
+    fontFamily: fonts.bold,
   },
   indicator: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
-    width: '100%',
+    width: "100%",
     height: 3,
     backgroundColor: BRAND_COLORS.accent,
     borderBottomLeftRadius: RADIUS.full,
@@ -285,17 +286,17 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: RADIUS.full,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     ...SHADOWS.lg,
-    position: 'absolute',
+    position: "absolute",
     bottom: SPACING.lg,
     right: SPACING.lg,
   },
   pagination: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
     gap: SPACING.sm,
     paddingVertical: SPACING.lg,
   },
@@ -303,17 +304,17 @@ const styles = StyleSheet.create({
     minWidth: 36,
     height: 36,
     lineHeight: 36,
-    textAlign: 'center',
+    textAlign: "center",
     color: BRAND_COLORS.accent,
-    fontWeight: '600',
+    fontFamily: fonts.semibold,
   },
   activePage: {
     minWidth: 36,
     height: 36,
     borderRadius: RADIUS.lg,
     backgroundColor: BRAND_COLORS.accent,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   ellipsis: {
     color: BRAND_COLORS.textMuted,

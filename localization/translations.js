@@ -1,5 +1,16 @@
 export const translations = {
   en: {
+    team: 'Team', account: 'Account', shopDetails: 'Shop details',
+    createOrder: 'Create order', cutting: 'Cutting', overdue: 'Overdue', cancelled: 'Cancelled',
+    retry: 'Try again', clear: 'Clear', selectOutfit: 'Choose an outfit',
+    loadCustomersFailed: 'Could not load customers. Please try again.',
+    loadOrdersFailed: 'Could not load orders. Please try again.',
+    loadMeasurementsFailed: 'Could not load measurements. Please try again.',
+    loadDashboardFailed: 'Could not load your shop summary. Please try again.',
+    loadSubscriptionFailed: 'Could not load your subscription status. Please try again.',
+    loadStaffFailed: 'Could not load staff. Please try again.',
+    loadNotificationsFailed: 'Could not load notifications. Please try again.',
+
     selectLanguage: 'Select Language',
     choosePreferredLanguage: 'Choose your preferred language',
     continue: 'Continue',
@@ -245,7 +256,7 @@ export const translations = {
     editingFitProfile: 'Editing fit profile in inches.',
     customFitPreview: 'Custom Fit Preview',
     fitPreviewSubtitle: 'Review core measurements visually before saving the profile.',
-    complete: 'complete',
+    complete: 'Complete',
     measurementReuseHelper: 'Capture the exact fit once, then reuse it across repeat orders and alterations.',
     profileDetails: 'Profile details',
     profileDetailsSubtitle: 'Add a label and select the garment type before entering measurements.',
@@ -263,8 +274,8 @@ export const translations = {
     no: 'No',
     tailorShopManager: 'Tailor shop manager',
     secure: 'Secure',
-    loginHeroTitle: 'Run your tailor shop without paper chaos.',
-    loginHeroSubtitle: 'Orders, measurements, staff work, and payments in one calm workspace.',
+    loginHeroTitle: 'Keep your shop organized.',
+    loginHeroSubtitle: 'Customers, orders, measurements and payments in one place.',
     staff: 'Staff',
     payments: 'Payments',
     welcomeBack: 'Welcome back',
@@ -3905,6 +3916,7 @@ export const languages = [
 export const getTranslation = (languageCode, key) => {
   return appTranslationExtensions[languageCode]?.[key]
     || translations[languageCode]?.[key]
+    || appTranslationExtensions.en?.[key]
     || translations.en?.[key]
     || key;
 };

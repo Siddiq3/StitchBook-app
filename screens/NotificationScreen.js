@@ -1,3 +1,5 @@
+import { ListSkeleton } from "../components/SkeletonBlock";
+import InlineAlert from "../components/InlineAlert";
 import React, { useCallback, useEffect } from 'react';
 import {
   ScrollView,
@@ -10,7 +12,7 @@ import {
 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { MotiView } from 'moti';
+import { MotiView } from '../components/AccessibleMotionView';
 import AppButton from '../components/AppButton';
 import ScreenHeader from '../components/ScreenHeader';
 import EmptyState from '../components/EmptyState';
@@ -43,8 +45,8 @@ function NotificationItem({ notification, onPress, onMarkRead }) {
       animate={{ opacity: 1, translateY: 0 }}
       from={{ opacity: 0, translateY: 10 }}
       transition={{ duration: 300, type: 'timing' }}>
-      
-      <Pressable
+
+      <Pressable accessibilityRole="button"
         style={[
         styles.notification,
         !notification.read && styles.notificationUnread]
@@ -55,7 +57,7 @@ function NotificationItem({ notification, onPress, onMarkRead }) {
           }
           onPress(notification);
         }}>
-        
+
         <View style={[
         styles.notificationIcon,
         { backgroundColor: getTypeColor(notification.type) + '20' }]
@@ -64,7 +66,7 @@ function NotificationItem({ notification, onPress, onMarkRead }) {
             name={iconMap[notification.type] || 'bell-outline'}
             size={18}
             color={getTypeColor(notification.type)} />
-          
+
         </View>
 
         <View style={{ flex: 1 }}>
@@ -88,6 +90,7 @@ function NotificationItem({ notification, onPress, onMarkRead }) {
 }
 
 export default function NotificationScreen({ navigation }) {const { t } = useLanguage();
+  const { notificationsError } = useStitchPro();
   const {
     notifications,
     notificationsLoading,
@@ -129,12 +132,13 @@ export default function NotificationScreen({ navigation }) {const { t } = useLan
         tintColor={colors123.primary} />
 
       }>
-      
+
       <ScreenHeader
         title={t("auto_notifications")}
         subtitle={`You have ${notificationCount} unread`} />
-      
 
+
+<InlineAlert message={notificationsError ? t("loadNotificationsFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
       {unreadNotifications.length > 0 &&
       <AppButton
         label={`Mark all ${unreadNotifications.length} as read`}
@@ -144,12 +148,11 @@ export default function NotificationScreen({ navigation }) {const { t } = useLan
 
       }
 
-      {notifications.length === 0 ?
+      {notificationsLoading && !notifications.length ? <ListSkeleton /> : notificationsError && !notifications.length ? null : notifications.length === 0 ?
       <EmptyState
         icon="bell-outline"
         title={t("auto_no_notifications")}
-        message={t("auto_you_re_all_caught_up_new_order_updates_will_")} /> :
-
+        description={t("auto_you_re_all_caught_up_new_order_updates_will_")} /> :
 
       <FlatList
         data={notifications}
@@ -173,57 +176,57 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
     paddingBottom: 100,
-    gap: spacing.md
+    gap: spacing.md,
   },
   markAllButton: {
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   notification: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: spacing.md,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     borderLeftWidth: 4,
-    borderLeftColor: colors123.transparent
+    borderLeftColor: colors123.transparent,
   },
   notificationUnread: {
     backgroundColor: colors123.primarySoft,
-    borderLeftColor: colors123.primary
+    borderLeftColor: colors123.primary,
   },
   notificationIcon: {
     width: 40,
     height: 40,
     borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 2
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
   },
   notificationTitle: {
     fontSize: 14,
     fontFamily: fonts.semibold,
     color: colors123.text,
-    marginBottom: spacing.xs
+    marginBottom: spacing.xs,
   },
   notificationBody: {
     fontSize: 12,
     fontFamily: fonts.regular,
     color: colors123.textMuted,
     marginBottom: spacing.xs,
-    lineHeight: 16
+    lineHeight: 16,
   },
   notificationTime: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: fonts.regular,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   unreadBadge: {
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: colors123.primary,
-    marginTop: spacing.sm
-  }
+    marginTop: spacing.sm,
+  },
 });

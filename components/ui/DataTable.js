@@ -4,14 +4,7 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   BRAND_COLORS,
@@ -269,8 +262,8 @@ export function InfoCard({
 
 const styles = StyleSheet.create({
   listItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     backgroundColor: BRAND_COLORS.white,
@@ -295,11 +288,11 @@ const styles = StyleSheet.create({
   tableContainer: {
     backgroundColor: BRAND_COLORS.white,
     borderRadius: RADIUS.lg,
-    overflow: 'hidden',
+    overflow: "hidden",
     ...SHADOWS.sm,
   },
   tableHeader: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     backgroundColor: BRAND_COLORS.lightBg,
@@ -307,7 +300,7 @@ const styles = StyleSheet.create({
     borderBottomColor: BRAND_COLORS.border,
   },
   tableRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     borderBottomWidth: 1,
@@ -323,8 +316,8 @@ const styles = StyleSheet.create({
     color: BRAND_COLORS.textMuted,
   },
   statRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: SPACING.lg,
     paddingVertical: SPACING.md,
     backgroundColor: BRAND_COLORS.white,
@@ -338,8 +331,8 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xs,
   },
   infoCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: BRAND_COLORS.white,
     borderRadius: RADIUS.lg,
     padding: SPACING.lg,

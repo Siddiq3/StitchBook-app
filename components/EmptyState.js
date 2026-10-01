@@ -3,11 +3,11 @@ import { StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
 
-export default function EmptyState({ icon = "hanger", title, description }) {
+export default function EmptyState({ icon = "hanger", title, description, message, action }) {
   return (
     <View style={styles.wrapper}>
       <View
-        style={[styles.illustration, { backgroundColor: "#E0E7FF" }]}
+        style={[styles.illustration, { backgroundColor: colors123.surfaceMuted }]}
       >
         <View style={styles.innerCircle}>
           <MaterialCommunityIcons
@@ -18,7 +18,8 @@ export default function EmptyState({ icon = "hanger", title, description }) {
         </View>
       </View>
       <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{description}</Text>
+      <Text style={styles.description}>{description || message}</Text>
+      {action ? <View style={{ marginTop: spacing.md }}>{action}</View> : null}
     </View>
   );
 }
@@ -30,15 +31,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.xxl,
     backgroundColor: colors123.surface,
-    borderRadius: radius.xl,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     ...shadows.soft,
   },
   illustration: {
-    width: 88,
-    height: 88,
-    borderRadius: 24,
+    width: 64,
+    height: 64,
+    borderRadius: radius.lg,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: spacing.md,

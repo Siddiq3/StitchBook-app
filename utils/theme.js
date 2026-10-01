@@ -1,59 +1,65 @@
-import { Dimensions, PixelRatio } from 'react-native';
+import { Dimensions, PixelRatio } from "react-native";
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
+const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 export const COLORS = {
-  // Primary brand: modern service-app blue with tailoring-friendly teal support.
-  primary:       '#1A56DB',
-  primaryLight:  '#EEF4FF',
-  primaryDark:   '#123E9C',
-  accent:        '#6366F1',
+  // Roles shared by every mobile surface; compatibility aliases remain below.
+  primary: "#1A56DB",
+  primaryLight: "#EEF3FF",
+  primaryDark: "#1745B0",
+  accent: "#6366F1",
 
   // Semantic
-  success:       '#16A34A',
-  successLight:  '#ECFDF5',
-  warning:       '#D97706',
-  warningLight:  '#FFFBEB',
-  danger:        '#DC2626',
-  dangerLight:   '#FEF2F2',
-  info:          '#0284C7',
-  infoLight:     '#F0F9FF',
+  success: "#15803D",
+  successLight: "#F0FDF4",
+  warning: "#B45309",
+  warningLight: "#FFFBEB",
+  danger: "#B91C1C",
+  dangerLight: "#FEF2F2",
+  info: "#0369A1",
+  infoLight: "#F0F9FF",
 
   // Neutrals (slate/ash scale)
-  text:          '#0F172A',
-  textSecondary: '#334155',
-  textMuted:     '#64748B',
-  border:        '#CBD5E1',
-  borderLight:   '#E2E8F0',
-  background:    '#F5F7FA',
-  surface:       '#FFFFFF',
-  overlay:       'rgba(0,0,0,0.5)',
+  text: "#111827",
+  textSecondary: "#4B5563",
+  textMuted: "#5F6673",
+  border: "#CBD0D9",
+  borderLight: "#E2E5EB",
+  background: "#F7F8FA",
+  surface: "#FFFFFF",
+  overlay: "rgba(0,0,0,0.5)",
 
   // Status badge backgrounds + text (exact pairs)
-  pendingBg:     '#FFFBEB',
-  pendingText:   '#92400E',
-  progressBg:    '#EFF6FF',
-  progressText:  '#1A56DB',
-  readyBg:       '#F0FDFA',
-  readyText:     '#0F766E',
-  deliveredBg:   '#ECFDF5',
-  deliveredText: '#166534',
-  urgentBg:      '#FEF2F2',
-  urgentText:    '#B91C1C',
+  pendingBg: "#EFF1F5",
+  pendingText: "#4B5563",
+  progressBg: "#EFF6FF",
+  progressText: "#1A56DB",
+  readyBg: "#F0FDF4",
+  readyText: "#15803D",
+  deliveredBg: "#F0FDF4",
+  deliveredText: "#166534",
+  urgentBg: "#FEF2F2",
+  urgentText: "#B91C1C",
 
   // Avatar colors123 (rotate through these)
   avatarColors: [
-    '#1A56DB','#6366F1','#0F766E','#D97706',
-    '#0284C7','#16A34A','#DC2626','#475569',
+    "#1A56DB",
+    "#6366F1",
+    "#0F766E",
+    "#B45309",
+    "#0369A1",
+    "#15803D",
+    "#B91C1C",
+    "#475569",
   ],
 
   // Stat card colors123 (one per card)
-  statPrimary:  '#1A56DB',
-  statSuccess:  '#16A34A',
-  statWarning:  '#D97706',
-  statPurple:   '#6366F1',
-  statDanger:   '#DC2626',
-  statInfo:     '#0284C7',
+  statPrimary: "#1A56DB",
+  statSuccess: "#15803D",
+  statWarning: "#B45309",
+  statPurple: "#6366F1",
+  statDanger: "#B91C1C",
+  statInfo: "#0369A1",
 };
 
 // Legacy color mapping for existing code compatibility
@@ -77,18 +83,19 @@ export const colors123 = {
   dangerSoft: COLORS.dangerLight,
   dangerLight: COLORS.dangerLight,
   background: COLORS.background,
-  backgroundAccent: '#EEF4FF',
+  backgroundAccent: "#EEF3FF",
   surface: COLORS.surface,
-  surfaceMuted: '#F1F5F9',
+  surfaceMuted: "#EFF1F5",
   card: COLORS.surface,
   border: COLORS.border,
+  borderLight: COLORS.borderLight,
   borderStrong: COLORS.border,
   text: COLORS.text,
   textSecondary: COLORS.textSecondary,
   textMuted: COLORS.textMuted,
   textSoft: COLORS.textSecondary,
   white: COLORS.surface,
-  shadow: 'rgba(15,23,42,0.08)',
+  shadow: "rgba(15,23,42,0.08)",
   overlay: COLORS.overlay,
   pendingBg: COLORS.pendingBg,
   pendingText: COLORS.pendingText,
@@ -100,56 +107,56 @@ export const colors123 = {
   deliveredText: COLORS.deliveredText,
   urgentBg: COLORS.urgentBg,
   urgentText: COLORS.urgentText,
-  error:       COLORS.danger,
-  transparent: 'transparent',
-  bgInput:     '#F8FAFC',
+  error: COLORS.danger,
+  transparent: "transparent",
+  bgInput: "#F7F8FA",
 };
 
 export const FONTS = {
-  regular:    '400',
-  medium:     '500',
-  semibold:   '600',
-  bold:       '700',
-  extraBold:  '800',
+  regular: "400",
+  medium: "500",
+  semibold: "600",
+  bold: "700",
+  extraBold: "800",
 };
 
 export const SIZES = {
   // Text sizes
-  xs:   11,
-  sm:   12,
+  xs: 11,
+  sm: 12,
   base: 14,
-  md:   15,
-  lg:   16,
-  xl:   18,
-  xxl:  20,
+  md: 15,
+  lg: 16,
+  xl: 18,
+  xxl: 20,
   xxxl: 22,
   huge: 28,
 
   // Spacing
-  xs2:  4,
-  xs3:  6,
-  sm2:  8,
-  sm3:  10,
-  md2:  12,
-  md3:  16,
-  lg2:  20,
-  lg3:  24,
-  xl2:  32,
-  xl3:  40,
+  xs2: 4,
+  xs3: 6,
+  sm2: 8,
+  sm3: 10,
+  md2: 12,
+  md3: 16,
+  lg2: 20,
+  lg3: 24,
+  xl2: 32,
+  xl3: 40,
 
   // Radius
-  radiusSm:   8,
-  radiusMd:   12,
-  radiusLg:   16,
-  radiusXl:   20,
+  radiusSm: 8,
+  radiusMd: 12,
+  radiusLg: 16,
+  radiusXl: 20,
   radiusFull: 999,
 
   // Heights
-  inputH:     48,
-  buttonH:    52,
-  buttonHSm:  40,
-  tabBarH:    64,
-  headerH:    56,
+  inputH: 48,
+  buttonH: 52,
+  buttonHSm: 44,
+  tabBarH: 64,
+  headerH: 56,
 };
 
 // Legacy spacing mapping for existing code
@@ -180,48 +187,40 @@ export const fonts = {
   lg: { fontSize: 16 },
   xl: { fontSize: 18 },
   xxl: { fontSize: 20 },
-  regular: '400',
-  medium: '500',
-  semibold: '600',
-  bold: '700',
-  extrabold: '800',
+  regular: "Inter_400Regular",
+  medium: "Inter_500Medium",
+  semibold: "Inter_600SemiBold",
+  bold: "Inter_700Bold",
+  extrabold: "Inter_600SemiBold",
 };
 
+// Elevation is reserved for floating layers. Existing card aliases stay flat.
+const flatShadow = { shadowOpacity: 0, shadowRadius: 0, elevation: 0 };
 export const SHADOWS = {
-  sm: {
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 0,
-  },
-  md: {
-    shadowColor: '#0F172A',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 1,
-  },
+  none: flatShadow,
+  xs: flatShadow,
+  sm: flatShadow,
+  md: flatShadow,
   lg: {
-    shadowColor: '#0F172A',
+    shadowColor: COLORS.text,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 18,
-    elevation: 3,
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
   },
-  colored: (color) => ({
-  shadowColor: color || '#1A56DB',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.10,
-    shadowRadius: 12,
-    elevation: 4,
-  }),
+  xl: {
+    shadowColor: COLORS.text,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.16,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  colored: () => flatShadow,
 };
-
-// Legacy shadows mapping
 export const shadows = {
-  card: SHADOWS.md,
-  soft: SHADOWS.sm,
+  card: SHADOWS.none,
+  soft: SHADOWS.none,
+  floating: SHADOWS.lg,
 };
 
 // Responsive helpers
@@ -246,15 +245,87 @@ export const navigationTheme = {
   },
 };
 
+export const normalizeStatus = (status = "") =>
+  String(status)
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
 export const statusToneMap = {
-  Pending: { bg: colors123.pendingBg, color: colors123.pendingText, border: colors123.warning },
-  "In Progress": { bg: colors123.progressBg, color: colors123.progressText, border: colors123.info },
-  Ready: { bg: colors123.readyBg, color: colors123.readyText, border: colors123.success },
-  Delivered: { bg: colors123.deliveredBg, color: colors123.deliveredText, border: colors123.text },
+  pending: {
+    bg: colors123.pendingBg,
+    color: colors123.pendingText,
+    border: colors123.borderLight,
+    labelKey: "pending",
+  },
+  new: {
+    bg: colors123.pendingBg,
+    color: colors123.pendingText,
+    border: colors123.borderLight,
+    labelKey: "pending",
+  },
+  started: {
+    bg: colors123.pendingBg,
+    color: colors123.pendingText,
+    border: colors123.borderLight,
+    labelKey: "pending",
+  },
+  cutting: {
+    bg: colors123.progressBg,
+    color: colors123.progressText,
+    border: colors123.primaryLight,
+    labelKey: "cutting",
+  },
+  stitching: {
+    bg: colors123.progressBg,
+    color: colors123.progressText,
+    border: colors123.primaryLight,
+    labelKey: "stitching",
+  },
+  in_progress: {
+    bg: colors123.progressBg,
+    color: colors123.progressText,
+    border: colors123.primaryLight,
+    labelKey: "inProgress",
+  },
+  ready: {
+    bg: colors123.readyBg,
+    color: colors123.readyText,
+    border: colors123.successLight,
+    labelKey: "ready",
+  },
+  delivered: {
+    bg: colors123.deliveredBg,
+    color: colors123.deliveredText,
+    border: colors123.successLight,
+    labelKey: "delivered",
+  },
+  urgent: {
+    bg: colors123.urgentBg,
+    color: colors123.urgentText,
+    border: colors123.dangerLight,
+    labelKey: "urgent",
+  },
+  overdue: {
+    bg: colors123.urgentBg,
+    color: colors123.urgentText,
+    border: colors123.dangerLight,
+    labelKey: "overdue",
+  },
+  cancelled: {
+    bg: colors123.urgentBg,
+    color: colors123.urgentText,
+    border: colors123.dangerLight,
+    labelKey: "cancelled",
+  },
 };
-
 export function getStatusTone(status) {
-  return statusToneMap[status] || statusToneMap.Pending;
+  return (
+    statusToneMap[normalizeStatus(status)] || {
+      bg: colors123.surfaceMuted,
+      color: colors123.textSecondary,
+      border: colors123.borderLight,
+    }
+  );
 }
 
 export function formatCurrency(amount) {

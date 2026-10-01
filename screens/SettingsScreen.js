@@ -75,42 +75,41 @@ const settingsMenuItems = [
   id: 'notifications',
   icon: 'bell-outline',
   label: 'notifications',
-  iconBgColor: '#FF6B6B'
+  iconBgColor: colors123.primaryLight
 },
 {
   id: 'staff-management',
   icon: 'account-multiple',
   label: 'staffManagement',
-  iconBgColor: '#4F46E5'
+  iconBgColor: colors123.primaryLight
 },
 {
   id: 'subscription',
   icon: 'credit-card',
   label: 'subscription',
-  iconBgColor: '#FF6B6B'
+  iconBgColor: colors123.primaryLight
 }];
-
 
 function SettingsMenuItem({ item, onPress, t }) {
   return (
-    <TouchableOpacity
+    <TouchableOpacity accessibilityRole="button"
       style={styles.menuItem}
       onPress={onPress}
       activeOpacity={0.7}>
-      
+
       <View style={styles.iconContainer}>
         <MaterialCommunityIcons
           name={item.icon}
           size={20}
           color={colors123.primary} />
-        
+
       </View>
       <Text style={styles.menuLabel}>{t(item.label)}</Text>
       <MaterialCommunityIcons
         name="chevron-right"
         size={24}
         color={colors123.textSoft} />
-      
+
     </TouchableOpacity>);
 
 }
@@ -388,14 +387,14 @@ export default function SettingsScreen({ navigation }) {
       <View style={styles.headerWrap}>
         <ScreenHeader title={t('settings')} />
       </View>
-      
+
       <ScrollView
         contentContainerStyle={[
         styles.scrollContent,
-        { paddingBottom: insets.bottom + 144 }]
+        { paddingBottom: insets.bottom + spacing.xl }]
         }
         showsVerticalScrollIndicator={false}>
-        
+
         {/* Profile Section */}
         <View style={styles.profileSection}>
             <View style={styles.profileHeader}>
@@ -406,18 +405,18 @@ export default function SettingsScreen({ navigation }) {
               <Text style={styles.profileName}>{user?.name || t('user')}</Text>
               <Text style={styles.profileRole}>{shop?.name || t('shopOwner')}</Text>
             </View>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={styles.editButton}
               onPress={() => setShopEditModalVisible(true)}>
-              
+
               <MaterialCommunityIcons
                 name="pencil"
                 size={20}
                 color={colors123.text} />
-              
+
             </TouchableOpacity>
           </View>
-          
+
           {/* Shop Info Card */}
           {shop &&
           <>
@@ -442,10 +441,10 @@ export default function SettingsScreen({ navigation }) {
                   </View>
               }
               </View>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
               style={styles.editShopButton}
               onPress={() => setShopEditModalVisible(true)}>
-              
+
                 <MaterialCommunityIcons name="pencil" size={16} color={colors123.primary} />
                 <Text style={styles.editShopButtonText}>{t('editShopDetails')}</Text>
               </TouchableOpacity>
@@ -456,17 +455,17 @@ export default function SettingsScreen({ navigation }) {
         {/* Language Section */}
         <View style={styles.languageSection}>
           <Text style={styles.sectionTitle}>{t('changeLanguage')}</Text>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.languageItem}
             onPress={() => setLanguageModalVisible(true)}
             activeOpacity={0.7}>
-            
+
             <View style={styles.languageIconContainer}>
               <MaterialCommunityIcons
                 name="earth"
                 size={20}
                 color={colors123.primary} />
-              
+
             </View>
             <View style={styles.languageInfo}>
               <Text style={styles.languageLabel}>{t('language')}</Text>
@@ -476,7 +475,7 @@ export default function SettingsScreen({ navigation }) {
               name="chevron-right"
               size={24}
               color={colors123.textSoft} />
-            
+
           </TouchableOpacity>
         </View>
 
@@ -554,7 +553,10 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Settings Menu */}
         <View style={styles.settingsMenu}>
-          {settingsMenuItems.map((item) =>
+          <Text style={styles.sectionTitle}>{t("shopDetails")}</Text>
+          <SettingsMenuItem item={{ id: 'measurements', icon: 'ruler', label: 'measurements' }} t={t} onPress={() => navigation.navigate('Measurements')} />
+          <Text style={styles.sectionTitle}>{t("team")}</Text>
+          {settingsMenuItems.filter(item => item.id !== "subscription").map((item) =>
           <SettingsMenuItem
             key={item.id}
             item={item}
@@ -564,25 +566,29 @@ export default function SettingsScreen({ navigation }) {
           )}
         </View>
 
+        <View style={styles.settingsMenu}>
+          <Text style={styles.sectionTitle}>{t("account")}</Text>
+          {settingsMenuItems.filter(item => item.id === "subscription").map(item => <SettingsMenuItem key={item.id} item={item} t={t} onPress={() => handleMenuItemPress(item.id)} />)}
+        </View>
         {/* Logout Button */}
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={styles.logoutButton}
           onPress={handleLogout}
           activeOpacity={0.7}>
-          
-          <View style={[styles.iconContainer, { backgroundColor: '#FF4444' }]}>
+
+          <View style={[styles.iconContainer, { backgroundColor: colors123.danger }]}>
             <MaterialCommunityIcons
               name="logout"
               size={20}
               color={colors123.surface} />
-            
+
           </View>
           <Text style={styles.logoutLabel}>{t('logout')}</Text>
           <MaterialCommunityIcons
             name="chevron-right"
             size={24}
             color={colors123.textSoft} />
-          
+
         </TouchableOpacity>
       </ScrollView>
 
@@ -592,16 +598,16 @@ export default function SettingsScreen({ navigation }) {
         transparent
         animationType="slide"
         onRequestClose={() => setShopEditModalVisible(false)}>
-        
+
         <KeyboardAvoidingView
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           style={{ flex: 1 }}>
-          
+
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <View style={styles.modalHeader}>
                 <Text style={styles.modalTitle}>{t('editShopDetails')}</Text>
-                <TouchableOpacity onPress={() => setShopEditModalVisible(false)}>
+                <TouchableOpacity accessibilityRole="button" onPress={() => setShopEditModalVisible(false)}>
                   <MaterialCommunityIcons name="close" size={24} color={colors123.text} />
                 </TouchableOpacity>
               </View>
@@ -609,43 +615,43 @@ export default function SettingsScreen({ navigation }) {
               <ScrollView style={styles.modalBody}>
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>{t('shopName')} *</Text>
-                  <TextInput
+                  <TextInput accessibilityLabel={t('enterShopName')}
                     style={styles.input}
                     placeholder={t('enterShopName')}
                     value={shopForm.name}
                     onChangeText={(text) => setShopForm({ ...shopForm, name: text })} />
-                  
+
                 </View>
 
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>{t('phone')}</Text>
-                  <TextInput
+                  <TextInput accessibilityLabel={t('enterPhoneNumber')}
                     style={styles.input}
                     placeholder={t('enterPhoneNumber')}
                     value={shopForm.phone}
                     onChangeText={(text) => setShopForm({ ...shopForm, phone: text })}
                     keyboardType="phone-pad" />
-                  
+
                 </View>
 
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>{t('locationAddress')}</Text>
-                  <TextInput
+                  <TextInput accessibilityLabel={t('enterShopLocation')}
                     style={[styles.input, { minHeight: 80 }]}
                     placeholder={t('enterShopLocation')}
                     value={shopForm.location}
                     onChangeText={(text) => setShopForm({ ...shopForm, location: text })}
                     multiline
                     textAlignVertical="top" />
-                  
+
                 </View>
               </ScrollView>
 
               <View style={styles.modalActions}>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   style={styles.cancelButton}
                   onPress={() => setShopEditModalVisible(false)}>
-                  
+
                   <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
                 </TouchableOpacity>
                 <AppButton
@@ -653,7 +659,7 @@ export default function SettingsScreen({ navigation }) {
                   onPress={handleUpdateShop}
                   disabled={isUpdatingShop}
                   style={{ flex: 1, marginLeft: spacing.md }} />
-                
+
               </View>
             </View>
           </View>
@@ -666,26 +672,26 @@ export default function SettingsScreen({ navigation }) {
         transparent
         animationType="slide"
         onRequestClose={() => setLanguageModalVisible(false)}>
-        
-        <Pressable
+
+        <Pressable accessibilityRole="button"
           style={styles.modalOverlay}
           onPress={() => setLanguageModalVisible(false)}>
-          
+
           <View style={styles.languageModalContent}>
             <View style={styles.languageModalHeader}>
               <Text style={styles.languageModalTitle}>{t('selectLanguage')}</Text>
-              <TouchableOpacity onPress={() => setLanguageModalVisible(false)}>
+              <TouchableOpacity accessibilityRole="button" onPress={() => setLanguageModalVisible(false)}>
                 <MaterialCommunityIcons
                   name="close"
                   size={24}
                   color={colors123.text} />
-                
+
               </TouchableOpacity>
             </View>
 
             <ScrollView style={styles.languageList}>
               {languages.map((lang) =>
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(language === lang.code) }}
                 key={lang.code}
                 style={[
                 styles.languageOption,
@@ -693,13 +699,13 @@ export default function SettingsScreen({ navigation }) {
                 }
                 onPress={() => handleLanguageSelect(lang.code)}
                 activeOpacity={0.7}>
-                
+
                   <View
                   style={[
                   styles.radioOuter,
                   language === lang.code && styles.radioOuterSelected]
                   }>
-                  
+
                     {language === lang.code &&
                   <View style={styles.radioInner} />
                   }
@@ -709,7 +715,7 @@ export default function SettingsScreen({ navigation }) {
                   styles.languageOptionText,
                   language === lang.code && styles.languageOptionTextSelected]
                   }>
-                  
+
                     {lang.nativeName}
                   </Text>
                   {language === lang.code &&
@@ -745,7 +751,7 @@ export default function SettingsScreen({ navigation }) {
                   <Text style={styles.modalTitle}>Connect mobile login</Text>
                   <Text style={styles.modalSubtitle}>Verify OTP to link this number safely.</Text>
                 </View>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   onPress={() => {
                     setMobileLinkModalVisible(false);
                     resetMobileLink();
@@ -757,7 +763,7 @@ export default function SettingsScreen({ navigation }) {
               <View style={styles.modalBody}>
                 <View style={styles.formGroup}>
                   <Text style={styles.label}>Mobile number</Text>
-                  <TextInput
+                  <TextInput accessibilityLabel="Enter 10 digit number"
                     style={styles.input}
                     placeholder="Enter 10 digit number"
                     value={linkPhone}
@@ -769,7 +775,7 @@ export default function SettingsScreen({ navigation }) {
                 {linkReqId ? (
                   <View style={styles.formGroup}>
                     <Text style={styles.label}>OTP</Text>
-                    <TextInput
+                    <TextInput accessibilityLabel="Enter OTP"
                       style={styles.input}
                       placeholder="Enter OTP"
                       value={linkOtp}
@@ -781,7 +787,7 @@ export default function SettingsScreen({ navigation }) {
               </View>
 
               <View style={styles.modalActions}>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   style={styles.cancelButton}
                   onPress={() => {
                     setMobileLinkModalVisible(false);
@@ -806,15 +812,15 @@ export default function SettingsScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   scrollContent: {
-    paddingBottom: 168
+    paddingBottom: 168,
   },
   headerWrap: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   profileSection: {
     paddingHorizontal: spacing.lg,
@@ -826,78 +832,78 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     shadowColor: colors123.text,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0,
     shadowRadius: 10,
-    elevation: 1
+    elevation: 0,
   },
   profileHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
   },
   profileImageContainer: {
     width: 56,
     height: 56,
     borderRadius: 18,
     backgroundColor: colors123.primarySoft,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   profileInitial: {
     fontSize: 24,
-    fontWeight: '700',
+
     color: colors123.primary,
-    fontFamily: fonts.bold
+    fontFamily: fonts.bold,
   },
   profileInfo: {
-    flex: 1
+    flex: 1,
   },
   profileName: {
     fontSize: 16,
-    fontWeight: '600',
+
     color: colors123.text,
-    fontFamily: fonts.semibold
+    fontFamily: fonts.semibold,
   },
   profileRole: {
     fontSize: 14,
     color: colors123.textMuted,
     fontFamily: fonts.regular,
-    marginTop: 2
+    marginTop: 2,
   },
   editButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 14,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     backgroundColor: colors123.surface,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   shopInfoCard: {
     marginTop: spacing.md,
     padding: spacing.md,
     backgroundColor: colors123.surfaceMuted,
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   shopInfoRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
   },
   shopInfoLabel: {
     fontSize: 13,
     color: colors123.textMuted,
-    fontFamily: fonts.regular
+    fontFamily: fonts.regular,
   },
   shopInfoValue: {
     fontSize: 13,
     color: colors123.text,
     fontFamily: fonts.medium,
-    flex: 1
+    flex: 1,
   },
   settingsMenu: {
     marginTop: spacing.lg,
@@ -906,64 +912,53 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    overflow: 'hidden',
+    overflow: "hidden",
     shadowColor: colors123.text,
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
+    shadowOpacity: 0,
     shadowRadius: 10,
-    elevation: 1
+    elevation: 0,
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     backgroundColor: colors123.surface,
     borderBottomWidth: 1,
     borderBottomColor: colors123.borderLight,
-    gap: spacing.md
+    gap: spacing.md,
   },
   iconContainer: {
     width: 40,
     height: 40,
     borderRadius: radius.md,
     backgroundColor: colors123.surfaceMuted,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   menuLabel: {
     flex: 1,
     fontSize: 15,
     color: colors123.text,
-    fontFamily: fonts.medium
+    fontFamily: fonts.medium,
   },
-  // Language Section Styles
   languageSection: {
     marginTop: spacing.lg,
     paddingHorizontal: spacing.md,
-    marginBottom: spacing.md
-  },
-  authSection: {
-    paddingHorizontal: spacing.md,
-    marginTop: spacing.sm,
-    marginBottom: spacing.md
-  },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
+    marginBottom: spacing.md,
   },
   sectionTitle: {
     fontSize: 14,
-    fontWeight: '800',
+
     color: colors123.textMuted,
     fontFamily: fonts.semibold,
     marginBottom: spacing.md,
-    textTransform: 'uppercase'
+    textTransform: "uppercase",
   },
   languageItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     backgroundColor: colors123.surface,
@@ -973,161 +968,78 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     shadowColor: colors123.text,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0,
     shadowRadius: 4,
-    elevation: 0
-  },
-  authCard: {
-    backgroundColor: colors123.surface,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    paddingHorizontal: spacing.md,
-    shadowColor: colors123.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 1
-  },
-  authMethodRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    gap: spacing.md
-  },
-  authMethodIcon: {
-    width: 42,
-    height: 42,
-    borderRadius: radius.md,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  googleIcon: {
-    backgroundColor: colors123.text
-  },
-  mobileIcon: {
-    backgroundColor: colors123.primarySoft
-  },
-  authMethodCopy: {
-    flex: 1,
-    minWidth: 0
-  },
-  authMethodTitle: {
-    fontSize: 15,
-    color: colors123.text,
-    fontFamily: fonts.semibold
-  },
-  authMethodMeta: {
-    marginTop: 3,
-    fontSize: 13,
-    color: colors123.textMuted,
-    fontFamily: fonts.regular
-  },
-  connectedPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingVertical: 7,
-    paddingHorizontal: spacing.sm,
-    backgroundColor: colors123.successSoft,
-    borderRadius: radius.pill
-  },
-  connectedText: {
-    fontSize: 12,
-    color: colors123.success,
-    fontFamily: fonts.semibold
-  },
-  connectButton: {
-    paddingVertical: 8,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors123.primary,
-    borderRadius: radius.pill
-  },
-  connectButtonText: {
-    fontSize: 13,
-    color: colors123.surface,
-    fontFamily: fonts.semibold
-  },
-  authDivider: {
-    height: 1,
-    backgroundColor: colors123.borderLight
-  },
-  authHelpText: {
-    marginTop: spacing.sm,
-    fontSize: 12,
-    lineHeight: 17,
-    color: colors123.textMuted,
-    fontFamily: fonts.regular
+    elevation: 0,
   },
   languageIconContainer: {
     width: 40,
     height: 40,
     borderRadius: radius.md,
     backgroundColor: colors123.primarySoft,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   languageInfo: {
-    flex: 1
+    flex: 1,
   },
   languageLabel: {
     fontSize: 14,
     color: colors123.textMuted,
-    fontFamily: fonts.regular
+    fontFamily: fonts.regular,
   },
   languageValue: {
     fontSize: 16,
-    fontWeight: '600',
+
     color: colors123.text,
     fontFamily: fonts.semibold,
-    marginTop: 2
+    marginTop: 2,
   },
-  // Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end'
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "flex-end",
   },
   languageModalContent: {
     backgroundColor: colors123.surface,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
-    maxHeight: '80%',
-    paddingTop: spacing.lg
+    maxHeight: "80%",
+    paddingTop: spacing.lg,
   },
   languageModalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors123.border
+    borderBottomColor: colors123.border,
   },
   languageModalTitle: {
     fontSize: 18,
-    fontWeight: '700',
+
     color: colors123.text,
-    fontFamily: fonts.bold
+    fontFamily: fonts.bold,
   },
   languageList: {
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md
+    paddingVertical: spacing.md,
   },
   languageOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     marginBottom: spacing.sm,
     borderRadius: radius.lg,
     backgroundColor: colors123.surface,
-    gap: spacing.md
+    gap: spacing.md,
   },
   languageOptionSelected: {
     backgroundColor: colors123.primarySoft,
     borderWidth: 2,
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   radioOuter: {
     width: 24,
@@ -1135,35 +1047,35 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderColor: colors123.border,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   radioOuterSelected: {
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   radioInner: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: colors123.primary
+    backgroundColor: colors123.primary,
   },
   languageOptionText: {
     flex: 1,
     fontSize: 15,
     color: colors123.text,
-    fontFamily: fonts.medium
+    fontFamily: fonts.medium,
   },
   languageOptionTextSelected: {
     color: colors123.primary,
-    fontFamily: fonts.semibold
+    fontFamily: fonts.semibold,
   },
   logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     backgroundColor: colors123.surface,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     gap: spacing.md,
@@ -1172,77 +1084,77 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xxl,
     shadowColor: colors123.text,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
+    shadowOpacity: 0,
     shadowRadius: 4,
-    elevation: 0
+    elevation: 0,
   },
   logoutLabel: {
     flex: 1,
     fontSize: 15,
-    color: '#FF4444',
-    fontFamily: fonts.medium
+    color: colors123.danger,
+    fontFamily: fonts.medium,
   },
   editShopButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     marginTop: spacing.md,
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   editShopButtonText: {
     fontSize: 14,
     color: colors123.primary,
-    fontFamily: fonts.semibold
+    fontFamily: fonts.semibold,
   },
   modalContent: {
     backgroundColor: colors123.background,
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
-    maxHeight: '90%',
-    paddingTop: spacing.lg
+    maxHeight: "90%",
+    paddingTop: spacing.lg,
   },
   modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: spacing.lg,
     paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: colors123.border
+    borderBottomColor: colors123.border,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '700',
+
     color: colors123.text,
-    fontFamily: fonts.bold
+    fontFamily: fonts.bold,
   },
   modalSubtitle: {
     marginTop: 4,
     fontSize: 13,
     color: colors123.textMuted,
-    fontFamily: fonts.regular
+    fontFamily: fonts.regular,
   },
   modalBody: {
     padding: spacing.lg,
-    maxHeight: '70%'
+    maxHeight: "70%",
   },
   modalActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: colors123.border
+    borderTopColor: colors123.border,
   },
   formGroup: {
-    marginBottom: spacing.lg
+    marginBottom: spacing.lg,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+
     color: colors123.text,
     fontFamily: fonts.semibold,
-    marginBottom: spacing.sm
+    marginBottom: spacing.sm,
   },
   input: {
     paddingHorizontal: spacing.md,
@@ -1253,7 +1165,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors123.text,
     backgroundColor: colors123.surface,
-    fontFamily: fonts.regular
+    fontFamily: fonts.regular,
   },
   cancelButton: {
     flex: 1,
@@ -1261,12 +1173,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.border,
     borderRadius: radius.md,
-    alignItems: 'center'
+    alignItems: "center",
   },
   cancelButtonText: {
     fontSize: 14,
-    fontWeight: '600',
+
     color: colors123.text,
-    fontFamily: fonts.semibold
-  }
+    fontFamily: fonts.semibold,
+  },
 });

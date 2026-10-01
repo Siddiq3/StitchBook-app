@@ -1,3 +1,6 @@
+import { ListSkeleton } from "../components/SkeletonBlock";
+import InlineAlert from "../components/InlineAlert";
+import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ScrollView,
@@ -12,7 +15,7 @@ import {
 "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { MotiView } from "moti";
+import { MotiView } from "../components/AccessibleMotionView";
 import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";
 import ScreenHeader from "../components/ScreenHeader";
@@ -27,7 +30,6 @@ const PAYMENT_TYPES = [
 { id: "daily", labelKey: "staffDaily", icon: "calendar-today-outline" },
 { id: "per_piece", labelKey: "staffPerPiece", icon: "needle" },
 { id: "commission", labelKey: "staffCommission", icon: "percent-outline" }];
-
 
 const WORK_STATUSES = [
 { id: "completed", labelKey: "completed" },
@@ -102,7 +104,7 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
       animate={{ opacity: 1, translateX: 0 }}
       from={{ opacity: 0, translateX: -20 }}
       transition={{ duration: 300, type: "timing" }}>
-      
+
       <AppCard style={styles.staffCard}>
         <View style={styles.staffHeader}>
           <View style={styles.staffAvatar}>
@@ -123,7 +125,7 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
               colors123.textMuted
             }]
             } />
-          
+
         </View>
 
         <View style={styles.staffMeta}>
@@ -132,7 +134,7 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
               name={staff.role === "cutter" ? "content-cut" : "needle"}
               size={14}
               color={colors123.primary} />
-            
+
             <Text style={styles.staffRoleText}>
               {roleLabel} Google access
             </Text>
@@ -142,7 +144,7 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
               name="cash-multiple"
               size={14}
               color={colors123.primary} />
-            
+
             <Text style={styles.staffRoleText}>
               {paymentTypeLabel(staff.payment_type, t)} - {money(payRate)}
             </Text>
@@ -167,7 +169,7 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
         </View>
 
         <View style={styles.staffActions}>
-          <Pressable
+          <Pressable accessibilityRole="button"
             style={[styles.actionButton, styles.editButton]}
             onPress={() => onPreview(staff)}>
 
@@ -178,48 +180,48 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
 
             <Text style={styles.actionButtonText}>View</Text>
           </Pressable>
-          <Pressable
+          <Pressable accessibilityRole="button"
             style={[styles.actionButton, styles.editButton]}
             onPress={() => onEdit(staff)}>
-            
+
             <MaterialCommunityIcons
               name="pencil"
               size={16}
               color={colors123.primary} />
-            
+
             <Text style={styles.actionButtonText}>{t("edit")}</Text>
           </Pressable>
-          <Pressable
+          <Pressable accessibilityRole="button"
             style={[styles.actionButton, styles.editButton]}
             onPress={() => onLogWork(staff)}>
-            
+
             <MaterialCommunityIcons
               name="needle"
               size={16}
               color={colors123.primary} />
-            
+
             <Text style={styles.actionButtonText}>{t("work")}</Text>
           </Pressable>
-          <Pressable
+          <Pressable accessibilityRole="button"
             style={[styles.actionButton, styles.editButton]}
             onPress={() => onViewLedger(staff)}>
-            
+
             <MaterialCommunityIcons
               name="clipboard-text-clock-outline"
               size={16}
               color={colors123.primary} />
-            
+
             <Text style={styles.actionButtonText}>{t("ledger")}</Text>
           </Pressable>
-          <Pressable
+          <Pressable accessibilityRole="button"
             style={[styles.actionIconButton, styles.deleteButton]}
             onPress={() => onDelete(staff)}>
-            
+
             <MaterialCommunityIcons
               name="trash-can-outline"
               size={16}
               color={colors123.danger} />
-            
+
           </Pressable>
         </View>
       </AppCard>
@@ -228,6 +230,7 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
 }
 
 export default function StaffScreen() {const { t } = useLanguage();
+  const { staffError } = useStitchPro();
   const {
     staff,
     staffLoading,
@@ -603,15 +606,15 @@ export default function StaffScreen() {const { t } = useLanguage();
           name="account"
           size={18}
           color={colors123.primary} />
-        
-          <TextInput
+
+          <TextInput accessibilityLabel={t("auto_enter_name")}
           style={styles.textInput}
           value={formData.name}
           onChangeText={(text) => setFormData({ ...formData, name: text })}
           placeholder={t("auto_enter_name")}
           placeholderTextColor={colors123.textMuted}
           returnKeyType="next" />
-        
+
         </View>
       </View>
 
@@ -622,8 +625,8 @@ export default function StaffScreen() {const { t } = useLanguage();
           name="email-outline"
           size={18}
           color={colors123.primary} />
-        
-          <TextInput
+
+          <TextInput accessibilityLabel="staff@gmail.com"
           style={styles.textInput}
           value={formData.email}
           onChangeText={(text) => setFormData({ ...formData, email: text })}
@@ -632,7 +635,7 @@ export default function StaffScreen() {const { t } = useLanguage();
           keyboardType="email-address"
           autoCapitalize="none"
           returnKeyType="next" />
-        
+
         </View>
         <Text style={styles.helpText}>
           Staff must open StitchBook and continue with this Google account.
@@ -646,8 +649,8 @@ export default function StaffScreen() {const { t } = useLanguage();
           name="phone"
           size={18}
           color={colors123.primary} />
-        
-          <TextInput
+
+          <TextInput accessibilityLabel={t("auto_enter_phone")}
           style={styles.textInput}
           value={formData.phone}
           onChangeText={(text) => setFormData({ ...formData, phone: text })}
@@ -655,7 +658,7 @@ export default function StaffScreen() {const { t } = useLanguage();
           placeholderTextColor={colors123.textMuted}
           keyboardType="phone-pad"
           returnKeyType="done" />
-        
+
         </View>
         <Text style={styles.helpText}>
           Save mobile number now for future OTP login after DLT approval.
@@ -668,7 +671,7 @@ export default function StaffScreen() {const { t } = useLanguage();
           {PRIMARY_STAFF_ROLES.map((role) => {
             const selected = formData.role === role.id;
             return (
-              <Pressable
+              <Pressable accessibilityRole="button" accessibilityState={{ selected: Boolean(selected) }}
                 key={role.id}
                 style={[styles.accessRoleCard, selected && styles.accessRoleCardActive]}
                 onPress={() =>
@@ -703,9 +706,9 @@ export default function StaffScreen() {const { t } = useLanguage();
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>{t("auto_payment_basis")}</Text>
-        <View style={styles.paymentGrid}>
+        <ResponsiveGrid style={styles.paymentGrid}>
           {PAYMENT_TYPES.map((type) =>
-        <Pressable
+        <Pressable accessibilityRole="button" accessibilityState={{ selected: Boolean(formData.payment_type === type.id) }}
           key={type.id}
           style={[
           styles.paymentButton,
@@ -714,7 +717,7 @@ export default function StaffScreen() {const { t } = useLanguage();
           onPress={() =>
           setFormData({ ...formData, payment_type: type.id })
           }>
-          
+
               <MaterialCommunityIcons
             name={type.icon}
             size={18}
@@ -723,19 +726,19 @@ export default function StaffScreen() {const { t } = useLanguage();
             colors123.primary :
             colors123.textMuted
             } />
-          
+
               <Text
             style={[
             styles.roleButtonText,
             formData.payment_type === type.id &&
             styles.roleButtonTextActive]
             }>
-            
+
                 {t(type.labelKey)}
               </Text>
             </Pressable>
         )}
-        </View>
+        </ResponsiveGrid>
       </View>
 
       <View style={styles.formGroup}>
@@ -747,8 +750,12 @@ export default function StaffScreen() {const { t } = useLanguage();
           name="cash"
           size={18}
           color={colors123.primary} />
-        
-          <TextInput
+
+          <TextInput accessibilityLabel={
+          formData.payment_type === "commission" ?
+          "Example: 10" :
+          "Example: 500"
+          }
           style={styles.textInput}
           value={formData.pay_rate}
           onChangeText={(text) =>
@@ -761,28 +768,27 @@ export default function StaffScreen() {const { t } = useLanguage();
           }
           placeholderTextColor={colors123.textMuted}
           keyboardType="numeric" />
-        
+
         </View>
       </View>
 
       <View style={styles.formActions}>
-        <Pressable
+        <Pressable accessibilityRole="button"
         style={styles.cancelButton}
         onPress={() => {
           resetStaffForm();
           setShowForm(false);
         }}>
-        
+
           <Text style={styles.cancelButtonText}>{t("auto_cancel")}</Text>
         </Pressable>
         <AppButton
         label={editingId ? "Save Changes" : "Add Staff"}
         onPress={handleSaveStaff}
         style={{ flex: 1 }} />
-      
+
       </View>
     </AppCard>;
-
 
   const renderWorkForm = () => {
     if (!workStaff) return null;
@@ -795,15 +801,15 @@ export default function StaffScreen() {const { t } = useLanguage();
             <Text style={styles.formTitle}>{t("auto_log_work")}</Text>
             <Text style={styles.sheetSubtitle}>{workStaff.name}</Text>
           </View>
-          <Pressable
+          <Pressable accessibilityRole="button"
             style={styles.closeButton}
             onPress={() => setWorkStaff(null)}>
-            
+
             <MaterialCommunityIcons
               name="close"
               size={18}
               color={colors123.text} />
-            
+
           </Pressable>
         </View>
 
@@ -813,7 +819,7 @@ export default function StaffScreen() {const { t } = useLanguage();
             <ScrollView horizontal showsHorizontalScrollIndicator={false}>
               <View style={styles.optionRow}>
                 {orders.slice(0, 12).map((order) =>
-              <Pressable
+              <Pressable accessibilityRole="button" accessibilityState={{ selected: Boolean(String(workForm.order_id) === String(order.id)) }}
                 key={order.id}
                 style={[
                 styles.orderChip,
@@ -821,14 +827,14 @@ export default function StaffScreen() {const { t } = useLanguage();
                 styles.roleButtonActive]
                 }
                 onPress={() => handleSelectOrder(order)}>
-                
+
                     <Text
                   style={[
                   styles.orderChipText,
                   String(workForm.order_id) === String(order.id) &&
                   styles.roleButtonTextActive]
                   }>
-                  
+
                       {orderLabel(order)}
                     </Text>
                   </Pressable>
@@ -845,21 +851,21 @@ export default function StaffScreen() {const { t } = useLanguage();
               {orderItems.map((item, index) => {
               const label = orderItemLabel(item);
               return (
-                <Pressable
+                <Pressable accessibilityRole="button" accessibilityState={{ selected: Boolean(workForm.item_name === label) }}
                   key={`${label}-${index}`}
                   style={[
                   styles.roleButton,
                   workForm.item_name === label && styles.roleButtonActive]
                   }
                   onPress={() => handleSelectItem(item)}>
-                  
+
                     <Text
                     style={[
                     styles.roleButtonText,
                     workForm.item_name === label &&
                     styles.roleButtonTextActive]
                     }>
-                    
+
                       {label}
                     </Text>
                   </Pressable>);
@@ -876,8 +882,8 @@ export default function StaffScreen() {const { t } = useLanguage();
               name="hanger"
               size={18}
               color={colors123.primary} />
-            
-            <TextInput
+
+            <TextInput accessibilityLabel={t("auto_shirt_pant_blouse")}
               style={styles.textInput}
               value={workForm.item_name}
               onChangeText={(text) =>
@@ -885,7 +891,7 @@ export default function StaffScreen() {const { t } = useLanguage();
               }
               placeholder={t("auto_shirt_pant_blouse")}
               placeholderTextColor={colors123.textMuted} />
-            
+
           </View>
         </View>
 
@@ -900,13 +906,13 @@ export default function StaffScreen() {const { t } = useLanguage();
                 setWorkForm({ ...workForm, quantity: text })
                 }
                 keyboardType="numeric" />
-              
+
             </View>
           </View>
           <View style={[styles.formGroup, { flex: 1 }]}>
             <Text style={styles.label}>{t("auto_work_date")}</Text>
             <View style={styles.input}>
-              <TextInput
+              <TextInput accessibilityLabel={t("auto_yyyy_mm_dd")}
                 style={[styles.textInput, { marginLeft: 0 }]}
                 value={workForm.work_date}
                 onChangeText={(text) =>
@@ -914,7 +920,7 @@ export default function StaffScreen() {const { t } = useLanguage();
                 }
                 placeholder={t("auto_yyyy_mm_dd")}
                 placeholderTextColor={colors123.textMuted} />
-              
+
             </View>
           </View>
         </View>
@@ -925,7 +931,7 @@ export default function StaffScreen() {const { t } = useLanguage();
               name="calculator-variant-outline"
               size={18}
               color={colors123.primary} />
-            
+
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.payRuleTitle}>{t("auto_auto_pay_rule")}</Text>
@@ -937,21 +943,21 @@ export default function StaffScreen() {const { t } = useLanguage();
           <Text style={styles.label}>{t("auto_status")}</Text>
           <View style={styles.roleOptions}>
             {WORK_STATUSES.map((status) =>
-            <Pressable
+            <Pressable accessibilityRole="button" accessibilityState={{ selected: Boolean(workForm.status === status.id) }}
               key={status.id}
               style={[
               styles.roleButton,
               workForm.status === status.id && styles.roleButtonActive]
               }
               onPress={() => setWorkForm({ ...workForm, status: status.id })}>
-              
+
                 <Text
                 style={[
                 styles.roleButtonText,
                 workForm.status === status.id &&
                 styles.roleButtonTextActive]
                 }>
-                
+
                   {t(status.labelKey)}
                 </Text>
               </Pressable>
@@ -995,15 +1001,15 @@ export default function StaffScreen() {const { t } = useLanguage();
             <Text style={styles.formTitle}>{t("auto_staff_ledger")}</Text>
             <Text style={styles.sheetSubtitle}>{ledgerStaff.name}</Text>
           </View>
-          <Pressable
+          <Pressable accessibilityRole="button"
             style={styles.closeButton}
             onPress={() => setLedgerStaff(null)}>
-            
+
             <MaterialCommunityIcons
               name="close"
               size={18}
               color={colors123.text} />
-            
+
           </Pressable>
         </View>
 
@@ -1029,21 +1035,21 @@ export default function StaffScreen() {const { t } = useLanguage();
             name="magnify"
             size={18}
             color={colors123.textMuted} />
-          
-          <TextInput
+
+          <TextInput accessibilityLabel={t("auto_search_item_order_date_status")}
             style={styles.searchInput}
             value={ledgerSearch}
             onChangeText={setLedgerSearch}
             placeholder={t("auto_search_item_order_date_status")}
             placeholderTextColor={colors123.textMuted} />
-          
+
           {ledgerSearch.length > 0 &&
-          <Pressable onPress={() => setLedgerSearch("")}>
+          <Pressable accessibilityRole="button" onPress={() => setLedgerSearch("")}>
               <MaterialCommunityIcons
               name="close-circle"
               size={18}
               color={colors123.textMuted} />
-            
+
             </Pressable>
           }
         </View>
@@ -1067,15 +1073,15 @@ export default function StaffScreen() {const { t } = useLanguage();
                   <Text style={styles.logAmount}>{money(log.amount)}</Text>
                   <Text style={styles.logStatus}>{log.status}</Text>
                 </View>
-                <Pressable
+                <Pressable accessibilityRole="button"
               style={styles.logDeleteButton}
               onPress={() => handleDeleteWorkLog(log)}>
-              
+
                   <MaterialCommunityIcons
                 name="trash-can-outline"
                 size={16}
                 color={colors123.danger} />
-              
+
                 </Pressable>
               </View>
           )}
@@ -1113,7 +1119,7 @@ export default function StaffScreen() {const { t } = useLanguage();
             </Text>
             <Text style={styles.sheetSubtitle}>{previewStaff.name}</Text>
           </View>
-          <Pressable
+          <Pressable accessibilityRole="button"
             style={styles.closeButton}
             onPress={() => setPreviewStaff(null)}>
 
@@ -1172,14 +1178,14 @@ export default function StaffScreen() {const { t } = useLanguage();
                   </Text>
                 </View>
                 {isCutter && measurementEntries.length > 0 ?
-                <View style={styles.previewMeasurementGrid}>
+                <ResponsiveGrid style={styles.previewMeasurementGrid}>
                   {measurementEntries.map(([label, value]) =>
                     <View key={label} style={styles.previewMeasurementTile}>
                       <Text style={styles.previewMeasurementLabel}>{label}</Text>
                       <Text style={styles.previewMeasurementValue}>{value}</Text>
                     </View>
                   )}
-                </View> :
+                </ResponsiveGrid> :
                 null}
               </View>
             );
@@ -1215,11 +1221,12 @@ export default function StaffScreen() {const { t } = useLanguage();
         tintColor={colors123.primary} />
 
       }>
-      
+
       <ScreenHeader
         title="Staff Work Access"
         subtitle="Cutter and Stitcher login, work tracking, and owner earnings view." />
-      
+
+<InlineAlert message={staffError ? t("loadStaffFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
       {renderWorkflowGuide()}
 
       {!showForm ?
@@ -1233,7 +1240,6 @@ export default function StaffScreen() {const { t } = useLanguage();
         }}
         style={styles.addButton} /> :
 
-
       renderStaffForm()
       }
 
@@ -1241,12 +1247,11 @@ export default function StaffScreen() {const { t } = useLanguage();
       {renderStaffPreview()}
       {renderLedger()}
 
-      {staff.length === 0 ?
+      {staffLoading && !staff.length ? <ListSkeleton /> : staffError && !staff.length ? null : staff.length === 0 ?
       <EmptyState
         icon="account-group-outline"
         title={t("auto_no_staff_members")}
-        message={t("auto_add_team_members_to_delegate_tasks_and_manag")} /> :
-
+        description={t("auto_add_team_members_to_delegate_tasks_and_manag")} /> :
 
       <FlatList
         data={staff}
@@ -1275,33 +1280,33 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: 100,
     gap: spacing.md,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   addButton: {
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   formCard: {
-    marginBottom: spacing.lg
+    marginBottom: spacing.lg,
   },
   workflowCard: {
     gap: spacing.sm,
     borderColor: colors123.borderLight,
-    backgroundColor: colors123.surface
+    backgroundColor: colors123.surface,
   },
   workflowTitle: {
     fontSize: 17,
     fontFamily: fonts.extrabold,
-    color: colors123.text
+    color: colors123.text,
   },
   workflowSubtitle: {
     fontSize: 13,
     fontFamily: fonts.regular,
     lineHeight: 20,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   workflowGrid: {
     flexDirection: "row",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   workflowItem: {
     flex: 1,
@@ -1310,7 +1315,7 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: radius.lg,
     backgroundColor: colors123.surfaceMuted,
-    padding: spacing.sm
+    padding: spacing.sm,
   },
   workflowIcon: {
     width: 36,
@@ -1319,19 +1324,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors123.primarySoft,
-    marginBottom: spacing.xs
+    marginBottom: spacing.xs,
   },
   workflowItemTitle: {
     fontFamily: fonts.extrabold,
     fontSize: 14,
-    color: colors123.text
+    color: colors123.text,
   },
   workflowItemText: {
     marginTop: 4,
     fontFamily: fonts.regular,
-    fontSize: 11,
+    fontSize: 12,
     lineHeight: 16,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   ownerTrackStrip: {
     flexDirection: "row",
@@ -1339,25 +1344,25 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     borderRadius: radius.lg,
     backgroundColor: colors123.primarySoft,
-    padding: spacing.sm
+    padding: spacing.sm,
   },
   ownerTrackText: {
     flex: 1,
     fontFamily: fonts.semibold,
     fontSize: 12,
     lineHeight: 18,
-    color: colors123.primaryDark
+    color: colors123.primaryDark,
   },
   previewHint: {
     marginBottom: spacing.md,
     fontFamily: fonts.regular,
     fontSize: 13,
     lineHeight: 20,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   previewList: {
     gap: spacing.sm,
-    marginTop: spacing.sm
+    marginTop: spacing.sm,
   },
   previewOrderCard: {
     borderWidth: 1,
@@ -1365,92 +1370,92 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors123.surface,
     padding: spacing.md,
-    ...shadows.card
+    ...shadows.card,
   },
   previewOrderTop: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   previewOrderTitle: {
     fontFamily: fonts.extrabold,
     fontSize: 14,
-    color: colors123.text
+    color: colors123.text,
   },
   previewOrderMeta: {
     marginTop: 3,
     fontFamily: fonts.regular,
     fontSize: 12,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   previewDue: {
     fontFamily: fonts.semibold,
     fontSize: 12,
-    color: colors123.primary
+    color: colors123.primary,
   },
   previewMeasurementGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.xs,
-    marginTop: spacing.sm
+    marginTop: spacing.sm,
   },
   previewMeasurementTile: {
-    width: "48%",
+    width: "100%",
     borderRadius: radius.md,
     backgroundColor: colors123.surfaceMuted,
     padding: spacing.xs,
     borderWidth: 1,
-    borderColor: colors123.borderLight
+    borderColor: colors123.borderLight,
   },
   previewMeasurementLabel: {
     fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors123.textMuted
+    fontSize: 12,
+    color: colors123.textMuted,
   },
   previewMeasurementValue: {
     marginTop: 2,
     fontFamily: fonts.extrabold,
     fontSize: 13,
-    color: colors123.text
+    color: colors123.text,
   },
   versionListTitle: {
     fontFamily: fonts.extrabold,
     fontSize: 13,
-    color: colors123.text
+    color: colors123.text,
   },
   formTitle: {
     fontSize: 16,
     fontFamily: fonts.bold,
     color: colors123.text,
-    marginBottom: spacing.xs
+    marginBottom: spacing.xs,
   },
   sheetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   sheetSubtitle: {
     fontSize: 12,
     fontFamily: fonts.medium,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors123.bgInput
+    backgroundColor: colors123.bgInput,
   },
   formGroup: {
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   label: {
     fontSize: 13,
     fontFamily: fonts.semibold,
     color: colors123.textMuted,
-    marginBottom: spacing.xs
+    marginBottom: spacing.xs,
   },
   input: {
     flexDirection: "row",
@@ -1459,9 +1464,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     backgroundColor: colors123.surface,
-    borderRadius: 16,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors123.borderLight
+    borderColor: colors123.borderLight,
   },
   textInput: {
     flex: 1,
@@ -1469,19 +1474,19 @@ const styles = StyleSheet.create({
     color: colors123.text,
     fontFamily: fonts.regular,
     fontSize: 14,
-    padding: 0
+    padding: 0,
   },
   twoColumn: {
     flexDirection: "row",
-    gap: spacing.md
+    gap: spacing.md,
   },
   roleOptions: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   accessRoleGrid: {
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   accessRoleCard: {
     borderWidth: 1,
@@ -1489,17 +1494,17 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: colors123.surface,
     padding: spacing.md,
-    ...shadows.soft
+    ...shadows.soft,
   },
   accessRoleCardActive: {
     borderColor: colors123.primary,
-    backgroundColor: colors123.primarySoft
+    backgroundColor: colors123.primarySoft,
   },
   accessRoleHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    marginBottom: spacing.xs
+    marginBottom: spacing.xs,
   },
   accessRoleIcon: {
     width: 36,
@@ -1507,25 +1512,25 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors123.primarySoft
+    backgroundColor: colors123.primarySoft,
   },
   accessRoleIconActive: {
-    backgroundColor: colors123.primary
+    backgroundColor: colors123.primary,
   },
   accessRoleTitle: {
     fontFamily: fonts.extrabold,
     fontSize: 15,
-    color: colors123.text
+    color: colors123.text,
   },
   accessRoleSummary: {
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 18,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   optionRow: {
     flexDirection: "row",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   roleButton: {
     paddingHorizontal: spacing.md,
@@ -1533,15 +1538,15 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    backgroundColor: colors123.surface
+    backgroundColor: colors123.surface,
   },
   paymentGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   paymentButton: {
-    width: "48%",
+    width: "100%",
     minHeight: 44,
     flexDirection: "row",
     alignItems: "center",
@@ -1551,7 +1556,7 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    backgroundColor: colors123.surface
+    backgroundColor: colors123.surface,
   },
   orderChip: {
     maxWidth: 150,
@@ -1560,29 +1565,29 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    backgroundColor: colors123.surface
+    backgroundColor: colors123.surface,
   },
   orderChipText: {
     fontSize: 12,
     fontFamily: fonts.medium,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   roleButtonActive: {
     backgroundColor: colors123.primarySoft,
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   roleButtonText: {
     fontSize: 12,
     fontFamily: fonts.medium,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   roleButtonTextActive: {
-    color: colors123.primary
+    color: colors123.primary,
   },
   formActions: {
     flexDirection: "row",
     gap: spacing.md,
-    marginTop: spacing.md
+    marginTop: spacing.md,
   },
   cancelButton: {
     flex: 1,
@@ -1590,21 +1595,21 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.border,
-    alignItems: "center"
+    alignItems: "center",
   },
   cancelButtonText: {
     fontSize: 14,
     fontFamily: fonts.semibold,
-    color: colors123.text
+    color: colors123.text,
   },
   staffCard: {
-    padding: spacing.md
+    padding: spacing.md,
   },
   staffHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   staffAvatar: {
     width: 48,
@@ -1612,42 +1617,42 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: colors123.primarySoft,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   staffAvatarText: {
     fontSize: 18,
     fontFamily: fonts.bold,
-    color: colors123.primary
+    color: colors123.primary,
   },
   staffName: {
     fontSize: 14,
     fontFamily: fonts.semibold,
-    color: colors123.text
+    color: colors123.text,
   },
   staffPhone: {
     fontSize: 12,
     fontFamily: fonts.regular,
     color: colors123.textMuted,
-    marginTop: 2
+    marginTop: 2,
   },
   statusDot: {
     width: 8,
     height: 8,
-    borderRadius: 4
+    borderRadius: 4,
   },
   staffMeta: {
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
     gap: spacing.sm,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   staffAccessText: {
     marginBottom: spacing.md,
     fontFamily: fonts.regular,
     fontSize: 12,
     lineHeight: 18,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   staffRole: {
     flexDirection: "row",
@@ -1656,42 +1661,42 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     backgroundColor: colors123.primarySoft,
-    borderRadius: radius.sm
+    borderRadius: radius.sm,
   },
   staffRoleText: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: fonts.semibold,
-    color: colors123.primary
+    color: colors123.primary,
   },
   statsRow: {
     flexDirection: "row",
     gap: spacing.sm,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   statPill: {
     flex: 1,
     padding: spacing.sm,
     borderRadius: radius.md,
-    backgroundColor: colors123.bgInput
+    backgroundColor: colors123.bgInput,
   },
   statLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: fonts.medium,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   statValue: {
     fontSize: 15,
     fontFamily: fonts.bold,
     color: colors123.text,
-    marginTop: 2
+    marginTop: 2,
   },
   staffActions: {
     flexDirection: "row",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   actionButton: {
     flex: 1,
-    minHeight: 38,
+    minHeight: 44,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -1699,28 +1704,28 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.xs,
     paddingVertical: spacing.sm,
     borderRadius: radius.sm,
-    borderWidth: 1
+    borderWidth: 1,
   },
   actionIconButton: {
-    width: 40,
-    minHeight: 38,
+    width: 44,
+    minHeight: 44,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.sm,
-    borderWidth: 1
+    borderWidth: 1,
   },
   editButton: {
     borderColor: colors123.primary,
-    backgroundColor: colors123.primarySoft
+    backgroundColor: colors123.primarySoft,
   },
   deleteButton: {
     borderColor: colors123.danger,
-    backgroundColor: colors123.dangerSoft || "#FFEBEE"
+    backgroundColor: colors123.dangerSoft || "#FFEBEE",
   },
   actionButtonText: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: fonts.semibold,
-    color: colors123.primary
+    color: colors123.primary,
   },
   earningsPreview: {
     flexDirection: "row",
@@ -1729,7 +1734,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
     backgroundColor: colors123.primarySoft,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   payRuleBox: {
     flexDirection: "row",
@@ -1738,7 +1743,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     borderRadius: radius.md,
     backgroundColor: colors123.bgInput,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   payRuleIcon: {
     width: 34,
@@ -1746,37 +1751,37 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors123.primarySoft
+    backgroundColor: colors123.primarySoft,
   },
   payRuleTitle: {
     fontSize: 12,
     fontFamily: fonts.semibold,
-    color: colors123.text
+    color: colors123.text,
   },
   payRuleText: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: fonts.regular,
     color: colors123.textMuted,
-    marginTop: 2
+    marginTop: 2,
   },
   helpText: {
     fontSize: 12,
     lineHeight: 18,
     fontFamily: fonts.regular,
     color: colors123.textMuted,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   previewAmount: {
     fontSize: 18,
     fontFamily: fonts.bold,
-    color: colors123.primary
+    color: colors123.primary,
   },
   emptyLedgerText: {
     fontSize: 13,
     fontFamily: fonts.medium,
     color: colors123.textMuted,
     textAlign: "center",
-    paddingVertical: spacing.md
+    paddingVertical: spacing.md,
   },
   searchBox: {
     flexDirection: "row",
@@ -1786,17 +1791,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     marginBottom: spacing.md,
     borderRadius: radius.md,
-    backgroundColor: colors123.bgInput
+    backgroundColor: colors123.bgInput,
   },
   searchInput: {
     flex: 1,
     color: colors123.text,
     fontFamily: fonts.regular,
     fontSize: 13,
-    padding: 0
+    padding: 0,
   },
   logList: {
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   logRow: {
     flexDirection: "row",
@@ -1804,37 +1809,37 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: colors123.border
+    borderBottomColor: colors123.border,
   },
   logItem: {
     fontSize: 13,
     fontFamily: fonts.semibold,
-    color: colors123.text
+    color: colors123.text,
   },
   logMeta: {
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: fonts.regular,
     color: colors123.textMuted,
-    marginTop: 2
+    marginTop: 2,
   },
   logAmount: {
     fontSize: 13,
     fontFamily: fonts.bold,
-    color: colors123.text
+    color: colors123.text,
   },
   logStatus: {
-    fontSize: 10,
+    fontSize: 12,
     fontFamily: fonts.medium,
     color: colors123.textMuted,
     textTransform: "capitalize",
-    marginTop: 2
+    marginTop: 2,
   },
   logDeleteButton: {
-    width: 34,
-    height: 34,
+    width: 44,
+    height: 44,
     alignItems: "center",
     justifyContent: "center",
     borderRadius: radius.sm,
-    backgroundColor: colors123.dangerSoft || "#FFEBEE"
-  }
+    backgroundColor: colors123.dangerSoft || "#FFEBEE",
+  },
 });

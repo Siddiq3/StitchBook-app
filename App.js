@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
@@ -10,7 +10,6 @@ import {
   Inter_500Medium,
   Inter_600SemiBold,
   Inter_700Bold,
-  Inter_800ExtraBold,
 } from "@expo-google-fonts/inter";
 import { StitchProProvider } from "./context/StitchProContext";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -24,8 +23,7 @@ export default function StitchProApp() {
     Inter_500Medium,
     Inter_600SemiBold,
     Inter_700Bold,
-    Inter_800ExtraBold,
-  });
+    });
 
   const appBackground = colors123?.background ?? '#F8FAFC';
 
@@ -36,7 +34,7 @@ export default function StitchProApp() {
   }, []);
 
   if (!fontsLoaded) {
-    return <View style={{ flex: 1, backgroundColor: appBackground }} />;
+    return <View accessible accessibilityLabel="Loading StitchBook" accessibilityState={{ busy: true }} style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: appBackground }}><ActivityIndicator color={colors123.primary} /></View>;
   }
 
   return (

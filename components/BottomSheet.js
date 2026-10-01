@@ -10,9 +10,10 @@ import {
   Text,
   View,
 } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { colors123, fonts, radius, spacing } from "../utils/theme";
+import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
 
 export default function BottomSheet({
   visible,
@@ -22,10 +23,16 @@ export default function BottomSheet({
   onClose,
   scrollRef,
 }) {
+  const reducedMotion = useReducedMotion();
   const translateY = useRef(new Animated.Value(420)).current;
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    if (reducedMotion) {
+      opacity.setValue(visible ? 1 : 0);
+      translateY.setValue(visible ? 0 : 420);
+      return;
+    }
     if (visible) {
       Animated.parallel([
         Animated.timing(opacity, {
@@ -45,7 +52,7 @@ export default function BottomSheet({
       translateY.setValue(420);
       opacity.setValue(0);
     }
-  }, [opacity, translateY, visible]);
+  }, [opacity, translateY, visible, reducedMotion]);
 
   return (
     <Modal
@@ -69,7 +76,7 @@ export default function BottomSheet({
             },
           ]}
         >
-          <SafeAreaView edges={["bottom"]}>
+          <SafeAreaView edges={["bottom"]} style={{ flexShrink: 1 }}>
             <View style={styles.grabber} />
             <View style={styles.header}>
               <View style={styles.headerCopy}>
@@ -78,7 +85,7 @@ export default function BottomSheet({
                   <Text style={styles.subtitle}>{subtitle}</Text>
                 ) : null}
               </View>
-              <Pressable onPress={onClose} style={styles.closeButton}>
+              <Pressable accessibilityRole="button" accessibilityLabel="Close" onPress={onClose} style={styles.closeButton}>
                 <MaterialCommunityIcons
                   color={colors123.textMuted}
                   name="close"
@@ -115,6 +122,10 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: radius.xl,
     borderTopRightRadius: radius.xl,
     maxHeight: "88%",
+    width: "100%",
+    maxWidth: 560,
+    alignSelf: "center",
+    ...shadows.floating,
     borderWidth: 1,
     borderColor: colors123.border,
   },
@@ -150,9 +161,9 @@ const styles = StyleSheet.create({
     color: colors123.textMuted,
   },
   closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 44,
+    height: 44,
+    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors123.surfaceMuted,
@@ -160,7 +171,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: 100,
+    paddingBottom: spacing.xl,
     gap: spacing.md,
   },
 });

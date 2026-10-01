@@ -1,17 +1,19 @@
+import InlineAlert from "../components/InlineAlert";
+import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl, ActivityIndicator } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
-import { MotiView } from "moti";
+import { MotiView } from "../components/AccessibleMotionView";
 import AppButton from "../components/AppButton";
-import AppCard from "../components/AppCard";
+
 import AvatarBadge from "../components/AvatarBadge";
 import MeasurementFieldThumb from "../components/MeasurementFieldThumb";
 import MeasurementSheet from "../components/MeasurementSheet";
 import StatusBadge from "../components/StatusBadge";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
-import { measurementFields, garmentTypes } from "../utils/mockData";
+
 import { measurementApi } from "../services/api";
 import { colors123, fonts, formatCurrency, radius, shadows, spacing } from "../utils/theme";import { useLanguage } from "../context/LanguageContext";
 
@@ -26,6 +28,7 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
   const [expandedMeasurements, setExpandedMeasurements] = useState([]);
   const [customerMeasurements, setCustomerMeasurements] = useState([]);
   const [measurementListLoading, setMeasurementListLoading] = useState(false);
+  const [measurementListError, setMeasurementListError] = useState(false);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
 
   const normalizeOutfitType = (value) => {
@@ -60,12 +63,13 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
   const loadMeasurementList = async (id) => {
     if (!id) return;
     setMeasurementListLoading(true);
+    setMeasurementListError(false);
     try {
       const res = await measurementApi.getByCustomer(id);
       setCustomerMeasurements(res.data?.data?.measurements || res.data?.data || []);
     } catch (error) {
 
-      setCustomerMeasurements([]);
+      setMeasurementListError(true);
     } finally {
       setMeasurementListLoading(false);
     }
@@ -126,14 +130,14 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: spacing.md }}>
         <MaterialCommunityIcons name="account-alert-outline" size={48} color={colors123.border} style={{ marginBottom: spacing.md }} />
-        <Text style={{ fontSize: 16, fontWeight: '600', color: colors123.text, textAlign: 'center' }}>{t("auto_customer_not_found")}
+        <Text style={{ fontSize: 16, fontFamily: fonts.semibold, color: colors123.text, textAlign: 'center' }}>{t("auto_customer_not_found")}
 
         </Text>
         <AppButton
           label={t("auto_back_to_customers")}
           onPress={() => navigation.goBack()}
           style={{ marginTop: spacing.md }} />
-        
+
       </View>);
 
   }
@@ -161,7 +165,6 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
 
   const handleDeleteMeasurement = (measurement) => {
     Alert.alert(t("auto_delete_this_measurement"), t("auto_this_profile_will_be_removed_permanently"),
-
 
     [
     { text: "Cancel", style: "cancel" },
@@ -232,31 +235,31 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
       !customer ?
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: spacing.md }}>
           <MaterialCommunityIcons name="account-alert-outline" size={48} color={colors123.border} style={{ marginBottom: spacing.md }} />
-          <Text style={{ fontSize: 16, fontWeight: '600', color: colors123.text, textAlign: 'center' }}>{t("auto_customer_not_found")}
+          <Text style={{ fontSize: 16, fontFamily: fonts.semibold, color: colors123.text, textAlign: 'center' }}>{t("auto_customer_not_found")}
 
         </Text>
           <AppButton
           label={t("auto_back_to_customers")}
           onPress={() => navigation.goBack()}
           style={{ marginTop: spacing.md }} />
-        
+
         </View> :
 
       <>
           <ScrollView
           contentContainerStyle={styles.content}
           showsVerticalScrollIndicator={false}>
-          
+
             {/* Header */}
             <View style={styles.header}>
-              <Pressable onPress={navigation.goBack} style={styles.backButton}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t("back")} onPress={navigation.goBack} style={styles.backButton}>
                 <MaterialCommunityIcons color={colors123.text} name="chevron-left" size={24} />
               </Pressable>
               <View style={styles.headerContent}>
                 <Text style={styles.headerTitle}>{customer?.name || 'Unknown'}</Text>
                 <Text style={styles.headerSubtitle}>{customer?.phone || 'No phone'}</Text>
               </View>
-              <Pressable onPress={handleCreateOrderPress} style={styles.createOrderButton}>
+              <Pressable accessibilityRole="button" onPress={handleCreateOrderPress} style={styles.createOrderButton}>
                 <MaterialCommunityIcons color={colors123.surface} name="plus" size={22} />
               </Pressable>
             </View>
@@ -268,7 +271,7 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
                 initials={customer?.avatar}
                 name={customer?.name}
                 size={48} />
-              
+
                 <View style={styles.customerInfo}>
                   <Text style={styles.customerName}>{customer?.name || 'Unknown'}</Text>
                   <Text style={styles.customerPhone}>{customer?.phone || 'No phone'}</Text>
@@ -297,10 +300,10 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
 
             {/* Action Cards */}
             <View style={styles.actionCardsRow}>
-              <Pressable
-              onPress={openAddMeasurementSheet}
+              <Pressable accessibilityRole="button"
+              onPress={() => navigation.navigate('ViewMeasurements', { customerId: customer.id, customerName: customer.name, customerGender: customer.gender || 'male' })}
               style={styles.actionCard}>
-              
+
                 <View style={styles.actionCardIcon}>
                   <MaterialCommunityIcons color={colors123.primary} name="ruler" size={20} />
                 </View>
@@ -310,10 +313,10 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
                 <MaterialCommunityIcons color={colors123.textMuted} name="chevron-right" size={20} />
               </Pressable>
 
-              <Pressable
+              <Pressable accessibilityRole="button"
               onPress={() => navigation.navigate('Orders', { customerId: customer.id })}
               style={styles.actionCard}>
-              
+
                 <View style={styles.actionCardIcon}>
                   <MaterialCommunityIcons color={colors123.primary} name="clipboard-list-outline" size={20} />
                 </View>
@@ -333,19 +336,21 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
                 </View>
               </View>
 
+              <InlineAlert message={measurementListError ? t("loadMeasurementsFailed") : null} onRetry={() => loadMeasurementList(customerId)} retryLabel={t("retry")} />
               {measurementListLoading ?
             <View style={styles.loadingSection}>
                   <ActivityIndicator size="large" color={colors123.primary} />
                 </View> :
+            measurementListError && sortedMeasurements.length === 0 ? null :
             sortedMeasurements.length === 0 ?
             <View style={styles.emptyStateCard}>
                   <MaterialCommunityIcons color={colors123.border} name="ruler" size={32} />
                   <Text style={styles.emptyStateTitle}>{t("auto_no_measurements_saved")}</Text>
                   <Text style={styles.emptyStateText}>{t("auto_add_measurements_to_speed_up_order_creation")}</Text>
-                  <Pressable
+                  <Pressable accessibilityRole="button"
                 onPress={openAddMeasurementSheet}
                 style={styles.emptyStateButton}>
-                
+
                     <Text style={styles.emptyStateButtonText}>{t("auto_add_first_measurement")}</Text>
                   </Pressable>
                 </View> :
@@ -370,22 +375,22 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
                             </Text>
                           </View>
                           <View style={styles.measurementCardActions}>
-                            <Pressable onPress={() => openEditMeasurementSheet(measurement)} style={styles.iconButton}>
+                            <Pressable accessibilityRole="button" onPress={() => openEditMeasurementSheet(measurement)} style={styles.iconButton}>
                               <MaterialCommunityIcons name="pencil" size={18} color={colors123.primary} />
                             </Pressable>
-                            <Pressable onPress={() => handleDeleteMeasurement(measurement)} style={styles.iconButton}>
+                            <Pressable accessibilityRole="button" onPress={() => handleDeleteMeasurement(measurement)} style={styles.iconButton}>
                               <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors123.danger} />
                             </Pressable>
                           </View>
                         </View>
-                        <View style={styles.measurementGrid}>
+                        <ResponsiveGrid style={styles.measurementGrid}>
                           {visibleEntries.map(([key, value]) =>
                       <View key={key} style={styles.measurementGridItem}>
                               <MeasurementFieldThumb
                           bodyType={getMeasurementBodyType(measurement)}
                           label={key}
                           size={40} />
-                        
+
                               <View style={styles.measurementGridCopy}>
                                 <Text style={styles.measurementGridLabel}>{key}</Text>
                                 <Text style={styles.measurementGridValue}>
@@ -394,9 +399,9 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
                               </View>
                             </View>
                       )}
-                        </View>
+                        </ResponsiveGrid>
                         {entries.length > 0 &&
-                    <Pressable onPress={() => toggleMeasurementExpand(measurement.id)} style={styles.viewMoreButton}>
+                    <Pressable accessibilityRole="button" onPress={() => toggleMeasurementExpand(measurement.id)} style={styles.viewMoreButton}>
                             <Text style={styles.viewMoreLink}>
                               {isExpanded ? "Show less" : `Show all ${entries.length}`}
                             </Text>
@@ -404,7 +409,7 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
                         name={isExpanded ? "chevron-up" : "chevron-down"}
                         size={18}
                         color={colors123.primary} />
-                      
+
                           </Pressable>
                     }
                       </View>);
@@ -428,10 +433,10 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
                   <MaterialCommunityIcons color={colors123.border} name="clipboard-outline" size={32} />
                   <Text style={styles.emptyStateTitle}>{t("auto_no_orders_yet")}</Text>
                   <Text style={styles.emptyStateText}>{t("auto_create_the_first_order_for_this_customer")}</Text>
-                  <Pressable
+                  <Pressable accessibilityRole="button"
                 onPress={handleCreateOrderPress}
                 style={styles.emptyStateButton}>
-                
+
                     <Text style={styles.emptyStateButtonText}>{t("auto_create_order")}</Text>
                   </Pressable>
                 </View> :
@@ -447,11 +452,11 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
                   duration: 240,
                   type: "timing"
                 }}>
-                
-                      <Pressable
+
+                      <Pressable accessibilityRole="button"
                   onPress={() => navigation.navigate("OrderDetail", { orderId: order.id })}
                   style={styles.orderCard}>
-                  
+
                         <View style={styles.orderCardHeader}>
                           <View style={styles.orderCardInfo}>
                             <Text style={styles.orderCardTitle}>{order.item}</Text>
@@ -490,7 +495,7 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
           }}
           onSubmit={handleMeasurementSheetSubmit}
           visible={showMeasurementSheet} />
-        
+
         </>
       }
     </>);
@@ -500,43 +505,43 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
     paddingBottom: 112,
-    gap: spacing.md
+    gap: spacing.md,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacing.sm
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: spacing.sm,
   },
   backButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: radius.md,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerContent: {
     flex: 1,
-    marginHorizontal: spacing.md
+    marginHorizontal: spacing.md,
   },
   headerTitle: {
     fontFamily: fonts.bold,
     fontSize: 22,
-    color: colors123.text
+    color: colors123.text,
   },
   headerSubtitle: {
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colors123.textMuted,
-    marginTop: 2
+    marginTop: 2,
   },
   createOrderButton: {
-    width: 40,
-    height: 40,
+    width: 44,
+    height: 44,
     borderRadius: radius.md,
     backgroundColor: colors123.primary,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   // Customer Info Card
@@ -547,111 +552,111 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     padding: spacing.md,
     marginBottom: spacing.lg,
-    ...shadows.card
+    ...shadows.card,
   },
   customerCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
   },
   customerInfo: {
-    flex: 1
+    flex: 1,
   },
   customerName: {
     fontFamily: fonts.bold,
     fontSize: 18,
-    color: colors123.text
+    color: colors123.text,
   },
   customerPhone: {
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colors123.textMuted,
-    marginTop: 2
+    marginTop: 2,
   },
   customerEmail: {
     fontFamily: fonts.regular,
     fontSize: 12,
     color: colors123.textMuted,
-    marginTop: 2
+    marginTop: 2,
   },
 
   // Stats
   statsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: spacing.md,
-    gap: 0
+    gap: 0,
   },
   statItem: {
     flex: 1,
-    alignItems: 'center',
-    paddingVertical: spacing.sm
+    alignItems: "center",
+    paddingVertical: spacing.sm,
   },
   statValue: {
     fontFamily: fonts.bold,
     fontSize: 18,
-    color: colors123.text
+    color: colors123.text,
   },
   statLabel: {
     fontFamily: fonts.regular,
-    fontSize: 11,
+    fontSize: 12,
     color: colors123.textMuted,
-    marginTop: 2
+    marginTop: 2,
   },
   divider: {
     width: 1,
-    backgroundColor: colors123.border
+    backgroundColor: colors123.border,
   },
 
   // Action Cards
   actionCardsRow: {
     gap: spacing.md,
-    marginBottom: spacing.lg
+    marginBottom: spacing.lg,
   },
   actionCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: colors123.surface,
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
     gap: spacing.md,
-    ...shadows.card
+    ...shadows.card,
   },
   actionCardIcon: {
     width: 40,
     height: 40,
     borderRadius: radius.md,
     backgroundColor: colors123.primarySoft,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
   actionCardContent: {
-    flex: 1
+    flex: 1,
   },
   actionCardTitle: {
     fontFamily: fonts.semibold,
     fontSize: 16,
-    color: colors123.text
+    color: colors123.text,
   },
 
   // Sections
   section: {
-    marginBottom: spacing.lg
+    marginBottom: spacing.lg,
   },
   sectionHeader: {
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   sectionTitle: {
     fontFamily: fonts.bold,
     fontSize: 18,
-    color: colors123.text
+    color: colors123.text,
   },
   sectionSubtitle: {
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colors123.textMuted,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
 
   // Empty State
@@ -661,46 +666,46 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     minHeight: 200,
-    ...shadows.soft
+    ...shadows.soft,
   },
   emptyStateTitle: {
     fontFamily: fonts.bold,
     fontSize: 16,
     color: colors123.text,
-    marginTop: spacing.md
+    marginTop: spacing.md,
   },
   emptyStateText: {
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colors123.textMuted,
     marginTop: spacing.xs,
-    textAlign: 'center'
+    textAlign: "center",
   },
   emptyStateButton: {
     marginTop: spacing.md,
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.sm,
     backgroundColor: colors123.primary,
-    borderRadius: radius.md
+    borderRadius: radius.md,
   },
   emptyStateButtonText: {
     fontFamily: fonts.semibold,
     fontSize: 14,
-    color: colors123.surface
+    color: colors123.surface,
   },
 
   loadingSection: {
     height: 200,
-    justifyContent: 'center',
-    alignItems: 'center'
+    justifyContent: "center",
+    alignItems: "center",
   },
 
   // Measurements
   measurementsList: {
-    gap: spacing.md
+    gap: spacing.md,
   },
   measurementCard: {
     backgroundColor: colors123.surface,
@@ -708,85 +713,85 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
-    ...shadows.card
+    ...shadows.card,
   },
   measurementCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    gap: spacing.md
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    gap: spacing.md,
   },
   measurementInfo: {
-    flex: 1
+    flex: 1,
   },
   measurementCardTitle: {
     fontFamily: fonts.semibold,
     fontSize: 16,
-    color: colors123.text
+    color: colors123.text,
   },
   measurementCardSubtitle: {
     fontFamily: fonts.regular,
     fontSize: 12,
     color: colors123.textMuted,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   measurementCardActions: {
-    flexDirection: 'row',
-    gap: spacing.xs
+    flexDirection: "row",
+    gap: spacing.xs,
   },
   measurementGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.sm,
-    marginTop: spacing.md
+    marginTop: spacing.md,
   },
   measurementGridItem: {
-    width: '47.5%',
-    flexDirection: 'row',
-    alignItems: 'center',
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.xs,
     backgroundColor: colors123.background,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.xs,
-    minHeight: 64
+    minHeight: 64,
   },
   measurementGridCopy: {
     flex: 1,
-    minWidth: 0
+    minWidth: 0,
   },
   measurementGridLabel: {
     fontFamily: fonts.regular,
-    fontSize: 11,
-    color: colors123.textMuted
+    fontSize: 12,
+    color: colors123.textMuted,
   },
   measurementGridValue: {
     fontFamily: fonts.bold,
     fontSize: 15,
     color: colors123.text,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   viewMoreButton: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
-    alignItems: 'center',
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.xs,
     marginTop: spacing.md,
-    paddingVertical: spacing.xs
+    paddingVertical: spacing.xs,
   },
   viewMoreLink: {
     fontFamily: fonts.semibold,
     fontSize: 13,
-    color: colors123.primary
+    color: colors123.primary,
   },
   iconButton: {
-    padding: spacing.xs
+    padding: spacing.xs,
   },
 
   // Orders
   ordersList: {
-    gap: spacing.md
+    gap: spacing.md,
   },
   orderCard: {
     backgroundColor: colors123.surface,
@@ -794,63 +799,63 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
-    ...shadows.card
+    ...shadows.card,
   },
   orderCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     gap: spacing.md,
-    marginBottom: spacing.sm
+    marginBottom: spacing.sm,
   },
   orderCardInfo: {
-    flex: 1
+    flex: 1,
   },
   orderCardTitle: {
     fontFamily: fonts.bold,
     fontSize: 16,
-    color: colors123.text
+    color: colors123.text,
   },
   orderCardMeta: {
     fontFamily: fonts.regular,
     fontSize: 12,
     color: colors123.textMuted,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   orderCardActions: {
-    alignItems: 'flex-end',
-    gap: spacing.xs
+    alignItems: "flex-end",
+    gap: spacing.xs,
   },
   orderCardAmount: {
     fontFamily: fonts.bold,
     fontSize: 14,
-    color: colors123.primary
+    color: colors123.primary,
   },
   orderCardDue: {
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colors123.textMuted,
-    marginBottom: spacing.sm
+    marginBottom: spacing.sm,
   },
   orderCardNotes: {
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colors123.text,
     lineHeight: 20,
-    marginTop: spacing.sm
+    marginTop: spacing.sm,
   },
 
   // Loading
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     backgroundColor: colors123.background,
-    gap: spacing.md
+    gap: spacing.md,
   },
   loadingText: {
     fontFamily: fonts.regular,
     fontSize: 14,
-    color: colors123.textMuted
-  }
+    color: colors123.textMuted,
+  },
 });

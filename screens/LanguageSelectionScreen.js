@@ -27,7 +27,7 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
   },
   title: {
     fontSize: 30,
-    fontWeight: '800',
+
     color: colors123.text,
     marginBottom: spacing.sm,
     fontFamily: fonts.bold,
@@ -41,8 +41,8 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
     gap: spacing.md,
   },
   languageOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
     borderRadius: 18,
@@ -63,8 +63,8 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
     borderRadius: 12,
     borderWidth: 2,
     borderColor: colors123.border,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   radioOuterSelected: {
     borderColor: colors123.primary,
@@ -93,18 +93,18 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
     paddingTop: spacing.md,
   },
   continueButton: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: colors123.primary,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.lg,
-    borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
     gap: spacing.md,
   },
   continueButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+
     color: colors123.surface,
     fontFamily: fonts.semibold,
   },
@@ -134,7 +134,7 @@ export default function LanguageSelectionScreen({ navigation }) {
 
         <View style={styles.languageList}>
           {supportedLanguages.map((lang) => (
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(selectedLanguage === lang.code) }}
               key={lang.code}
               style={[
                 styles.languageOption,
@@ -180,7 +180,7 @@ export default function LanguageSelectionScreen({ navigation }) {
       </ScrollView>
 
       <View style={styles.footer}>
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={styles.continueButton}
           onPress={handleContinue}
           activeOpacity={0.8}

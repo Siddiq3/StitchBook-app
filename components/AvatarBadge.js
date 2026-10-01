@@ -1,6 +1,6 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { colors123, fonts, radius } from "../utils/theme";
+import React, { useState, useEffect } from "react";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { colors123, fonts } from "../utils/theme";
 
 const getFallbackInitials = (name = "") => {
   const words = String(name || "")
@@ -19,8 +19,26 @@ const normalizeInitials = (initials, name) => {
   return value.slice(0, 2).toUpperCase();
 };
 
-export default function AvatarBadge({ initials, name, size = 48 }) {
+export default function AvatarBadge({
+  initials,
+  name,
+  size = 48,
+  photoUrl,
+  style,
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+  useEffect(() => setImageFailed(false), [photoUrl]);
   const displayInitials = normalizeInitials(initials, name);
+
+  if (photoUrl && !imageFailed)
+    return (
+      <Image
+        accessibilityLabel={name}
+        source={{ uri: photoUrl }}
+        onError={() => setImageFailed(true)}
+        style={[{ width: size, height: size, borderRadius: size / 2 }, style]}
+      />
+    );
 
   return (
     <View
@@ -30,8 +48,9 @@ export default function AvatarBadge({ initials, name, size = 48 }) {
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: colors123.primary,
+          backgroundColor: colors123.surfaceMuted,
         },
+        style,
       ]}
     >
       <Text style={[styles.initials, { fontSize: size * 0.34 }]}>
@@ -46,10 +65,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: colors123.backgroundAccent,
+    borderColor: colors123.borderLight,
   },
   initials: {
-    color: colors123.surface,
+    color: colors123.textSecondary,
     fontFamily: fonts.bold,
   },
 });

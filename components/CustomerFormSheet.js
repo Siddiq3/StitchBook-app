@@ -1,5 +1,6 @@
+import InlineAlert from "./InlineAlert";
 import React, { useMemo, useState } from "react";
-import { StyleSheet, View, Text, TouchableOpacity, Pressable } from "react-native";
+import { StyleSheet, View, Text, Pressable } from "react-native";
 import BottomSheet from "./BottomSheet";
 import IconInput from "./IconInput";
 import AppButton from "./AppButton";
@@ -18,10 +19,12 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
   const { t } = useLanguage();
   const [form, setForm] = useState(emptyForm);
   const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(false);
 
   const canSubmit = useMemo(
     () => form.name.trim().length > 0 && form.phone.trim().length >= 10,
-    [form.name, form.phone],
+    [form.name, form.phone]
   );
 
   const handleChange = (field, value) => {
@@ -29,7 +32,8 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
     setErrors((current) => ({ ...current, [field]: undefined }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (submitting) return;
     const nextErrors = {};
 
     if (!form.name.trim()) {
@@ -47,12 +51,26 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
       return;
     }
 
-    onSubmit(form);
-    setForm(emptyForm);
-    setErrors({});
+    setSubmitting(true);
+    setSubmitError(false);
+    try {
+      const result = await onSubmit(form);
+      if (result === false) {
+        setSubmitError(true);
+        return;
+      }
+      setForm(emptyForm);
+      setErrors({});
+    } catch {
+      setSubmitError(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const handleClose = () => {
+    if (submitting) return;
+    setSubmitError(false);
     setErrors({});
     setForm(emptyForm);
     onClose();
@@ -108,52 +126,70 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
 
       {/* Gender Selection */}
       <View style={styles.genderSection}>
-        <Text style={styles.genderLabel}>{t("gender")}<Text style={styles.required}>*</Text></Text>
+        <Text style={styles.genderLabel}>
+          {t("gender")}
+          <Text style={styles.required}>*</Text>
+        </Text>
         <View style={styles.genderOptions}>
           <Pressable
+            accessibilityRole="radio"
+            accessibilityState={{ checked: form.gender === "male" }}
+            accessibilityLabel={t("male")}
             style={[
               styles.genderButton,
-              form.gender === 'male' && styles.genderButtonActive,
+              form.gender === "male" && styles.genderButtonActive,
             ]}
-            onPress={() => handleChange('gender', 'male')}
+            onPress={() => handleChange("gender", "male")}
           >
-            <View style={[
-              styles.radio,
-              form.gender === 'male' && styles.radioActive,
-            ]}>
-              {form.gender === 'male' && <View style={styles.radioDot} />}
+            <View
+              style={[
+                styles.radio,
+                form.gender === "male" && styles.radioActive,
+              ]}
+            >
+              {form.gender === "male" && <View style={styles.radioDot} />}
             </View>
-            <Text style={[
-              styles.genderButtonText,
-              form.gender === 'male' && styles.genderButtonTextActive,
-            ]}>
+            <Text
+              style={[
+                styles.genderButtonText,
+                form.gender === "male" && styles.genderButtonTextActive,
+              ]}
+            >
               {t("male")}
             </Text>
           </Pressable>
 
           <Pressable
+            accessibilityRole="radio"
+            accessibilityState={{ checked: form.gender === "female" }}
+            accessibilityLabel={t("female")}
             style={[
               styles.genderButton,
-              form.gender === 'female' && styles.genderButtonActive,
+              form.gender === "female" && styles.genderButtonActive,
             ]}
-            onPress={() => handleChange('gender', 'female')}
+            onPress={() => handleChange("gender", "female")}
           >
-            <View style={[
-              styles.radio,
-              form.gender === 'female' && styles.radioActive,
-            ]}>
-              {form.gender === 'female' && <View style={styles.radioDot} />}
+            <View
+              style={[
+                styles.radio,
+                form.gender === "female" && styles.radioActive,
+              ]}
+            >
+              {form.gender === "female" && <View style={styles.radioDot} />}
             </View>
-            <Text style={[
-              styles.genderButtonText,
-              form.gender === 'female' && styles.genderButtonTextActive,
-            ]}>
+            <Text
+              style={[
+                styles.genderButtonText,
+                form.gender === "female" && styles.genderButtonTextActive,
+              ]}
+            >
               {t("female")}
             </Text>
           </Pressable>
         </View>
       </View>
 
+      <InlineAlert message={submitError ? t("customerCreateFailed") : null} />
       <View style={styles.actions}>
         <AppButton
           label={t("cancel")}
@@ -162,7 +198,8 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
           variant="secondary"
         />
         <AppButton
-          disabled={!canSubmit}
+          disabled={!canSubmit || submitting}
+          loading={submitting}
           icon="plus"
           label={t("createCustomer")}
           onPress={handleSubmit}
@@ -179,30 +216,30 @@ const styles = StyleSheet.create({
   },
   genderLabel: {
     fontSize: 13,
-    fontWeight: fonts.semibold,
+    fontFamily: fonts.semibold,
     color: colors123.text,
     marginBottom: spacing.sm,
   },
   required: {
-    color: '#EF4444',
+    color: colors123.danger,
   },
   genderOptions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing.md,
   },
   genderButton: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.sm,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors123.border,
   },
   genderButtonActive: {
     borderColor: colors123.primary,
-    backgroundColor: '#EFF6FF',
+    backgroundColor: colors123.primaryLight,
   },
   genderButtonText: {
     fontSize: 14,
@@ -211,7 +248,7 @@ const styles = StyleSheet.create({
   },
   genderButtonTextActive: {
     color: colors123.primary,
-    fontWeight: fonts.semibold,
+    fontFamily: fonts.semibold,
   },
   radio: {
     width: 20,
@@ -219,8 +256,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 2,
     borderColor: colors123.border,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   radioActive: {
     borderColor: colors123.primary,

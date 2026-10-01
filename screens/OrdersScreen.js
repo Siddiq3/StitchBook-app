@@ -1,3 +1,5 @@
+import SegmentedControl from "../components/SegmentedControl";
+import InlineAlert from "../components/InlineAlert";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Alert,
@@ -10,7 +12,7 @@ import {
 "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { format, isValid, parseISO } from "date-fns";
-import { MotiView } from "moti";
+import { MotiView } from "../components/AccessibleMotionView";
 import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";
 import EmptyState from "../components/EmptyState";
@@ -18,7 +20,7 @@ import IconInput from "../components/IconInput";
 import ScreenHeader from "../components/ScreenHeader";
 import { ListSkeleton } from "../components/SkeletonBlock";
 import StatusBadge from "../components/ui/StatusBadge";
-import Card from "../components/ui/Card";
+
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
@@ -82,6 +84,7 @@ const getOrderAmountDetails = (order) => {
 
 export default function OrdersScreen({ navigation, route }) {
   const { t } = useLanguage();
+  const { ordersError, ordersLoading } = useStitchPro();
   const { customerId } = route?.params || {};
   const { orders, customers, isBooting, dashboardStats, addOrder, fetchOrders, fetchCustomers, dashboardLoading } =
   useStitchPro();
@@ -124,9 +127,6 @@ export default function OrdersScreen({ navigation, route }) {
       });
     }
 
-
-
-
     return orders.filter((order) => {
       // Filter by customer if customerId is provided
       if (customerId && order.customerId !== customerId) {
@@ -168,22 +168,6 @@ export default function OrdersScreen({ navigation, route }) {
     );
   }, [navigation, t]);
 
-  const handleCreateOrder = async (form) => {
-    try {
-      await addOrder(form);
-      setShowOrderSheet(false);
-      showToast(t("orderCreated"));
-    } catch (err) {
-      if (err.code === "SUBSCRIPTION_REQUIRED") {
-        setShowOrderSheet(false);
-        showSubscriptionRequiredAlert();
-        return;
-      }
-
-      showToast(err.message || t("orderCreateFailed"), "error");
-    }
-  };
-
   const handleAddOrderPress = () => {
     if (!customers || customers.length === 0) {
       Alert.alert(
@@ -195,7 +179,7 @@ export default function OrdersScreen({ navigation, route }) {
           text: t("goToCustomers"),
           onPress: () => {
 
-            // Navigate to Customers tab
+            navigation.navigate("Customers");
           } }]
 
       );
@@ -218,7 +202,7 @@ export default function OrdersScreen({ navigation, route }) {
           colors={[colors123.primary]} />
 
         }>
-        
+
         <ScreenHeader
           eyebrow={t("productionFlow")}
           title={t("ordersTitle")}
@@ -231,20 +215,20 @@ export default function OrdersScreen({ navigation, route }) {
             style={styles.addButton} />
 
           } />
-        
+
 
         <View style={styles.miniStats}>
           <AppCard style={styles.miniStatCard} variant="muted">
             <Text style={styles.miniStatLabel}>{t("inQueue")}</Text>
-            <Text style={styles.miniStatValue}>{dashboardStats?.inProgressCount || 0}</Text>
+            <Text style={styles.miniStatValue}>{dashboardStats?.inProgressCount ?? "—"}</Text>
           </AppCard>
           <AppCard style={styles.miniStatCard} variant="muted">
             <Text style={styles.miniStatLabel}>{t("pickupReady")}</Text>
-            <Text style={styles.miniStatValue}>{dashboardStats?.readyCount || 0}</Text>
+            <Text style={styles.miniStatValue}>{dashboardStats?.readyCount ?? "—"}</Text>
           </AppCard>
           <AppCard style={styles.miniStatCard} variant="muted">
             <Text style={styles.miniStatLabel}>{t("thisMonth")}</Text>
-            <Text style={styles.miniStatValue}>{dashboardStats?.deliveredCount || 0}</Text>
+            <Text style={styles.miniStatValue}>{dashboardStats?.deliveredCount ?? "—"}</Text>
           </AppCard>
         </View>
 
@@ -253,46 +237,19 @@ export default function OrdersScreen({ navigation, route }) {
           onChangeText={setSearchQuery}
           placeholder={t("searchOrdersPlaceholder")}
           value={searchQuery} />
-        
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filters}>
-          
-          {allFilters.map((filter) => {
-            const selected = filter === activeFilter;
-            const displayLabel = filter === "All" ? t("all") : statusLabels[filter] || filter;
-            return (
-              <Pressable
-                key={filter}
-                onPress={() => setActiveFilter(filter)}
-                style={[
-                styles.filterChip,
-                selected && styles.filterChipSelected]
-                }>
-                
-                <Text
-                  style={[
-                  styles.filterText,
-                  selected && styles.filterTextSelected]
-                  }>
-                  
-                  {displayLabel}
-                </Text>
-              </Pressable>);
 
-          })}
-        </ScrollView>
+        <SegmentedControl options={allFilters.map(filter => ({ value: filter, label: filter === "All" ? t("all") : statusLabels[filter] || filter }))} value={activeFilter} onChange={setActiveFilter} />
 
-        {dashboardLoading ?
+<InlineAlert message={ordersError ? t("loadOrdersFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
+        {ordersLoading && !orders.length ?
         <ListSkeleton /> :
+        filteredOrders.length === 0 && ordersError ? null :
         filteredOrders.length === 0 ?
         <EmptyState
           description={t("noOrdersMatchDescription")}
           icon="clipboard-search-outline"
           title={t("noOrdersMatch")} /> :
-
 
         <View style={styles.list}>
             {filteredOrders.map((order, index) => {
@@ -317,11 +274,11 @@ export default function OrdersScreen({ navigation, route }) {
                   duration: 220,
                   type: "timing"
                 }}>
-                
-                  <Pressable
+
+                  <Pressable accessibilityRole="button"
                   onPress={() => navigation.navigate("OrderDetail", { orderId: order.id })}
                   style={({ pressed }) => [styles.orderCardWrapper, pressed && { opacity: 0.7 }]}>
-                  
+
                     <AppCard style={styles.orderCard}>
                     <View style={styles.orderHeader}>
                       <View style={{ flex: 1 }}>
@@ -381,7 +338,7 @@ export default function OrdersScreen({ navigation, route }) {
                           color={colors123.textMuted}
                           name="calendar-clock-outline"
                           size={15} />
-                        
+
                       <Text style={styles.deliveryText}>Delivery: {deliveryText}</Text>
                     </View>
 
@@ -410,17 +367,17 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: 112,
+    paddingBottom: spacing.xl,
     gap: spacing.md,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   addButton: {
-    minHeight: 42,
-    paddingHorizontal: spacing.sm
+    minHeight: 44,
+    paddingHorizontal: spacing.sm,
   },
   miniStats: {
     flexDirection: "row",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   miniStatCard: {
     flex: 1,
@@ -428,65 +385,39 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderWidth: 1,
     borderRadius: 16,
-    backgroundColor: colors123.surface
+    backgroundColor: colors123.surface,
   },
   miniStatLabel: {
     fontFamily: fonts.medium,
     fontSize: 12,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   miniStatValue: {
     marginTop: spacing.xs,
     fontFamily: fonts.extrabold,
     fontSize: 22,
-    color: colors123.text
-  },
-  filters: {
-    gap: spacing.sm,
-    paddingVertical: spacing.xs
-  },
-  filterChip: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: 10,
-    borderRadius: radius.pill,
-    backgroundColor: colors123.surface,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    flexDirection: "row",
-    alignItems: "center"
-  },
-  filterChipSelected: {
-    backgroundColor: colors123.primary,
-    borderColor: colors123.primary
-  },
-  filterText: {
-    fontFamily: fonts.semibold,
-    fontSize: 13,
-    color: colors123.textMuted
-  },
-  filterTextSelected: {
-    color: colors123.surface
+    color: colors123.text,
   },
   list: {
-    gap: 10
+    gap: 10,
   },
   orderCard: {
     gap: 10,
     borderWidth: 0,
-    borderRadius: 14,
+    borderRadius: 16,
     backgroundColor: colors123.surface,
-    ...shadows.soft
+    ...shadows.soft,
   },
   orderHeader: {
     flexDirection: "row",
     gap: spacing.md,
-    alignItems: "flex-start"
+    alignItems: "flex-start",
   },
   customerLine: {
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    marginBottom: spacing.sm
+    marginBottom: spacing.sm,
   },
   customerAvatar: {
     width: 38,
@@ -496,23 +427,23 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     backgroundColor: colors123.primarySoft,
     borderWidth: 1,
-    borderColor: colors123.borderLight
+    borderColor: colors123.borderLight,
   },
   customerAvatarText: {
     fontFamily: fonts.extrabold,
     fontSize: 15,
-    color: colors123.primary
+    color: colors123.primary,
   },
   orderTitleRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     alignItems: "center",
-    gap: spacing.xs
+    gap: spacing.xs,
   },
   orderTitle: {
     fontFamily: fonts.medium,
     fontSize: 13,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   quantityText: {
     overflow: "hidden",
@@ -521,61 +452,61 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
     fontFamily: fonts.semibold,
-    fontSize: 11,
-    color: colors123.textSecondary
+    fontSize: 12,
+    color: colors123.textSecondary,
   },
   orderCustomer: {
     fontFamily: fonts.bold,
     fontSize: 16,
-    color: colors123.text
+    color: colors123.text,
   },
   orderAmount: {
     fontFamily: fonts.bold,
     fontSize: 15,
-    color: colors123.primary
+    color: colors123.primary,
   },
   amountPanel: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 14,
+    borderRadius: 16,
     backgroundColor: colors123.background,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md
+    paddingHorizontal: spacing.md,
   },
   amountInfo: {
-    flex: 1
+    flex: 1,
   },
   amountLabel: {
     fontFamily: fonts.medium,
-    fontSize: 11,
-    color: colors123.textMuted
+    fontSize: 12,
+    color: colors123.textMuted,
   },
   amountValue: {
     marginTop: 3,
     fontFamily: fonts.extrabold,
     fontSize: 14,
-    color: colors123.text
+    color: colors123.text,
   },
   balanceDueText: {
-    color: colors123.warning
+    color: colors123.warning,
   },
   amountDivider: {
     width: 1,
     height: 28,
     backgroundColor: colors123.borderLight,
-    marginHorizontal: spacing.md
+    marginHorizontal: spacing.md,
   },
   deliveryRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6
+    gap: 6,
   },
   deliveryText: {
     fontFamily: fonts.medium,
     fontSize: 12,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   orderTypeBadge: {
     marginTop: spacing.xs,
@@ -583,26 +514,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,
     borderRadius: radius.pill,
-    borderWidth: 1
+    borderWidth: 1,
   },
   orderTypeText: {
     fontFamily: fonts.semibold,
-    fontSize: 11,
-    textTransform: "uppercase"
+    fontSize: 12,
+    textTransform: "uppercase",
   },
   orderTypeStitching: {
     backgroundColor: colors123.primary + "15",
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   orderTypeAlteration: {
     backgroundColor: colors123.secondary + "15",
-    borderColor: colors123.secondary
+    borderColor: colors123.secondary,
   },
   cardFooter: {
     paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: colors123.borderLight,
-    gap: spacing.xs
+    gap: spacing.xs,
   },
   openDetailsRow: {
     marginTop: spacing.xs,
@@ -612,11 +543,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   openDetailsText: {
     fontFamily: fonts.extrabold,
     fontSize: 12,
-    color: colors123.primary
-  }
+    color: colors123.primary,
+  },
 });

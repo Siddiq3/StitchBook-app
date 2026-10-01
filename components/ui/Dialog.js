@@ -4,15 +4,7 @@
  */
 
 import React from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Animated,
-  Dimensions,
-} from 'react-native';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import Button from './Button';
 import {
@@ -280,25 +272,25 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: BRAND_COLORS.overlay,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingOverlay: {
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   dialogContainer: {
     backgroundColor: BRAND_COLORS.white,
     borderRadius: RADIUS.xl,
     padding: SPACING.lg,
-    width: '85%',
-    alignItems: 'center',
+    width: "85%",
+    alignItems: "center",
     ...SHADOWS.lg,
   },
   loadingBox: {
     backgroundColor: BRAND_COLORS.white,
     borderRadius: RADIUS.xl,
     padding: SPACING.xl,
-    alignItems: 'center',
+    alignItems: "center",
     ...SHADOWS.lg,
   },
   iconBox: {
@@ -306,20 +298,20 @@ const styles = StyleSheet.create({
     height: 64,
     borderRadius: RADIUS.full,
     backgroundColor: BRAND_COLORS.infoLight,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginBottom: SPACING.lg,
   },
   dialogActions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: SPACING.lg,
-    width: '100%',
-    justifyContent: 'space-between',
+    width: "100%",
+    justifyContent: "space-between",
   },
   bottomSheetOverlay: {
     flex: 1,
     backgroundColor: BRAND_COLORS.overlay,
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   bottomSheetBackdrop: {
     flex: 1,
@@ -336,24 +328,24 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: BRAND_COLORS.border,
     borderRadius: RADIUS.full,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginTop: SPACING.md,
     marginBottom: SPACING.lg,
   },
   sheetHeader: {
-    flexDirection: 'row',
+    flexDirection: "row",
     paddingHorizontal: SPACING.lg,
     paddingBottom: SPACING.lg,
     borderBottomWidth: 1,
     borderBottomColor: BRAND_COLORS.divider,
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
   },
   sheetContent: {
     paddingHorizontal: SPACING.lg,
     paddingTop: SPACING.lg,
   },
   loadingSpinner: {
-    alignSelf: 'center',
+    alignSelf: "center",
   },
 });
 

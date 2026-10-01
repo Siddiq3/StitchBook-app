@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
-import { colors123, SIZES } from '../../utils/theme';
+import { StyleSheet, Animated } from "react-native";
+import { SIZES } from "../../utils/theme";
 
 export default function SkeletonLoader({
   width = '100%',

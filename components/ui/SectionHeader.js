@@ -1,3 +1,4 @@
+import { fonts } from "../../utils/theme";
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors123, SIZES, normalize } from '../../utils/theme';
@@ -18,16 +19,16 @@ export default function SectionHeader({ title, actionLabel, onAction }) {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: SIZES.md2,
     marginTop: SIZES.lg2,
     paddingHorizontal: SIZES.lg2,
   },
   title: {
     fontSize: normalize(SIZES.lg),
-    fontWeight: '800',
+    fontFamily: fonts.semibold,
     color: colors123.text,
   },
   actionButton: {
@@ -39,6 +40,6 @@ const styles = StyleSheet.create({
   action: {
     fontSize: normalize(SIZES.sm),
     color: colors123.primary,
-    fontWeight: '800',
+    fontFamily: fonts.semibold,
   },
 });

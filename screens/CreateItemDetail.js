@@ -1,20 +1,12 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import ResponsiveGrid from "../components/ResponsiveGrid";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { MotiView } from "moti";
-import { useStitchPro } from "../context/StitchProContext";
+import { MotiView } from "../components/AccessibleMotionView";
+
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
-import { measurementApi } from "../services/api";
+
 import { colors123, fonts, radius, spacing } from "../utils/theme";
 import AppButton from "../components/AppButton";
 import MeasurementFieldThumb from "../components/MeasurementFieldThumb";
@@ -149,7 +141,7 @@ export default function CreateItemDetail({
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           onPress={onCancel}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
@@ -184,7 +176,7 @@ export default function CreateItemDetail({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t("type")}</Text>
           <View style={styles.typeButtonsContainer}>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(itemType === "stitching") }}
               style={[
                 styles.typeButton,
                 itemType === "stitching" && styles.typeButtonActive,
@@ -208,7 +200,7 @@ export default function CreateItemDetail({
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(itemType === "alteration") }}
               style={[
                 styles.typeButton,
                 itemType === "alteration" && styles.typeButtonActive,
@@ -269,7 +261,7 @@ export default function CreateItemDetail({
                 />
               </View>
 
-              <View style={styles.measurementGrid}>
+              <ResponsiveGrid style={styles.measurementGrid}>
                 {visibleMeasurementEntries.map(([key, value], index) => (
                   <MotiView
                     key={`${selectedMeasurement.id || "selected"}-${key}`}
@@ -290,10 +282,10 @@ export default function CreateItemDetail({
                     </View>
                   </MotiView>
                 ))}
-              </View>
+              </ResponsiveGrid>
 
               {selectedMeasurementEntries.length > 0 ? (
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button"
                   style={styles.measurementDropdown}
                   onPress={() => setMeasurementExpanded((current) => !current)}
                 >
@@ -310,7 +302,7 @@ export default function CreateItemDetail({
                 </TouchableOpacity>
               ) : null}
 
-              <TouchableOpacity
+              <TouchableOpacity accessibilityRole="button"
                 style={styles.changeButton}
                 onPress={() => setShowMeasurementPicker(true)}
               >
@@ -318,7 +310,7 @@ export default function CreateItemDetail({
               </TouchableOpacity>
             </View>
           ) : (
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={styles.addMeasurementButton}
               onPress={() => setShowMeasurementPicker(true)}
             >
@@ -336,7 +328,7 @@ export default function CreateItemDetail({
         {itemType === "stitching" && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>{t("stitchOptions")}</Text>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={styles.optionsButton}
               onPress={() => setShowStitchOptions(true)}
             >
@@ -349,7 +341,7 @@ export default function CreateItemDetail({
         {/* Fabric */}
         <View style={styles.section}>
           <Text style={styles.label}>{t("fabric")}</Text>
-          <TextInput
+          <TextInput accessibilityLabel={t("fabricPlaceholder")}
             style={styles.input}
             placeholder={t("fabricPlaceholder")}
             placeholderTextColor={colors123.textSoft}
@@ -362,14 +354,14 @@ export default function CreateItemDetail({
         <View style={styles.section}>
           <Text style={styles.label}>{t("quantity")}</Text>
           <View style={styles.quantityContainer}>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={styles.quantityButton}
               onPress={() => setQuantity(Math.max(1, quantity - 1))}
             >
               <Text style={styles.quantityButtonText}>−</Text>
             </TouchableOpacity>
             <Text style={styles.quantityValue}>{quantity}</Text>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={styles.quantityButton}
               onPress={() => setQuantity(quantity + 1)}
             >
@@ -383,7 +375,7 @@ export default function CreateItemDetail({
           <Text style={styles.label}>{t("pricePerItem")}</Text>
           <View style={styles.priceInputContainer}>
             <Text style={styles.currencySymbol}>₹</Text>
-            <TextInput
+            <TextInput accessibilityLabel="0"
               style={styles.priceInput}
               placeholder="0"
               placeholderTextColor={colors123.textSoft}
@@ -402,7 +394,7 @@ export default function CreateItemDetail({
         {/* Special Instructions */}
         <View style={styles.section}>
           <Text style={styles.label}>{t("specialInstructions")}</Text>
-          <TextInput
+          <TextInput accessibilityLabel={t("specialInstructionsPlaceholder")}
             style={[styles.input, styles.textArea]}
             placeholder={t("specialInstructionsPlaceholder")}
             placeholderTextColor={colors123.textSoft}
@@ -418,11 +410,11 @@ export default function CreateItemDetail({
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t("additionalInfo")}</Text>
           <View style={styles.mediaButtonsContainer}>
-            <TouchableOpacity style={styles.mediaButton}>
+            <TouchableOpacity accessibilityRole="button" style={styles.mediaButton}>
               <Ionicons name="mic-outline" size={24} color={colors123.primary} />
               <Text style={styles.mediaButtonText}>{t("recordAudio")}</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.mediaButton}>
+            <TouchableOpacity accessibilityRole="button" style={styles.mediaButton}>
               <Ionicons name="image-outline" size={24} color={colors123.primary} />
               <Text style={styles.mediaButtonText}>{t("uploadImages")}</Text>
             </TouchableOpacity>
@@ -435,7 +427,7 @@ export default function CreateItemDetail({
 
       {/* Bottom Actions */}
       <View style={styles.bottomActions}>
-        <TouchableOpacity
+        <TouchableOpacity accessibilityRole="button"
           style={styles.cancelButton}
           onPress={onCancel}
           disabled={saving}
@@ -490,7 +482,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: fonts.lg.fontSize,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
     color: colors123.text,
   },
   content: {
@@ -511,7 +503,7 @@ const styles = StyleSheet.create({
   },
   outfitLabel: {
     fontSize: fonts.base.fontSize,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
     color: colors123.text,
   },
   outfitDescription: {
@@ -524,7 +516,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: fonts.base.fontSize,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
     color: colors123.text,
     marginBottom: spacing.md,
   },
@@ -533,7 +525,7 @@ const styles = StyleSheet.create({
   },
   optional: {
     color: colors123.textSoft,
-    fontWeight: "400",
+    fontFamily: fonts.regular,
     fontSize: fonts.sm.fontSize,
   },
   measurementHeader: {
@@ -563,12 +555,12 @@ const styles = StyleSheet.create({
   typeButtonText: {
     marginLeft: spacing.md,
     fontSize: fonts.base.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
   },
   typeButtonTextActive: {
     color: colors123.primary,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
   },
   measurementCard: {
     padding: spacing.md,
@@ -585,7 +577,7 @@ const styles = StyleSheet.create({
   },
   measurementCardLabel: {
     fontSize: fonts.base.fontSize,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
     color: colors123.text,
   },
   measurementCardSubtitle: {
@@ -599,7 +591,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   measurementRow: {
-    width: "47.5%",
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.xs,
@@ -620,7 +612,7 @@ const styles = StyleSheet.create({
   },
   measurementRowValue: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
     marginTop: 3,
   },
@@ -635,7 +627,7 @@ const styles = StyleSheet.create({
   measurementDropdownText: {
     fontSize: fonts.sm.fontSize,
     color: colors123.primary,
-    fontWeight: "700",
+    fontFamily: fonts.bold,
   },
   changeButton: {
     marginTop: spacing.md,
@@ -645,7 +637,7 @@ const styles = StyleSheet.create({
   changeButtonText: {
     fontSize: fonts.sm.fontSize,
     color: colors123.primary,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
   },
   addMeasurementButton: {
     flexDirection: "row",
@@ -661,7 +653,7 @@ const styles = StyleSheet.create({
   addMeasurementText: {
     marginLeft: spacing.md,
     fontSize: fonts.base.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.primary,
   },
   optionsButton: {
@@ -677,12 +669,12 @@ const styles = StyleSheet.create({
   optionsButtonText: {
     marginLeft: spacing.md,
     fontSize: fonts.base.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.primary,
   },
   label: {
     fontSize: fonts.sm.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
     marginBottom: spacing.sm,
   },
@@ -706,9 +698,9 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   quantityButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors123.border,
     justifyContent: "center",
@@ -717,14 +709,14 @@ const styles = StyleSheet.create({
   },
   quantityButtonText: {
     fontSize: fonts.lg.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
   },
   quantityValue: {
     flex: 1,
     textAlign: "center",
     fontSize: fonts.base.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
     paddingVertical: spacing.md,
   },
@@ -739,7 +731,7 @@ const styles = StyleSheet.create({
   },
   currencySymbol: {
     fontSize: fonts.lg.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
     marginRight: spacing.xs,
   },
@@ -747,7 +739,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: spacing.md,
     fontSize: fonts.lg.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
   },
   totalPrice: {
@@ -774,7 +766,7 @@ const styles = StyleSheet.create({
   mediaButtonText: {
     marginLeft: spacing.sm,
     fontSize: fonts.sm.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
   },
   bottomActions: {
@@ -797,7 +789,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: fonts.base.fontSize,
-    fontWeight: "600",
+    fontFamily: fonts.semibold,
     color: colors123.text,
   },
 });

@@ -15,114 +15,88 @@ export default function AppButton({
   onPress,
   icon,
   variant = "primary",
+  size = "md",
   style,
   textStyle,
   loading = false,
   disabled = false,
+  accessibilityLabel,
+  ...props
 }) {
-  const isPrimary = variant === "primary";
-  const isAccent = variant === "accent";
+  const filled = ["primary", "accent", "danger"].includes(variant);
+  const foreground = filled
+    ? colors123.surface
+    : variant === "ghost"
+    ? colors123.textSecondary
+    : colors123.primary;
+  const unavailable = disabled || loading;
   const buttonLabel = label ?? title ?? "";
-
   return (
     <Pressable
+      {...props}
       accessibilityRole="button"
-      disabled={disabled || loading}
+      accessibilityLabel={accessibilityLabel || buttonLabel}
+      accessibilityState={{ disabled: unavailable, busy: loading }}
+      disabled={unavailable}
       onPress={onPress}
       style={({ pressed }) => [
         styles.base,
-        isPrimary && styles.primary,
-        isAccent && styles.accent,
-        !isPrimary && !isAccent && styles.secondary,
-        pressed && !disabled && styles.pressed,
-        disabled && styles.disabled,
+        size === "sm" && styles.small,
+        {
+          backgroundColor: filled
+            ? variant === "danger"
+              ? colors123.danger
+              : colors123.primary
+            : variant === "ghost"
+            ? "transparent"
+            : colors123.surface,
+          borderColor: filled
+            ? variant === "danger"
+              ? colors123.danger
+              : colors123.primary
+            : variant === "ghost"
+            ? "transparent"
+            : colors123.border,
+        },
         style,
+        pressed && { opacity: 0.8 },
+        unavailable && { opacity: 0.5 },
       ]}
     >
       <View style={styles.content}>
         {loading ? (
-          <ActivityIndicator
-            color={isAccent ? colors123.text : isPrimary ? colors123.surface : colors123.primary}
-            size="small"
-          />
-        ) : (
-          <>
-            {icon ? (
-              <MaterialCommunityIcons
-                color={isAccent ? colors123.text : isPrimary ? colors123.surface : colors123.primary}
-                name={icon}
-                size={18}
-              />
-            ) : null}
-            <Text
-              style={[
-                styles.label,
-                isAccent ? styles.accentLabel : isPrimary ? styles.primaryLabel : styles.secondaryLabel,
-                textStyle,
-              ]}
-            >
-              {buttonLabel}
-            </Text>
-          </>
-        )}
+          <ActivityIndicator color={foreground} size="small" />
+        ) : icon ? (
+          <MaterialCommunityIcons color={foreground} name={icon} size={20} />
+        ) : null}
+        <Text style={[styles.label, { color: foreground }, textStyle]}>
+          {buttonLabel}
+        </Text>
       </View>
     </Pressable>
   );
 }
-
 const styles = StyleSheet.create({
   base: {
     minHeight: 48,
-    borderRadius: radius.lg,
-    alignItems: "center",
+    borderRadius: radius.md,
     justifyContent: "center",
-    paddingHorizontal: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
     borderWidth: 1,
   },
-  primary: {
-    backgroundColor: colors123.primary,
-    borderColor: colors123.primary,
-    shadowColor: colors123.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  secondary: {
-    backgroundColor: colors123.surface,
-    borderColor: colors123.borderLight,
-  },
-  accent: {
-    backgroundColor: colors123.accent,
-    borderColor: colors123.accent,
-    shadowColor: colors123.accent,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  disabled: {
-    opacity: 0.6,
-  },
-  pressed: {
-    transform: [{ scale: 0.98 }],
-  },
+  small: { minHeight: 44, paddingVertical: spacing.xs },
   content: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     gap: spacing.xs,
   },
   label: {
-    fontFamily: fonts.bold,
-    fontSize: 14,
-  },
-  primaryLabel: {
-    color: colors123.surface,
-  },
-  accentLabel: {
-    color: colors123.text,
-  },
-  secondaryLabel: {
-    color: colors123.primary,
+    flexShrink: 1,
+    textAlign: "center",
+    fontFamily: fonts.semibold,
+    fontSize: 15,
+    lineHeight: 22,
   },
 });

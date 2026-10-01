@@ -1,3 +1,4 @@
+import { fonts } from "../../utils/theme";
 /**
  * Production-ready Badge & Pill Components
  * Status indicators and labels
@@ -195,7 +196,7 @@ export function CountBadge({ count, style }) {
           TEXT_STYLES.labelSmall,
           {
             color: BRAND_COLORS.white,
-            fontWeight: 'bold',
+            fontFamily: fonts.bold,
           },
         ]}
       >
@@ -243,37 +244,37 @@ export function Tag({ label, icon, selected = false, onPress, style }) {
 
 const styles = StyleSheet.create({
   badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderRadius: RADIUS.full,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderRadius: RADIUS.full,
     borderWidth: 1,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
   countBadge: {
     width: 24,
     height: 24,
     borderRadius: RADIUS.full,
     backgroundColor: BRAND_COLORS.danger,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'absolute',
+    justifyContent: "center",
+    alignItems: "center",
+    position: "absolute",
     right: -8,
     top: -8,
   },
   tag: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: RADIUS.full,
     borderWidth: 1.5,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
 });
 

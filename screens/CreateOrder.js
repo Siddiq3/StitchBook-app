@@ -1,23 +1,13 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  ScrollView,
-  StyleSheet,
-  FlatList,
-  TextInput,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-  Alert } from
-"react-native";
+import InlineAlert from "../components/InlineAlert";
+import ResponsiveGrid from "../components/ResponsiveGrid";
+import React, { useState, useEffect } from "react";
+import { View, Text, TouchableOpacity, ScrollView, StyleSheet, FlatList, TextInput, ActivityIndicator, Platform, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
-import { OUTFIT_TYPES, getOutfitsByGender } from "../services/outfitTypes";
+import { getOutfitsByGender } from "../services/outfitTypes";
 import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
 import AvatarCircle from "../components/AvatarCircle";
 import AppButton from "../components/AppButton";
@@ -26,6 +16,7 @@ import CreateItemDetail from "./CreateItemDetail";
 
 export default function CreateOrder({ navigation, route }) {
   const { t } = useLanguage();
+  const { customersError } = useStitchPro();
   const { addOrder, customers, fetchCustomers } = useStitchPro();
   const { showToast } = useToast();
 
@@ -305,7 +296,6 @@ export default function CreateOrder({ navigation, route }) {
         onSave={handleItemDetailSave}
         onCancel={handleItemDetailCancel} />);
 
-
   }
 
   // ========== STEP 1: CUSTOMER SELECTION ==========
@@ -313,10 +303,10 @@ export default function CreateOrder({ navigation, route }) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")}
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            
+
             <Ionicons name="chevron-back" size={28} color={colors123.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t("newOrder")}</Text>
@@ -339,7 +329,7 @@ export default function CreateOrder({ navigation, route }) {
         <ScrollView
           style={styles.content}
           contentContainerStyle={styles.contentScroll}>
-          
+
           <Text style={styles.stepTitle}>{t("selectCustomer")}</Text>
           <Text style={styles.stepSubtitle}>{t("whoOrderFor")}</Text>
 
@@ -350,16 +340,17 @@ export default function CreateOrder({ navigation, route }) {
               size={20}
               color={colors123.textSoft}
               style={styles.searchIcon} />
-            
-            <TextInput
+
+            <TextInput accessibilityLabel={t("searchCustomers")}
               style={styles.searchInput}
               placeholder={t("searchCustomers")}
               placeholderTextColor={colors123.textSoft}
               value={customerSearch}
               onChangeText={setCustomerSearch} />
-            
+
           </View>
 
+<InlineAlert message={customersError ? t("loadCustomersFailed") : null} onRetry={fetchCustomers} retryLabel={t("retry")} />
           {loadingCustomers ?
           <ActivityIndicator
             size="large"
@@ -378,10 +369,10 @@ export default function CreateOrder({ navigation, route }) {
             keyExtractor={(item) => item.id}
             scrollEnabled={false}
             renderItem={({ item }) =>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               style={styles.customerCard}
               onPress={() => handleSelectCustomer(item)}>
-              
+
                   <AvatarCircle name={item.name} size={48} />
                   <View style={styles.customerInfo}>
                     <Text style={styles.customerName}>{item.name}</Text>
@@ -396,7 +387,7 @@ export default function CreateOrder({ navigation, route }) {
                 name="chevron-forward"
                 size={20}
                 color={colors123.border} />
-              
+
                 </TouchableOpacity>
             } />
 
@@ -415,10 +406,10 @@ export default function CreateOrder({ navigation, route }) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             onPress={() => setCurrentStep(1)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            
+
             <Ionicons name="chevron-back" size={28} color={colors123.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t("newOrder")}</Text>
@@ -441,7 +432,7 @@ export default function CreateOrder({ navigation, route }) {
           style={styles.content}
           contentContainerStyle={styles.contentScroll}
           showsVerticalScrollIndicator={false}>
-          
+
           <Text style={styles.stepTitle}>{t("selectOutfitType")}</Text>
           <Text style={styles.stepSubtitle}>
             {t("outfitTypePrompt")}
@@ -472,10 +463,10 @@ export default function CreateOrder({ navigation, route }) {
                       {item.quantity}x ₹{item.price} = ₹{item.quantity * item.price}
                     </Text>
                   </View>
-                  <TouchableOpacity
+                  <TouchableOpacity accessibilityRole="button"
                 onPress={() => handleRemoveItem(index)}
                 style={styles.removeButton}>
-                
+
                     <Ionicons name="trash-outline" size={20} color="#EF4444" />
                   </TouchableOpacity>
                 </View>
@@ -484,30 +475,30 @@ export default function CreateOrder({ navigation, route }) {
               label={t("continueToReview")}
               onPress={() => setCurrentStep(5)}
               style={{ marginTop: spacing.md }} />
-            
+
             </View>
           }
 
           {/* Outfit Selection Grid */}
-          <View style={styles.outfitsGrid}>
+          <ResponsiveGrid style={styles.outfitsGrid}>
             {availableOutfits.map((outfit) => {
               const isSelected = currentOutfitType?.id === outfit.id;
               return (
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(isSelected) }}
                   key={outfit.id}
                   style={[
                   styles.outfitCard,
                   isSelected && styles.outfitCardSelected]
                   }
                   onPress={() => handleSelectOutfit(outfit)}>
-                  
+
                   {isSelected &&
                   <View style={styles.outfitCheckmark}>
                       <Ionicons
                       name="checkmark-circle"
                       size={24}
                       color={colors123.surface} />
-                    
+
                     </View>
                   }
                   <View
@@ -515,7 +506,7 @@ export default function CreateOrder({ navigation, route }) {
                     styles.outfitIconContainer,
                     isSelected && styles.outfitIconContainerSelected]
                     }>
-                    
+
                     <Ionicons
                       name={
                       outfit.category === "alteration" ?
@@ -524,20 +515,20 @@ export default function CreateOrder({ navigation, route }) {
                       }
                       size={30}
                       color={isSelected ? colors123.surface : colors123.primary} />
-                    
+
                   </View>
                   <Text
                     style={[
                     styles.outfitLabel,
                     isSelected && styles.outfitLabelSelected]
                     }>
-                    
+
                     {outfit.label}
                   </Text>
                 </TouchableOpacity>);
 
             })}
-          </View>
+          </ResponsiveGrid>
         </ScrollView>
       </View>);
 
@@ -548,10 +539,10 @@ export default function CreateOrder({ navigation, route }) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             onPress={() => setCurrentStep(2)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            
+
             <Ionicons name="chevron-back" size={28} color={colors123.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t("newOrder")}</Text>
@@ -574,7 +565,7 @@ export default function CreateOrder({ navigation, route }) {
           style={styles.content}
           contentContainerStyle={styles.contentScroll}
           showsVerticalScrollIndicator={false}>
-          
+
           <Text style={styles.stepTitle}>{t("measurementProfile")}</Text>
           <Text style={styles.stepSubtitle}>
             {t("selectOrCreateMeasurementProfile")} {tempItem?.typeLabel}
@@ -598,10 +589,10 @@ export default function CreateOrder({ navigation, route }) {
               // Modal will show automatically via visible prop
             }} />
 
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             style={styles.secondaryButton}
             onPress={handleSkipMeasurements}>
-            
+
             <Text style={styles.secondaryButtonText}>
               {t("continueWithoutMeasurements")}
             </Text>
@@ -617,7 +608,7 @@ export default function CreateOrder({ navigation, route }) {
           onClose={() => setCurrentStep(2)}
           onSelect={handleMeasurementSelected}
           onSkip={handleSkipMeasurements} />
-        
+
       </View>);
 
   }
@@ -627,10 +618,10 @@ export default function CreateOrder({ navigation, route }) {
     return (
       <View style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity
+          <TouchableOpacity accessibilityRole="button"
             onPress={() => setCurrentStep(2)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
-            
+
             <Ionicons name="chevron-back" size={28} color={colors123.primary} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>{t("reviewOrder")}</Text>
@@ -696,10 +687,10 @@ export default function CreateOrder({ navigation, route }) {
           {/* Delivery Details */}
           <View style={styles.summaryCard}>
             <Text style={styles.cardTitle}>{t("deliveryDetails")}</Text>
-            <TouchableOpacity
+            <TouchableOpacity accessibilityRole="button"
               onPress={() => setShowDatePicker(true)}
               style={styles.deliveryRow}>
-              
+
               <Ionicons name="calendar-outline" size={20} color={colors123.primary} />
               <Text style={styles.deliveryDate}>
                 {deliveryDate.toLocaleDateString("en-IN", {
@@ -713,35 +704,35 @@ export default function CreateOrder({ navigation, route }) {
             <View style={styles.priorityRow}>
               <Text style={styles.label}>{t("priority")}</Text>
               <View style={styles.priorityButtons}>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(priority === "normal") }}
                   style={[
                   styles.priorityButton,
                   priority === "normal" && styles.priorityButtonActive]
                   }
                   onPress={() => setPriority("normal")}>
-                  
+
                   <Text
                     style={[
                     styles.priorityButtonText,
                     priority === "normal" && styles.priorityButtonTextActive]
                     }>
-                    
+
                     {t("normal")}
                   </Text>
                 </TouchableOpacity>
-                <TouchableOpacity
+                <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(priority === "high") }}
                   style={[
                   styles.priorityButton,
                   priority === "high" && styles.priorityButtonActive]
                   }
                   onPress={() => setPriority("high")}>
-                  
+
                   <Text
                     style={[
                     styles.priorityButtonText,
                     priority === "high" && styles.priorityButtonTextActive]
                     }>
-                    
+
                     {t("high")}
                   </Text>
                 </TouchableOpacity>
@@ -750,7 +741,7 @@ export default function CreateOrder({ navigation, route }) {
 
             <View style={styles.notesContainer}>
               <Text style={styles.label}>{t("notesOptional")}</Text>
-              <TextInput
+              <TextInput accessibilityLabel={t("addSpecialInstructions")}
                 style={styles.notesInput}
                 placeholder={t("addSpecialInstructions")}
                 placeholderTextColor={colors123.textSoft}
@@ -758,7 +749,7 @@ export default function CreateOrder({ navigation, route }) {
                 onChangeText={setNotes}
                 multiline
                 numberOfLines={3} />
-              
+
             </View>
           </View>
 
@@ -779,13 +770,13 @@ export default function CreateOrder({ navigation, route }) {
             onPress={handleSubmitOrder}
             loading={loading}
             disabled={loading} />
-          
 
-          <TouchableOpacity
+
+          <TouchableOpacity accessibilityRole="button"
             style={styles.secondaryButton}
             onPress={() => setCurrentStep(2)}
             disabled={loading}>
-            
+
             <Text style={styles.secondaryButtonText}>{t("editItems")}</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -797,7 +788,7 @@ export default function CreateOrder({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   header: {
     flexDirection: "row",
@@ -808,12 +799,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     backgroundColor: colors123.background,
     borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight
+    borderBottomColor: colors123.borderLight,
   },
   headerTitle: {
     fontSize: 18,
     fontFamily: fonts.extrabold,
-    color: colors123.text
+    color: colors123.text,
   },
   progressContainer: {
     flexDirection: "row",
@@ -821,38 +812,38 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: spacing.sm,
     gap: 6,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   progressDot: {
     width: 30,
     height: 4,
     borderRadius: 2,
-    backgroundColor: colors123.borderLight
+    backgroundColor: colors123.borderLight,
   },
   progressDotActive: {
-    backgroundColor: colors123.primary
+    backgroundColor: colors123.primary,
   },
   content: {
-    flex: 1
+    flex: 1,
   },
   contentScroll: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: spacing.xxl
+    paddingBottom: spacing.xxl,
   },
   stepTitle: {
     fontSize: 22,
     lineHeight: 28,
     fontFamily: fonts.extrabold,
     color: colors123.text,
-    marginBottom: spacing.xs
+    marginBottom: spacing.xs,
   },
   stepSubtitle: {
     fontSize: 13,
     lineHeight: 20,
     fontFamily: fonts.regular,
     color: colors123.textMuted,
-    marginBottom: spacing.lg
+    marginBottom: spacing.lg,
   },
   searchContainer: {
     flexDirection: "row",
@@ -863,33 +854,33 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: 16,
     backgroundColor: colors123.surface,
-    ...shadows.soft
+    ...shadows.soft,
   },
   searchIcon: {
-    marginRight: spacing.sm
+    marginRight: spacing.sm,
   },
   searchInput: {
     flex: 1,
     paddingVertical: spacing.sm,
     fontSize: 14,
     fontFamily: fonts.medium,
-    color: colors123.text
+    color: colors123.text,
   },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: spacing.xl * 2
+    paddingVertical: spacing.xl * 2,
   },
   emptyText: {
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.semibold,
     color: colors123.text,
-    marginTop: spacing.md
+    marginTop: spacing.md,
   },
   emptySubtext: {
     fontSize: fonts.sm.fontSize,
     color: colors123.textMuted,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   customerCard: {
     flexDirection: "row",
@@ -901,22 +892,22 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    ...shadows.card
+    ...shadows.card,
   },
   customerInfo: {
     flex: 1,
-    marginLeft: spacing.md
+    marginLeft: spacing.md,
   },
   customerName: {
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.semibold,
-    color: colors123.text
+    color: colors123.text,
   },
   customerPhone: {
     fontSize: fonts.sm.fontSize,
     fontFamily: fonts.medium,
     color: colors123.textMuted,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   genderPill: {
     paddingHorizontal: spacing.sm,
@@ -924,23 +915,23 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surfaceMuted,
     borderRadius: radius.pill,
     borderWidth: 1,
-    borderColor: colors123.borderLight
+    borderColor: colors123.borderLight,
   },
   genderPillText: {
     color: colors123.textSecondary,
-    fontSize: 11,
+    fontSize: 12,
     fontFamily: fonts.extrabold,
-    textTransform: "capitalize"
+    textTransform: "capitalize",
   },
   outfitsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
     marginBottom: spacing.lg,
-    justifyContent: "space-between"
+    justifyContent: "space-between",
   },
   outfitCard: {
-    width: "48%",
+    width: "100%",
     minHeight: 118,
     backgroundColor: colors123.surface,
     borderRadius: 16,
@@ -949,11 +940,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: spacing.md,
-    ...shadows.card
+    ...shadows.card,
   },
   outfitCardSelected: {
     backgroundColor: colors123.primarySoft,
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   outfitCheckmark: {
     position: "absolute",
@@ -964,7 +955,7 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   outfitIconContainer: {
     width: 52,
@@ -973,32 +964,32 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surfaceMuted,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: spacing.sm
+    marginBottom: spacing.sm,
   },
   outfitIconContainerSelected: {
-    backgroundColor: colors123.primary
+    backgroundColor: colors123.primary,
   },
   outfitLabel: {
     fontSize: 13,
     lineHeight: 18,
     fontFamily: fonts.extrabold,
     color: colors123.text,
-    textAlign: "center"
+    textAlign: "center",
   },
   outfitLabelSelected: {
-    color: colors123.primaryDark
+    color: colors123.primaryDark,
   },
   itemsSection: {
     marginBottom: spacing.lg,
     paddingBottom: spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight
+    borderBottomColor: colors123.borderLight,
   },
   sectionTitle: {
     fontSize: 15,
     fontFamily: fonts.extrabold,
     color: colors123.text,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   itemCard: {
     flexDirection: "row",
@@ -1011,102 +1002,37 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    ...shadows.soft
+    ...shadows.soft,
   },
   itemDetails: {
-    flex: 1
+    flex: 1,
   },
   itemType: {
     fontSize: 15,
     fontFamily: fonts.extrabold,
-    color: colors123.text
+    color: colors123.text,
   },
   itemFabric: {
     fontSize: 13,
     fontFamily: fonts.medium,
     color: colors123.textMuted,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   itemPrice: {
     fontSize: 13,
     fontFamily: fonts.medium,
     color: colors123.textMuted,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   removeButton: {
     padding: spacing.md,
-    marginLeft: spacing.md
-  },
-  formSection: {
-    marginBottom: spacing.lg
-  },
-  formGroup: {
-    marginBottom: spacing.md
+    marginLeft: spacing.md,
   },
   label: {
     fontSize: fonts.sm.fontSize,
     fontFamily: fonts.semibold,
     color: colors123.text,
-    marginBottom: spacing.sm
-  },
-  input: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    borderRadius: 16,
-    fontSize: fonts.base.fontSize,
-    color: colors123.text,
-    backgroundColor: colors123.surface,
-    ...shadows.soft
-  },
-  quantityContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.md
-  },
-  quantityButton: {
-    width: 44,
-    height: 44,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  quantityButtonText: {
-    fontSize: fonts.lg.fontSize,
-    fontFamily: fonts.extrabold,
-    color: colors123.primary
-  },
-  quantityValue: {
-    flex: 1,
-    textAlign: "center",
-    fontSize: fonts.base.fontSize,
-    fontFamily: fonts.semibold,
-    color: colors123.text
-  },
-  priceInputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    borderRadius: 16,
-    backgroundColor: colors123.surface,
-    paddingHorizontal: spacing.md,
-    ...shadows.soft
-  },
-  currencySymbol: {
-    fontSize: fonts.lg.fontSize,
-    fontFamily: fonts.semibold,
-    color: colors123.text,
-    marginRight: spacing.xs
-  },
-  priceInput: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    fontSize: fonts.base.fontSize,
-    color: colors123.text
+    marginBottom: spacing.sm,
   },
   secondaryButton: {
     paddingVertical: spacing.md,
@@ -1115,12 +1041,12 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: radius.pill,
     alignItems: "center",
-    backgroundColor: colors123.surface
+    backgroundColor: colors123.surface,
   },
   secondaryButtonText: {
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.semibold,
-    color: colors123.primary
+    color: colors123.primary,
   },
   summaryCard: {
     padding: spacing.lg,
@@ -1129,76 +1055,24 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    ...shadows.card
+    ...shadows.card,
   },
   cardTitle: {
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.extrabold,
     color: colors123.text,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   customerSummary: {
     flexDirection: "row",
-    alignItems: "center"
+    alignItems: "center",
   },
   customerSummaryInfo: {
-    marginLeft: spacing.md
-  },
-  measurementPreviewCard: {
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-    backgroundColor: colors123.surface,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    ...shadows.card
-  },
-  measurementDetail: {
-    gap: spacing.sm
-  },
-  measurementHeading: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: spacing.sm
-  },
-  measurementLabelTitle: {
-    fontSize: fonts.base.fontSize,
-    fontFamily: fonts.extrabold,
-    color: colors123.text
+    marginLeft: spacing.md,
   },
   measurementMeta: {
     fontSize: fonts.xs.fontSize,
-    color: colors123.textMuted
-  },
-  measurementRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingVertical: spacing.xs
-  },
-  loadingContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: spacing.xl
-  },
-  loadingText: {
-    marginTop: spacing.sm,
-    fontSize: fonts.sm.fontSize,
-    color: colors123.textSoft
-  },
-  measurementValue: {
-    fontSize: fonts.sm.fontSize,
-    fontFamily: fonts.extrabold,
-    color: colors123.text
-  },
-  moreText: {
-    marginTop: spacing.sm,
-    fontSize: fonts.xs.fontSize,
-    color: colors123.textSoft
-  },
-  emptyMeasurementState: {
-    paddingVertical: spacing.lg,
-    alignItems: "center"
+    color: colors123.textMuted,
   },
   itemSummary: {
     flexDirection: "row",
@@ -1206,27 +1080,27 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight
+    borderBottomColor: colors123.borderLight,
   },
   divider: {
     height: 1,
     backgroundColor: colors123.borderLight,
-    marginVertical: spacing.md
+    marginVertical: spacing.md,
   },
   totalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
   },
   totalLabel: {
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.semibold,
-    color: colors123.text
+    color: colors123.text,
   },
   totalValue: {
     fontSize: fonts.lg.fontSize,
     fontFamily: fonts.extrabold,
-    color: colors123.primary
+    color: colors123.primary,
   },
   deliveryRow: {
     flexDirection: "row",
@@ -1239,19 +1113,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     gap: spacing.md,
-    ...shadows.soft
+    ...shadows.soft,
   },
   deliveryDate: {
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.semibold,
-    color: colors123.text
+    color: colors123.text,
   },
   priorityRow: {
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   priorityButtons: {
     flexDirection: "row",
-    gap: spacing.md
+    gap: spacing.md,
   },
   priorityButton: {
     flex: 1,
@@ -1261,33 +1135,33 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     borderRadius: radius.pill,
     backgroundColor: colors123.surface,
-    alignItems: "center"
+    alignItems: "center",
   },
   priorityButtonActive: {
     backgroundColor: colors123.primary,
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   priorityButtonText: {
     fontSize: fonts.sm.fontSize,
     fontFamily: fonts.semibold,
-    color: colors123.text
+    color: colors123.text,
   },
   priorityButtonTextActive: {
-    color: colors123.surface
+    color: colors123.surface,
   },
   notesContainer: {
-    marginTop: spacing.md
+    marginTop: spacing.md,
   },
   notesInput: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    borderRadius: 16,
+    borderRadius: 12,
     fontSize: fonts.base.fontSize,
     color: colors123.text,
     backgroundColor: colors123.surface,
     textAlignVertical: "top",
-    ...shadows.soft
-  }
+    ...shadows.soft,
+  },
 });

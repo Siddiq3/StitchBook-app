@@ -1,3 +1,4 @@
+import ResponsiveGrid from "./ResponsiveGrid";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -8,7 +9,7 @@ import {
   StyleSheet } from
 "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { MotiView } from "moti";
+import { MotiView } from "./AccessibleMotionView";
 import BottomSheet from "./BottomSheet";
 import AppButton from "./AppButton";
 import AppCard from "./AppCard";
@@ -17,7 +18,7 @@ import MeasurementSheet from "./MeasurementSheet";
 import { measurementApi } from "../services/api";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
-import { colors123, fonts, radius, spacing } from "../utils/theme";
+import { colors123, fonts, spacing } from "../utils/theme";
 
 export default function MeasurementPickerModal({
   visible,
@@ -166,7 +167,7 @@ export default function MeasurementPickerModal({
         onClose={onClose}
         title={t("selectMeasurements")}
         subtitle={t("selectMeasurementsSubtitle")}>
-        
+
         <Text style={styles.helperText}>
           {t("savedMeasurementsHelper")}
         </Text>
@@ -179,7 +180,7 @@ export default function MeasurementPickerModal({
             name="ruler-outline"
             size={48}
             color={colors123.border} />
-          
+
             <Text style={styles.emptyTitle}>{t("noMeasurementsYet")}</Text>
             <Text style={styles.emptyText}>
               {t("noMeasurementsYetDescription")}
@@ -189,7 +190,7 @@ export default function MeasurementPickerModal({
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContainer}>
-          
+
             {measurements.map((measurement) => {
             const isSelected = measurement.id === selectedMeasurementId;
             const data = measurement.measurementsData || measurement.measurements_data || {};
@@ -205,7 +206,7 @@ export default function MeasurementPickerModal({
                 isSelected && styles.measurementItemSelected]
                 }
                 onPress={() => handleSelect(measurement)}>
-                
+
                   <View style={styles.measurementHeader}>
                     <View style={styles.measurementTitleBlock}>
                       <Text style={styles.measurementTitle}>
@@ -226,7 +227,7 @@ export default function MeasurementPickerModal({
                     </View>
                   </View>
 
-                  {isExpanded ? <View style={styles.measurementGrid}>
+                  {isExpanded ? <ResponsiveGrid style={styles.measurementGrid}>
                     {visibleEntries.map(([key, value], index) =>
                   <MotiView
                     key={`${measurement.id}-${key}`}
@@ -238,14 +239,14 @@ export default function MeasurementPickerModal({
                       bodyType={getBodyType(measurement)}
                       label={key}
                       size={38} />
-                    
+
                         <View style={styles.measurementRowText}>
                           <Text numberOfLines={2} style={styles.measurementLabel}>{key}</Text>
                           <Text style={styles.measurementValue}>{value}</Text>
                         </View>
                       </MotiView>
                   )}
-                  </View> : null}
+                  </ResponsiveGrid> : null}
 
                   {entries.length > 0 ?
                 <TouchableOpacity
@@ -254,7 +255,7 @@ export default function MeasurementPickerModal({
                     toggleMeasurementExpand(measurement.id);
                   }}
                   style={styles.expandButton}>
-                  
+
                       <Text style={styles.expandButtonText}>
                         {isExpanded ? "Hide details" : "View details"}
                       </Text>
@@ -262,7 +263,7 @@ export default function MeasurementPickerModal({
                     name={isExpanded ? "chevron-up" : "chevron-down"}
                     size={18}
                     color={colors123.primary} />
-                  
+
                     </TouchableOpacity> :
                 null}
                 </TouchableOpacity>);
@@ -275,7 +276,7 @@ export default function MeasurementPickerModal({
           <AppButton
             label={t("createNewMeasurement")}
             onPress={() => setShowMeasurementSheet(true)} />
-          
+
           <TouchableOpacity style={styles.skipButton} onPress={onSkip}>
             <Text style={styles.skipButtonText}>{t("skipContinue")}</Text>
           </TouchableOpacity>
@@ -287,7 +288,7 @@ export default function MeasurementPickerModal({
         outfitType={outfitType}
         onClose={() => setShowMeasurementSheet(false)}
         onSubmit={handleCreateMeasurement} />
-      
+
     </>);
 
 }
@@ -298,28 +299,28 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     color: colors123.textMuted,
-    marginBottom: spacing.md
+    marginBottom: spacing.md,
   },
   listContainer: {
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: spacing.lg
+    paddingVertical: spacing.lg,
   },
   emptyTitle: {
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.extrabold,
     color: colors123.text,
-    marginTop: spacing.sm
+    marginTop: spacing.sm,
   },
   emptyText: {
     marginTop: spacing.xs,
     fontSize: fonts.sm.fontSize,
     color: colors123.textMuted,
     textAlign: "center",
-    lineHeight: 20
+    lineHeight: 20,
   },
   measurementItem: {
     borderWidth: 1,
@@ -327,25 +328,25 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    backgroundColor: colors123.surface
+    backgroundColor: colors123.surface,
   },
   measurementItemSelected: {
     borderColor: colors123.primary,
-    backgroundColor: colors123.primarySoft
+    backgroundColor: colors123.primarySoft,
   },
   measurementHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   measurementTitleBlock: {
     flex: 1,
-    minWidth: 0
+    minWidth: 0,
   },
   selectPill: {
     minWidth: 86,
-    minHeight: 36,
+    minHeight: 44,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors123.primary,
@@ -354,39 +355,39 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 5,
-    paddingHorizontal: spacing.sm
+    paddingHorizontal: spacing.sm,
   },
   selectPillSelected: {
     backgroundColor: colors123.primary,
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   selectPillText: {
     fontSize: fonts.xs.fontSize,
     fontFamily: fonts.extrabold,
-    color: colors123.primary
+    color: colors123.primary,
   },
   selectPillTextSelected: {
-    color: colors123.surface
+    color: colors123.surface,
   },
   measurementGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
-    marginTop: spacing.sm
+    marginTop: spacing.sm,
   },
   measurementTitle: {
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.extrabold,
-    color: colors123.text
+    color: colors123.text,
   },
   measurementSubtitle: {
     fontSize: fonts.xs.fontSize,
     fontFamily: fonts.medium,
     color: colors123.textMuted,
-    marginTop: spacing.xs
+    marginTop: spacing.xs,
   },
   measurementRow: {
-    width: "47.5%",
+    width: "100%",
     flexDirection: "row",
     alignItems: "center",
     marginTop: spacing.xs,
@@ -396,23 +397,23 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     paddingHorizontal: spacing.xs,
     paddingVertical: spacing.xs,
-    gap: spacing.xs
+    gap: spacing.xs,
   },
   measurementRowText: {
     flex: 1,
-    minWidth: 0
+    minWidth: 0,
   },
   measurementLabel: {
     flex: 1,
     fontSize: fonts.xs.fontSize,
     fontFamily: fonts.medium,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   measurementValue: {
     fontSize: fonts.sm.fontSize,
     color: colors123.text,
     fontFamily: fonts.extrabold,
-    marginTop: 3
+    marginTop: 3,
   },
   expandButton: {
     marginTop: spacing.xs,
@@ -420,27 +421,27 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    paddingVertical: spacing.xs
+    paddingVertical: spacing.xs,
   },
   expandButtonText: {
     fontSize: fonts.sm.fontSize,
     color: colors123.primary,
-    fontFamily: fonts.extrabold
+    fontFamily: fonts.extrabold,
   },
   actionsCard: {
     padding: 0,
     marginTop: spacing.md,
     borderWidth: 0,
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
   },
   skipButton: {
     marginTop: spacing.sm,
     paddingVertical: spacing.md,
-    alignItems: "center"
+    alignItems: "center",
   },
   skipButtonText: {
     fontSize: fonts.sm.fontSize,
     color: colors123.primary,
-    fontFamily: fonts.extrabold
-  }
+    fontFamily: fonts.extrabold,
+  },
 });

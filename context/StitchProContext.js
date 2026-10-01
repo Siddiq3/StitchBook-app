@@ -47,35 +47,42 @@ const INITIAL = {
   // Customers
   customers: [],
   customersLoading: false,
+  customersError: null,
   customersPagination: { page: 1, limit: 20, total: 0 },
 
   // Orders
   orders: [],
   ordersLoading: false,
+  ordersError: null,
   ordersPagination: { page: 1, limit: 20, total: 0 },
 
   // Measurements
   measurements: [],
   measurementsLoading: false,
+  measurementsError: null,
 
   // Dashboard
   dashboardStats: null,
   dashboardLoading: false,
+  dashboardError: null,
   dashboardPeriod: "month",
 
   // Subscription
   subscription: null,
   subscriptionLoading: false,
+  subscriptionError: null,
 
   // Staff
   staff: [],
   staffLoading: false,
+  staffError: null,
   staffWorkLogs: {},
   staffSummaries: {},
 
   // Notifications
   notifications: [],
   notificationsLoading: false,
+  notificationsError: null,
   notificationCount: 0,
 
   // Payments
@@ -283,7 +290,7 @@ export const StitchProProvider = ({ children }) => {
   // ════════════════════════════════════════
 
   const fetchSubscription = useCallback(async () => {
-    set({ subscriptionLoading: true });
+    set({ subscriptionLoading: true, subscriptionError: null });
     try {
       const res = await subscriptionApi.getStatus();
       const subscription = res.data?.data || res.data;
@@ -296,7 +303,7 @@ export const StitchProProvider = ({ children }) => {
         return null;
       }
 
-      set({ subscription: null, subscriptionLoading: false });
+      set({ subscription: null, subscriptionLoading: false, subscriptionError: err.message });
       throw err;
     }
   }, []);
@@ -356,7 +363,7 @@ export const StitchProProvider = ({ children }) => {
 
   const fetchCustomers = useCallback(
     async ({ search = "", page = 1, limit = 20 } = {}) => {
-      set({ customersLoading: true });
+      set({ customersLoading: true, customersError: null });
       try {
 
         const res = await customerApi.getAll({ search, page, limit });
@@ -401,7 +408,7 @@ export const StitchProProvider = ({ children }) => {
 
 
         }
-        set({ customersLoading: false });
+        set({ customersLoading: false, customersError: err.message || "Unable to load data" });
       }
     },
     []
@@ -476,7 +483,7 @@ export const StitchProProvider = ({ children }) => {
 
   const fetchOrders = useCallback(
     async ({ status, customerId, page = 1, limit = 20 } = {}) => {
-      set({ ordersLoading: true });
+      set({ ordersLoading: true, ordersError: null });
       try {
 
 
@@ -518,7 +525,7 @@ export const StitchProProvider = ({ children }) => {
 
 
 
-        set({ ordersLoading: false });
+        set({ ordersLoading: false, ordersError: err.message || "Unable to load data" });
       }
     },
     []
@@ -657,7 +664,7 @@ export const StitchProProvider = ({ children }) => {
   // ════════════════════════════════════════
 
   const fetchMeasurements = useCallback(async (customerId) => {
-    set({ measurementsLoading: true });
+    set({ measurementsLoading: true, measurementsError: null });
     try {
 
       const res = await measurementApi.getByCustomer(customerId);
@@ -696,7 +703,7 @@ export const StitchProProvider = ({ children }) => {
 
 
 
-      set({ measurementsLoading: false });
+      set({ measurementsLoading: false, measurementsError: err.message || "Unable to load data" });
     }
   }, []);
 
@@ -760,7 +767,7 @@ export const StitchProProvider = ({ children }) => {
 
   const fetchDashboardStats = useCallback(
     async (period = "month", order_type) => {
-      set({ dashboardLoading: true });
+      set({ dashboardLoading: true, dashboardError: null });
       try {
         const res = await dashboardApi.getStats(period, order_type);
         set({
@@ -770,7 +777,7 @@ export const StitchProProvider = ({ children }) => {
         });
       } catch (err) {
 
-        set({ dashboardLoading: false });
+        set({ dashboardLoading: false, dashboardError: err.message || "Unable to load data" });
       }
     },
     []
@@ -781,7 +788,7 @@ export const StitchProProvider = ({ children }) => {
   // ════════════════════════════════════════
 
   const fetchStaff = useCallback(async () => {
-    set({ staffLoading: true });
+    set({ staffLoading: true, staffError: null });
     try {
       const shopId = state.shop?.id;
       if (!shopId) {
@@ -801,7 +808,7 @@ export const StitchProProvider = ({ children }) => {
       });
     } catch (err) {
 
-      set({ staffLoading: false });
+      set({ staffLoading: false, staffError: err.message || "Unable to load data" });
     }
   }, [state.shop?.id]);
 
@@ -943,7 +950,7 @@ export const StitchProProvider = ({ children }) => {
   // ════════════════════════════════════════
 
   const fetchNotifications = useCallback(async () => {
-    set({ notificationsLoading: true });
+    set({ notificationsLoading: true, notificationsError: null });
     try {
 
       const res = await notificationApi.getAll();
@@ -962,7 +969,7 @@ export const StitchProProvider = ({ children }) => {
       });
     } catch (err) {
 
-      set({ notificationsLoading: false });
+      set({ notificationsLoading: false, notificationsError: err.message || "Unable to load data" });
     }
   }, []);
 
@@ -1158,7 +1165,7 @@ export const StitchProProvider = ({ children }) => {
         // Utilities
         getWhatsAppInvoiceLink
       }}>
-      
+
       {children}
     </StitchProContext.Provider>);
 

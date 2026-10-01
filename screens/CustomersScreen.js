@@ -1,9 +1,10 @@
+import InlineAlert from "../components/InlineAlert";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl, Alert } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
-import { MotiView } from "moti";
+import { MotiView } from "../components/AccessibleMotionView";
 import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";
 import AvatarBadge from "../components/AvatarBadge";
@@ -19,6 +20,7 @@ import { colors123, radius, shadows, spacing, fonts } from "../utils/theme";
 
 export default function CustomersScreen({ navigation }) {
   const { t } = useLanguage();
+  const { customersError } = useStitchPro();
   const { customers, orders, isBooting, customersLoading, addCustomer, fetchCustomers, deleteCustomer, fetchOrders } = useStitchPro();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -69,9 +71,6 @@ export default function CustomersScreen({ navigation }) {
       });
     }
 
-
-
-
     // Enhance customers with orderCount
     const customersWithOrderCount = customers.map((customer) => ({
       ...customer,
@@ -109,17 +108,19 @@ export default function CustomersScreen({ navigation }) {
       await addCustomer(form);
       setShowCreateSheet(false);
       showToast(`${form.name} ${t("customerAddedSuffix")}`);
+      return true;
     } catch (err) {
       if (err.code === 'SUBSCRIPTION_REQUIRED') {
         setShowCreateSheet(false);
         showSubscriptionRequiredAlert();
-        return;
+        return false;
       }
 
       const message = err.message === 'DUPLICATE_PHONE' ?
       t("duplicatePhone") :
       t("customerCreateFailed");
       showToast(message, 'error');
+      return false;
     }
   };
 
@@ -158,7 +159,7 @@ export default function CustomersScreen({ navigation }) {
           colors={[colors123.primary]} />
 
         }>
-        
+
         <ScreenHeader
           eyebrow={t("clientBook")}
           title={t("customersTitle")}
@@ -171,7 +172,7 @@ export default function CustomersScreen({ navigation }) {
             style={styles.addButton} />
 
           } />
-        
+
 
         <AppCard style={styles.insightCard}>
           <View style={styles.insightIcon}>
@@ -179,7 +180,7 @@ export default function CustomersScreen({ navigation }) {
               color={colors123.primary}
               name="account-star-outline"
               size={20} />
-            
+
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.insightTitle}>
@@ -196,16 +197,17 @@ export default function CustomersScreen({ navigation }) {
           onChangeText={setSearchQuery}
           placeholder={t("searchCustomersPlaceholder")}
           value={searchQuery} />
-        
 
-        {isBooting ?
+
+<InlineAlert message={customersError ? t("loadCustomersFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
+        {customersLoading && !customers.length ?
         <ListSkeleton /> :
+        filteredCustomers.length === 0 && customersError ? null :
         filteredCustomers.length === 0 ?
         <EmptyState
           description={searchQuery ? t("noCustomerMatchesDescription") : t("noCustomersYetDescription")}
           icon={searchQuery ? "account-search-outline" : "account-plus-outline"}
           title={searchQuery ? t("noCustomerMatches") : t("noCustomersYet")} /> :
-
 
         <View style={styles.list}>
             {filteredCustomers.map((customer, index) =>
@@ -218,27 +220,29 @@ export default function CustomersScreen({ navigation }) {
               duration: 260,
               type: "timing"
             }}>
-            
+
                 <Pressable
               onPress={() =>
               navigation.navigate("CustomerDetail", {
                 customerId: customer.id
               })
               }
+              accessibilityRole="button"
+              accessibilityLabel={`${customer.name}, ${customer.phone}`}
               onLongPress={() => handleDeleteCustomer(customer)}
               style={({ pressed }) => [
               styles.customerCard,
               pressed && styles.pressedCard]
               }>
-              
+
                   <AvatarBadge initials={customer.avatar} name={customer.name} />
                   <View style={styles.customerBody}>
                     <View style={styles.customerTitleRow}>
                       <Text style={styles.customerName}>{customer.name}</Text>
                       <View style={{ flexDirection: 'row', gap: spacing.xs }}>
                         {customer.gender &&
-                    <View style={[styles.genderBadge, { backgroundColor: customer.gender === 'male' ? '#3B82F6' + '20' : '#EC4899' + '20' }]}>
-                            <Text style={[styles.genderBadgeText, { color: customer.gender === 'male' ? '#3B82F6' : '#EC4899' }]}>
+                    <View style={[styles.genderBadge, { backgroundColor: colors123.surfaceMuted }]}>
+                            <Text style={[styles.genderBadgeText, { color: colors123.textSecondary }]}>
                               {customer.gender === 'male' ? 'M' : 'F'}
                             </Text>
                           </View>
@@ -271,7 +275,7 @@ export default function CustomersScreen({ navigation }) {
                 color={colors123.textSoft}
                 name="chevron-right"
                 size={22} />
-              
+
                 </Pressable>
               </MotiView>
           )}
@@ -283,7 +287,7 @@ export default function CustomersScreen({ navigation }) {
         onClose={() => setShowCreateSheet(false)}
         onSubmit={handleCreateCustomer}
         visible={showCreateSheet} />
-      
+
     </>);
 
 }
@@ -292,21 +296,21 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: 112,
+    paddingBottom: spacing.xl,
     gap: spacing.md,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   addButton: {
-    minHeight: 42,
-    paddingHorizontal: spacing.sm
+    minHeight: 44,
+    paddingHorizontal: spacing.sm,
   },
   insightCard: {
     flexDirection: "row",
     gap: spacing.md,
     alignItems: "center",
-    borderRadius: 18,
-    backgroundColor: "#EEF4FF",
-    borderColor: "#DCE8FF"
+    borderRadius: 16,
+    backgroundColor: colors123.primaryLight,
+    borderColor: colors123.primaryLight,
   },
   insightIcon: {
     width: 46,
@@ -314,62 +318,61 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors123.primarySoft
+    backgroundColor: colors123.primarySoft,
   },
   insightTitle: {
     fontFamily: fonts.semibold,
     fontSize: 15,
-    color: colors123.text
+    color: colors123.text,
   },
   insightSubtitle: {
     marginTop: spacing.xs,
     fontFamily: fonts.regular,
     fontSize: 13,
     lineHeight: 20,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   list: {
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   customerCard: {
     backgroundColor: colors123.surface,
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderBottomWidth: 1,
     borderColor: colors123.borderLight,
     paddingVertical: spacing.md,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.md,
-    ...shadows.card
+    ...shadows.card,
   },
   pressedCard: {
-    opacity: 0.88
+    opacity: 0.88,
   },
   customerBody: {
-    flex: 1
+    flex: 1,
   },
   customerTitleRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   customerName: {
     flex: 1,
     fontFamily: fonts.bold,
     fontSize: 16,
-    color: colors123.text
+    color: colors123.text,
   },
   genderBadge: {
     paddingHorizontal: spacing.sm,
     paddingVertical: 4,
-    borderRadius: radius.pill
+    borderRadius: radius.pill,
   },
   genderBadgeText: {
-    fontFamily: fonts.semibold,
-    fontSize: 11,
-    fontWeight: '700'
+    fontSize: 12,
+    fontFamily: fonts.bold,
   },
   tierPill: {
     paddingHorizontal: spacing.sm,
@@ -377,28 +380,28 @@ const styles = StyleSheet.create({
     borderRadius: radius.pill,
     backgroundColor: colors123.surfaceMuted,
     borderWidth: 1,
-    borderColor: colors123.borderLight
+    borderColor: colors123.borderLight,
   },
   tierLabel: {
     fontFamily: fonts.semibold,
-    fontSize: 11,
-    color: colors123.primaryDark
+    fontSize: 12,
+    color: colors123.primaryDark,
   },
   customerMeta: {
     marginTop: 4,
     fontFamily: fonts.regular,
     fontSize: 13,
-    color: colors123.textSecondary
+    color: colors123.textSecondary,
   },
   customerFooter: {
     marginTop: spacing.sm,
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   footerText: {
     fontFamily: fonts.medium,
     fontSize: 12,
-    color: colors123.textSoft
-  }
+    color: colors123.textSoft,
+  },
 });

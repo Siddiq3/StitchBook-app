@@ -4,14 +4,7 @@
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Platform,
-  useSafeAreaInsets,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, useSafeAreaInsets } from "react-native";
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import {
   BRAND_COLORS,
@@ -262,9 +255,9 @@ const styles = StyleSheet.create({
     ...SHADOWS.xs,
   },
   titleRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
   },
   backButton: {
     marginRight: SPACING.md,
@@ -273,33 +266,33 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginLeft: SPACING.md,
   },
   actionButton: {
     marginLeft: SPACING.md,
   },
   tabNav: {
-    flexDirection: 'row',
+    flexDirection: "row",
     backgroundColor: BRAND_COLORS.white,
     borderBottomWidth: 1,
     borderBottomColor: BRAND_COLORS.divider,
     paddingHorizontal: SPACING.lg,
   },
   tab: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.md,
     marginRight: SPACING.md,
-    position: 'relative',
+    position: "relative",
   },
   activeTab: {
     borderBottomWidth: 2,
     borderBottomColor: BRAND_COLORS.accent,
   },
   activeIndicator: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
@@ -309,8 +302,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: RADIUS.full,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     backgroundColor: BRAND_COLORS.white,
     borderRadius: RADIUS.lg,
     paddingHorizontal: SPACING.md,

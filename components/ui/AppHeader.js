@@ -1,3 +1,4 @@
+import { fonts } from "../../utils/theme";
 import React from 'react';
 import { View, TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -56,23 +57,23 @@ export default function AppHeader({
 const styles = StyleSheet.create({
   header: {
     minHeight: SIZES.headerH,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: SIZES.lg2,
     paddingBottom: 14,
   },
   content: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   iconButton: {
     width: 42,
     height: 42,
     borderRadius: 14,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: 12,
     backgroundColor: colors123.surface,
     borderWidth: 1,
@@ -83,7 +84,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: normalize(21),
-    fontWeight: '800',
+    fontFamily: fonts.semibold,
     color: colors123.text,
   },
   subtitle: {

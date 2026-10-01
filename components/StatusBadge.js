@@ -2,7 +2,14 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { fonts, getStatusTone, radius, spacing } from "../utils/theme";
 
-export default function StatusBadge({ status, compact = false, style }) {
+import { useLanguage } from "../context/LanguageContext";
+
+export default function StatusBadge({
+  status = "pending",
+  compact = false,
+  style,
+}) {
+  const { t } = useLanguage();
   const tone = getStatusTone(status);
   return (
     <View
@@ -23,7 +30,7 @@ export default function StatusBadge({ status, compact = false, style }) {
           { color: tone.color },
         ]}
       >
-        {status}
+        {tone.labelKey ? t(tone.labelKey) : String(status)}
       </Text>
     </View>
   );
@@ -46,6 +53,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   compactText: {
-    fontSize: 11,
+    fontSize: 12,
   },
 });

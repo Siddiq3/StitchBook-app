@@ -1,7 +1,8 @@
+import { fonts } from "../../utils/theme";
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+
 import { colors123, SIZES, SHADOWS } from '../../utils/theme';
 
 export default function FAB({ onPress, icon = 'plus', label = null }) {
@@ -13,10 +14,7 @@ export default function FAB({ onPress, icon = 'plus', label = null }) {
       activeOpacity={0.8}
       style={[styles.fab, SHADOWS.colored(colors123.primary)]}
     >
-      <LinearGradient
-        colors={[colors123.primary, colors123.primaryDark]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+      <View
         style={[
           styles.content,
           {
@@ -32,32 +30,33 @@ export default function FAB({ onPress, icon = 'plus', label = null }) {
             color={colors123.surface}
           />
           {label && <Text style={styles.label}>{label}</Text>}
-      </LinearGradient>
+      </View>
     </TouchableOpacity>
   );
 }
 
 const styles = StyleSheet.create({
   fab: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 26,
     right: 20,
     height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     borderRadius: 28,
-    overflow: 'hidden',
+    overflow: "hidden",
   },
   content: {
     height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: colors123.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
   },
   label: {
     color: colors123.surface,
-    fontWeight: '800',
+    fontFamily: fonts.semibold,
     fontSize: 15,
   },
 });

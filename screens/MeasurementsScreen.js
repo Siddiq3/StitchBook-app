@@ -1,8 +1,11 @@
+import AppButton from "../components/AppButton";
+import EmptyState from "../components/EmptyState";
+import InlineAlert from "../components/InlineAlert";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { format, parseISO } from "date-fns";
-import { MotiView } from "moti";
+import { MotiView } from "../components/AccessibleMotionView";
 import AppCard from "../components/AppCard";
 import AvatarBadge from "../components/AvatarBadge";
 import MeasurementFigure from "../components/MeasurementFigure";
@@ -18,7 +21,8 @@ function countFilledFields(values) {
   return measurementFields.filter((field) => values?.[field.key]).length;
 }
 
-export default function MeasurementsScreen() {const { t } = useLanguage();
+export default function MeasurementsScreen({ navigation }) {const { t } = useLanguage();
+  const { measurementsError } = useStitchPro();
   const { customers, measurements, addMeasurement, fetchMeasurements, measurementsLoading, fetchCustomers } =
   useStitchPro();
   const { showToast } = useToast();
@@ -130,15 +134,16 @@ export default function MeasurementsScreen() {const { t } = useLanguage();
           colors={[colors123.primary]} />
 
         }>
-        
+
         <ScreenHeader
           eyebrow="Fit Library"
           title={t("auto_measurements_2")}
           subtitle={t("auto_structured_reusable_fit_profiles_make_high_t")} />
-        
 
+
+<InlineAlert message={measurementsError ? t("loadMeasurementsFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
         <View style={styles.heroCard}>
-          
+
           <View style={styles.heroTop}>
             <View style={{ flex: 1 }}>
               <Text style={styles.heroEyebrow}>{t("auto_custom_measurement_studio")}</Text>
@@ -146,7 +151,6 @@ export default function MeasurementsScreen() {const { t } = useLanguage();
 
               </Text>
               <Text style={styles.heroSubtitle}>{t("auto_open_a_client_profile_review_the_visual_fit_")}
-
 
               </Text>
             </View>
@@ -189,7 +193,7 @@ export default function MeasurementsScreen() {const { t } = useLanguage();
         </View>
 
         {measurementsLoading ?
-        <ListSkeleton /> :
+        <ListSkeleton /> : measurementsError && !measurementRecords.length ? null : !measurementRecords.length ? <EmptyState title={t("auto_no_measurements")} description={t("noCustomersYetDescription")} action={<AppButton label={t("customersTitle")} variant="secondary" onPress={() => navigation.navigate("StudioTabs", { screen: "Customers" })} />} /> :
 
         <View style={styles.list}>
             {measurementRecords.map((record, index) =>
@@ -202,19 +206,19 @@ export default function MeasurementsScreen() {const { t } = useLanguage();
               duration: 260,
               type: "timing"
             }}>
-            
-                <Pressable
+
+                <Pressable accessibilityRole="button"
               onPress={() => openSheet(record.customer)}
               style={({ pressed }) => [
               styles.recordCard,
               pressed && styles.pressedCard]
               }>
-              
+
                   <View style={styles.recordTopRow}>
                     <AvatarBadge
                   initials={record.customer.avatar}
                   name={record.customer.name} />
-                
+
                     <View style={{ flex: 1 }}>
                       <Text style={styles.recordName}>
                         {record.customer.name}
@@ -244,7 +248,7 @@ export default function MeasurementsScreen() {const { t } = useLanguage();
                     )}%`
                   }]
                   } />
-                
+
                   </View>
 
                   <View style={styles.snapshotRow}>
@@ -282,7 +286,7 @@ export default function MeasurementsScreen() {const { t } = useLanguage();
                     color={colors123.primary}
                     name="chevron-right"
                     size={18} />
-                  
+
                     </View>
                   </View>
                 </Pressable>
@@ -300,7 +304,7 @@ export default function MeasurementsScreen() {const { t } = useLanguage();
         onClose={() => setSheetVisible(false)}
         onSubmit={handleSaveMeasurements}
         visible={sheetVisible} />
-      
+
     </>);
 
 }
@@ -311,42 +315,42 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     paddingBottom: 112,
     gap: spacing.md,
-    backgroundColor: colors123.background
+    backgroundColor: colors123.background,
   },
   heroCard: {
-    borderRadius: 18,
+    borderRadius: 16,
     padding: spacing.lg,
     gap: spacing.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     backgroundColor: colors123.surface,
-    ...shadows.card
+    ...shadows.card,
   },
   heroTop: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   heroEyebrow: {
     fontFamily: fonts.semibold,
     fontSize: 12,
     color: colors123.primary,
     textTransform: "uppercase",
-    letterSpacing: 0.4
+    letterSpacing: 0.4,
   },
   heroTitle: {
     marginTop: spacing.xs,
     fontFamily: fonts.extrabold,
     fontSize: 21,
     lineHeight: 27,
-    color: colors123.text
+    color: colors123.text,
   },
   heroSubtitle: {
     marginTop: spacing.sm,
     fontFamily: fonts.regular,
     fontSize: 14,
     lineHeight: 21,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   heroPill: {
     minWidth: 82,
@@ -355,17 +359,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     alignItems: "center",
-    alignSelf: "flex-start"
+    alignSelf: "flex-start",
   },
   heroPillValue: {
     fontFamily: fonts.extrabold,
     fontSize: 20,
-    color: colors123.surface
+    color: colors123.surface,
   },
   heroPillLabel: {
     fontFamily: fonts.medium,
-    fontSize: 11,
-    color: "rgba(255,255,255,0.82)"
+    fontSize: 12,
+    color: "rgba(255,255,255,0.82)",
   },
   heroPreview: {
     borderRadius: 16,
@@ -373,55 +377,55 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   heroPreviewCopy: {
-    gap: 4
+    gap: 4,
   },
   heroPreviewLabel: {
     fontFamily: fonts.semibold,
     fontSize: 12,
     color: colors123.textSoft,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   heroPreviewName: {
     fontFamily: fonts.bold,
     fontSize: 18,
-    color: colors123.text
+    color: colors123.text,
   },
   heroPreviewMeta: {
     fontFamily: fonts.regular,
     fontSize: 13,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   heroFigureWrap: {
     marginTop: spacing.xs,
     borderRadius: 14,
     backgroundColor: colors123.surface,
-    overflow: "visible"
+    overflow: "visible",
   },
   summaryRow: {
     flexDirection: "row",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   summaryCard: {
     flex: 1,
     minHeight: 96,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   summaryLabel: {
     fontFamily: fonts.medium,
     fontSize: 12,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   summaryValue: {
     marginTop: spacing.xs,
     fontFamily: fonts.extrabold,
     fontSize: 26,
-    color: colors123.text
+    color: colors123.text,
   },
   list: {
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   recordCard: {
     backgroundColor: colors123.surface,
@@ -430,37 +434,37 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
     padding: spacing.md,
     gap: spacing.sm,
-    ...shadows.card
+    ...shadows.card,
   },
   pressedCard: {
-    opacity: 0.88
+    opacity: 0.88,
   },
   recordTopRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.md
+    gap: spacing.md,
   },
   recordName: {
     fontFamily: fonts.bold,
     fontSize: 16,
-    color: colors123.text
+    color: colors123.text,
   },
   recordMeta: {
     marginTop: 4,
     fontFamily: fonts.regular,
     fontSize: 13,
-    color: colors123.textMuted
+    color: colors123.textMuted,
   },
   progressTrack: {
     height: 8,
     borderRadius: radius.pill,
     backgroundColor: colors123.backgroundAccent,
-    overflow: "hidden"
+    overflow: "hidden",
   },
   progressFill: {
     height: "100%",
     borderRadius: radius.pill,
-    backgroundColor: colors123.primary
+    backgroundColor: colors123.primary,
   },
   completionBubble: {
     width: 58,
@@ -468,22 +472,22 @@ const styles = StyleSheet.create({
     borderRadius: 29,
     backgroundColor: colors123.primarySoft,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   completionBubbleValue: {
     fontFamily: fonts.bold,
     fontSize: 16,
-    color: colors123.primaryDark
+    color: colors123.primaryDark,
   },
   completionBubbleLabel: {
     fontFamily: fonts.semibold,
-    fontSize: 10,
+    fontSize: 12,
     color: colors123.primary,
-    textTransform: "uppercase"
+    textTransform: "uppercase",
   },
   snapshotRow: {
     flexDirection: "row",
-    gap: spacing.xs
+    gap: spacing.xs,
   },
   snapshotPill: {
     flex: 1,
@@ -492,38 +496,38 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     paddingVertical: 10,
-    paddingHorizontal: 12
+    paddingHorizontal: 12,
   },
   snapshotLabel: {
     fontFamily: fonts.medium,
-    fontSize: 11,
-    color: colors123.textSoft
+    fontSize: 12,
+    color: colors123.textSoft,
   },
   snapshotValue: {
     marginTop: 4,
     fontFamily: fonts.bold,
     fontSize: 14,
-    color: colors123.text
+    color: colors123.text,
   },
   recordFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: spacing.sm
+    gap: spacing.sm,
   },
   recordFootnote: {
     fontFamily: fonts.medium,
     fontSize: 12,
-    color: colors123.textSoft
+    color: colors123.textSoft,
   },
   recordCta: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 2
+    gap: 2,
   },
   recordCtaText: {
     fontFamily: fonts.semibold,
     fontSize: 12,
-    color: colors123.primary
-  }
+    color: colors123.primary,
+  },
 });

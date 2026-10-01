@@ -1,4 +1,8 @@
-import React, { Suspense, useEffect } from 'react';
+import RecordMeasurementScreen from "../screens/RecordMeasurementScreen";
+import ViewMeasurementsScreen from "../screens/ViewMeasurementsScreen";
+import MeasurementsScreen from "../screens/MeasurementsScreen";
+import { fonts } from "../utils/theme";
+import React, { Suspense, useEffect, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -45,7 +49,6 @@ const LazyFallback = () =>
     <ActivityIndicator size="large" color={colors123.primary} />
   </View>;
 
-
 function StudioTabs() {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
@@ -66,23 +69,19 @@ function StudioTabs() {
         tabBarHideOnKeyboard: true,
         tabBarLabelStyle: {
           fontSize: normalize(SIZES.xs),
-          fontWeight: '600',
+          fontFamily: fonts.medium,
           marginBottom: 5
         },
         tabBarIcon: ({ color, focused }) =>
-        <View style={[styles.tabIconWrap, focused && styles.tabIconWrapActive]}>
+        <View style={[styles.tabIconWrap]}>
             <MaterialCommunityIcons
-            color={focused ? colors123.surface : color}
+            color={color}
             name={focused ? iconMap[route.name] : iconOutlineMap[route.name]}
             size={22} />
-          
+
           </View>,
 
         tabBarStyle: {
-          position: 'absolute',
-          left: 0,
-          right: 0,
-          bottom: 0,
           height: 66 + insets.bottom,
           paddingTop: 8,
           paddingBottom: Math.max(insets.bottom, 8),
@@ -90,17 +89,17 @@ function StudioTabs() {
           borderTopWidth: 1,
           borderColor: colors123.borderLight,
           backgroundColor: colors123.surface,
-          elevation: 8,
+          elevation: 0,
           shadowColor: colors123.text,
           shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.05,
+          shadowOpacity: 0,
           shadowRadius: 12
         },
         tabBarItemStyle: {
           borderRadius: 12
         }
       })}>
-      
+
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Orders" component={OrdersScreen} />
       <Tab.Screen name="Customers" component={CustomersScreen} />
@@ -111,9 +110,11 @@ function StudioTabs() {
 
 export default function MainTabNavigator() {
   const { subscription, subscriptionLoading, fetchSubscription } = useStitchPro();
+  const requestedSubscription = useRef(false);
 
   useEffect(() => {
-    if (!subscription && !subscriptionLoading) {
+    if (!requestedSubscription.current && !subscription && !subscriptionLoading) {
+      requestedSubscription.current = true;
       fetchSubscription().catch((err) => {
 
       });
@@ -131,20 +132,23 @@ export default function MainTabNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="StudioTabs" component={StudioTabs} />
+      <Stack.Screen name="RecordMeasurement" component={RecordMeasurementScreen} options={{ headerShown: true, title: 'Record measurement', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />
+      <Stack.Screen name="ViewMeasurements" component={ViewMeasurementsScreen} options={{ headerShown: true, title: 'Measurement history', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />
+      <Stack.Screen name="Measurements" component={MeasurementsScreen} options={{ headerShown: true, title: 'Measurements', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />
       <Stack.Screen
         name="CustomerDetail"
         component={CustomerDetailScreen}
         options={{ animation: 'slide_from_right' }} />
-      
+
       <Stack.Screen
         name="CustomerSelection"
         component={CustomerSelectionScreen}
         options={{ animation: 'slide_from_right' }} />
-      
+
       <Stack.Screen
         name="CreateOrder"
         options={{ animation: 'slide_from_right' }}>
-        
+
         {(props) =>
         <Suspense fallback={<LazyFallback />}>
             <CreateOrder {...props} />
@@ -155,31 +159,31 @@ export default function MainTabNavigator() {
         name="OrderDetail"
         component={OrderDetail}
         options={{ animation: 'slide_from_right' }} />
-      
+
       <Stack.Screen
         name="Staff"
         component={StaffScreen}
         options={{
           animation: 'slide_from_right',
-          presentation: 'card'
+          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold }
         }} />
-      
+
       <Stack.Screen
         name="Notifications"
         component={NotificationScreen}
         options={{
           animation: 'slide_from_right',
-          presentation: 'card'
+          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold }
         }} />
-      
+
       <Stack.Screen
         name="Subscription"
         component={SubscriptionScreen}
         options={{
           animation: 'slide_from_right',
-          presentation: 'card'
+          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold }
         }} />
-      
+
     </Stack.Navigator>);
 
 }
@@ -187,18 +191,15 @@ export default function MainTabNavigator() {
 const styles = StyleSheet.create({
   loadingScreen: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: colors123.background
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors123.background,
   },
   tabIconWrap: {
     width: 40,
     height: 30,
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center'
+    alignItems: "center",
+    justifyContent: "center",
   },
-  tabIconWrapActive: {
-    backgroundColor: colors123.primary
-  }
 });

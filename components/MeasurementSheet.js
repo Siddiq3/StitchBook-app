@@ -1,7 +1,8 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { MotiView } from "moti";
+import { MotiView } from "./AccessibleMotionView";
 import AppButton from "./AppButton";
 import BottomSheet from "./BottomSheet";
 import AppCard from "./AppCard";
@@ -437,19 +438,10 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: colors123.textMuted,
   },
-  section: {
-    gap: spacing.sm,
-  },
   sectionTitle: {
     fontFamily: fonts.bold,
     fontSize: 17,
     color: colors123.text,
-  },
-  sectionDescription: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    lineHeight: 20,
-    color: colors123.textMuted,
   },
   formHeader: {
     marginTop: spacing.md,
@@ -576,8 +568,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
   },
   nextFieldButton: {
-    width: 34,
-    height: 34,
+    width: 44,
+    height: 44,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
@@ -602,19 +594,6 @@ const styles = StyleSheet.create({
     color: colors123.textSoft,
     lineHeight: 20,
   },
-  pillGroup: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.xs,
-  },
-  pill: {
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors123.border,
-    backgroundColor: colors123.surface,
-  },
   pillSelected: {
     backgroundColor: colors123.primarySoft,
     borderColor: colors123.primary,
@@ -627,53 +606,9 @@ const styles = StyleSheet.create({
   pillLabelSelected: {
     color: colors123.primary,
   },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  fieldCard: {
-    width: "48%",
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors123.border,
-    backgroundColor: colors123.surface,
-    padding: spacing.sm,
-    gap: spacing.sm,
-  },
-  fieldHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
-  fieldIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 12,
-    backgroundColor: colors123.primarySoft,
-    alignItems: "center",
-    justifyContent: "center",
-  },
   fieldLabel: {
     fontFamily: fonts.semibold,
     fontSize: 13,
-    color: colors123.text,
-  },
-  fieldHint: {
-    marginTop: 2,
-    fontFamily: fonts.medium,
-    fontSize: 11,
-    color: colors123.textSoft,
-  },
-  fieldInput: {
-    minHeight: 46,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors123.border,
-    backgroundColor: colors123.surfaceMuted,
-    paddingHorizontal: 12,
-    fontFamily: fonts.bold,
-    fontSize: 20,
     color: colors123.text,
   },
   actions: {

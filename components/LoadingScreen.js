@@ -1,3 +1,4 @@
+import { colors123 } from "../utils/theme";
 import React from 'react';
 import { View, ActivityIndicator } from 'react-native';
 
@@ -8,7 +9,7 @@ export default function LoadingScreen() {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: colors123.surface,
       }}
     >
       <ActivityIndicator size="large" color="#4F46E5" />

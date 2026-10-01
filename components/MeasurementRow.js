@@ -1,12 +1,5 @@
 import React, { useRef, useState } from "react";
-import {
-  StyleSheet,
-  TextInput,
-  View,
-  Text,
-  Pressable,
-  Animated } from
-"react-native";
+import { StyleSheet, TextInput, View, Text, Pressable } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { colors123, fonts, spacing } from "../utils/theme";import { useLanguage } from "../context/LanguageContext";
 
@@ -55,7 +48,7 @@ export default function MeasurementRow({
       isFocused && styles.containerFocused,
       hasError && styles.containerError]
       }>
-      
+
       <View style={styles.leftSection}>
         <View style={styles.numberBadge}>
           <Text style={styles.numberBadgeText}>{fieldIndex}</Text>
@@ -68,6 +61,7 @@ export default function MeasurementRow({
 
       <View style={styles.inputWrapper}>
         <TextInput
+          accessibilityLabel={`${fieldName} (cm)`}
           ref={inputRef}
           style={[
           styles.input,
@@ -82,21 +76,23 @@ export default function MeasurementRow({
           onChangeText={handleChange}
           onFocus={handleFocus}
           maxLength={6} />
-        
+
 
         {value &&
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`${t("clear")} ${fieldName}`}
           onPress={handleClear}
           style={({ pressed }) => [
           styles.clearButton,
           pressed && styles.clearButtonPressed]
           }>
-          
+
             <MaterialCommunityIcons
             name="close-circle"
             size={18}
             color={colors123.textMuted} />
-          
+
           </Pressable>
         }
 
@@ -114,25 +110,25 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     marginVertical: spacing.xs,
-    backgroundColor: "#FFF",
+    backgroundColor: colors123.surface,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: colors123.border
+    borderColor: colors123.border,
   },
   containerFocused: {
     borderColor: colors123.primary,
-    backgroundColor: "#F0F9FF",
-    borderWidth: 2
+    backgroundColor: colors123.infoLight,
+    borderWidth: 2,
   },
   containerError: {
-    borderColor: "#EF4444",
-    backgroundColor: "#FEE2E2"
+    borderColor: colors123.danger,
+    backgroundColor: colors123.dangerLight,
   },
   leftSection: {
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    marginRight: spacing.md
+    marginRight: spacing.md,
   },
   numberBadge: {
     width: 28,
@@ -141,65 +137,68 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.primary,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: spacing.sm
+    marginRight: spacing.sm,
   },
   numberBadgeText: {
-    color: "#FFF",
+    color: colors123.surface,
     fontSize: 12,
-    fontWeight: fonts.bold
+    fontFamily: fonts.bold,
   },
   fieldInfo: {
-    flex: 1
+    flex: 1,
   },
   fieldName: {
     fontSize: 13,
-    fontWeight: fonts.semibold,
+    fontFamily: fonts.semibold,
     color: colors123.text,
-    marginBottom: 2
+    marginBottom: 2,
   },
   fieldUnit: {
-    fontSize: 11,
-    color: colors123.textSoft
+    fontSize: 12,
+    color: colors123.textSoft,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    width: 100,
-    position: "relative"
+    width: 136,
+    position: "relative",
   },
   input: {
     flex: 1,
+    minHeight: 48,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.sm,
     fontSize: 14,
-    fontWeight: fonts.semibold,
+    fontFamily: fonts.semibold,
     color: colors123.text,
-    borderRadius: 6,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors123.border,
-    backgroundColor: "#FFF"
+    backgroundColor: colors123.surface,
   },
   inputFocused: {
     borderColor: colors123.primary,
-    backgroundColor: "#F0F9FF"
+    backgroundColor: colors123.infoLight,
   },
   inputError: {
-    borderColor: "#EF4444",
-    backgroundColor: "#FEE2E2"
+    borderColor: colors123.danger,
+    backgroundColor: colors123.dangerLight,
   },
   inputFilled: {
-    borderColor: colors123.primary
+    borderColor: colors123.primary,
   },
   clearButton: {
-    padding: spacing.xs,
-    marginRight: spacing.xs
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: "center",
+    justifyContent: "center",
   },
   clearButtonPressed: {
-    opacity: 0.6
+    opacity: 0.6,
   },
   unit: {
-    fontSize: 11,
+    fontSize: 12,
     color: colors123.textMuted,
-    fontWeight: fonts.medium
-  }
+    fontFamily: fonts.medium,
+  },
 });

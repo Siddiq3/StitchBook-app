@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, View } from "react-native";
+import React from "react";
+import { StyleSheet, View } from "react-native";
 import { colors123, radius } from "../utils/theme";
 
 export function SkeletonBlock({
@@ -8,20 +8,6 @@ export function SkeletonBlock({
   borderRadius = radius.sm,
   style,
 }) {
-  const shimmerX = useRef(new Animated.Value(-140)).current;
-
-  useEffect(() => {
-    const animation = Animated.loop(
-      Animated.timing(shimmerX, {
-        toValue: 280,
-        duration: 1200,
-        useNativeDriver: true,
-      }),
-    );
-
-    animation.start();
-    return () => animation.stop();
-  }, [shimmerX]);
 
   return (
     <View
@@ -35,14 +21,7 @@ export function SkeletonBlock({
         style,
       ]}
     >
-      <Animated.View
-        pointerEvents="none"
-        style={[styles.shimmer, { transform: [{ translateX: shimmerX }] }]}
-      >
-        <View
-          style={[styles.gradient, { backgroundColor: "rgba(255,255,255,0.3)" }]}
-        />
-      </Animated.View>
+
     </View>
   );
 }
@@ -50,17 +29,17 @@ export function SkeletonBlock({
 export function DashboardSkeleton() {
   return (
     <View style={{ gap: 16 }}>
-      <SkeletonBlock height={92} borderRadius={24} />
+      <SkeletonBlock height={92} borderRadius={radius.lg} />
       <View style={{ flexDirection: "row", gap: 12 }}>
-        <SkeletonBlock style={{ flex: 1 }} height={116} borderRadius={20} />
-        <SkeletonBlock style={{ flex: 1 }} height={116} borderRadius={20} />
+        <SkeletonBlock style={{ flex: 1 }} height={116} borderRadius={radius.lg} />
+        <SkeletonBlock style={{ flex: 1 }} height={116} borderRadius={radius.lg} />
       </View>
       <View style={{ flexDirection: "row", gap: 12 }}>
-        <SkeletonBlock style={{ flex: 1 }} height={116} borderRadius={20} />
-        <SkeletonBlock style={{ flex: 1 }} height={116} borderRadius={20} />
+        <SkeletonBlock style={{ flex: 1 }} height={116} borderRadius={radius.lg} />
+        <SkeletonBlock style={{ flex: 1 }} height={116} borderRadius={radius.lg} />
       </View>
-      <SkeletonBlock height={210} borderRadius={24} />
-      <SkeletonBlock height={178} borderRadius={24} />
+      <SkeletonBlock height={210} borderRadius={radius.lg} />
+      <SkeletonBlock height={178} borderRadius={radius.lg} />
     </View>
   );
 }
@@ -85,14 +64,7 @@ export function ListSkeleton({ count = 4 }) {
 const styles = StyleSheet.create({
   base: {
     overflow: "hidden",
-    backgroundColor: "#E8EDF7",
-  },
-  shimmer: {
-    ...StyleSheet.absoluteFillObject,
-    width: 140,
-  },
-  gradient: {
-    flex: 1,
+    backgroundColor: colors123.surfaceMuted,
   },
   listItem: {
     flexDirection: "row",

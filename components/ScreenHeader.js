@@ -7,7 +7,9 @@ export default function ScreenHeader({ eyebrow, title, subtitle, action }) {
     <View style={styles.row}>
       <View style={styles.copy}>
         {eyebrow ? <Text style={styles.eyebrow}>{eyebrow}</Text> : null}
-        <Text style={styles.title}>{title}</Text>
+        <Text accessibilityRole="header" style={styles.title}>
+          {title}
+        </Text>
         {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
       {action ? <View style={styles.action}>{action}</View> : null}
@@ -28,7 +30,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   eyebrow: {
-    fontFamily: fonts.bold,
+    fontFamily: fonts.semibold,
     fontSize: 11,
     letterSpacing: 0,
     textTransform: "uppercase",
@@ -36,16 +38,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   title: {
-    fontFamily: fonts.bold,
-    fontSize: 22,
+    fontFamily: fonts.semibold,
+    fontSize: 24,
     color: colors123.text,
-    lineHeight: 28,
+    lineHeight: 30,
   },
   subtitle: {
     marginTop: spacing.xs,
     fontFamily: fonts.regular,
-    fontSize: 13,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 22,
     color: colors123.textMuted,
   },
   action: {

@@ -1,3 +1,4 @@
+import { fonts } from "../../utils/theme";
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,8 +37,8 @@ export default function EmptyState({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingHorizontal: 32,
     paddingVertical: 40,
   },
@@ -45,24 +46,24 @@ const styles = StyleSheet.create({
     width: 76,
     height: 76,
     borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: colors123.primarySoft,
     borderWidth: 1,
     borderColor: colors123.borderLight,
   },
   title: {
     fontSize: normalize(SIZES.xl),
-    fontWeight: '800',
+    fontFamily: fonts.semibold,
     color: colors123.text,
     marginTop: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
     fontSize: normalize(SIZES.md),
     color: colors123.textMuted,
     marginTop: 8,
-    textAlign: 'center',
+    textAlign: "center",
     lineHeight: 21,
   },
   button: {

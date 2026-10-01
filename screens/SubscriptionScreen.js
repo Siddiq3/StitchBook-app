@@ -1,3 +1,4 @@
+import InlineAlert from "../components/InlineAlert";
 import React, { useEffect, useMemo } from 'react';
 import {
   View,
@@ -10,8 +11,7 @@ import {
 'react-native';
 import { format, parseISO } from 'date-fns';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { MotiView } from 'moti';
+import { MotiView } from '../components/AccessibleMotionView';
 import { useStitchPro } from '../context/StitchProContext';
 import { useToast } from '../context/ToastContext';
 import ScreenHeader from '../components/ScreenHeader';
@@ -31,7 +31,6 @@ const PLAN_FEATURES = [
 'Custom Measurement',
 'Multi-Language Support',
 'Fiza AI Assistant'];
-
 
 const PLAN_TYPE_LABEL = {
   free: 'Free Plan',
@@ -53,6 +52,7 @@ const toDate = (value) => {
 };
 
 const getTrialMeta = (subscriptionData = {}) => {
+  subscriptionData = subscriptionData || {};
   const startDate = toDate(subscriptionData.trialStartDate || subscriptionData.startDate);
   const endDate = toDate(subscriptionData.trialEndDate || subscriptionData.endDate);
   const fallbackTotal = startDate && endDate ?
@@ -114,7 +114,6 @@ const buildFeatureRows = (features = {}) => [
   active: !!features.hasStaffManagement
 }];
 
-
 const formatDate = (value) => {
   if (!value) return '-';
   try {
@@ -125,6 +124,7 @@ const formatDate = (value) => {
 };
 
 const SubscriptionScreen = () => {const { t } = useLanguage();
+  const { subscriptionError } = useStitchPro();
   const {
     subscription,
     subscriptionLoading,
@@ -232,45 +232,46 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
       name={active ? 'check-circle' : 'circle-outline'}
       size={18}
       color={active ? colors123.success : colors123.textSoft} />
-    
+
       <Text style={[styles.featureLabel, !active && styles.featureLabelInactive]}>{label}</Text>
     </View>;
-
 
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}>
-      
+
       <ScreenHeader
         eyebrow="Account"
         title={t("auto_subscription")}
         subtitle={t("subscriptionScreenSubtitle")} />
-      
 
+
+      <InlineAlert message={subscriptionError ? t("loadSubscriptionFailed") : null} onRetry={handleRefreshStatus} retryLabel={t("retry")} />
       {subscriptionLoading && !subscriptionData ?
       <View style={styles.loadingContainer}>
           <ActivityIndicator color={colors123.primary} size="large" />
         </View> :
       null}
 
+      {(subscriptionData || (!subscriptionLoading && !subscriptionError)) ? (
       <MotiView
         animate={{ opacity: 1, translateY: 0 }}
         from={{ opacity: 0, translateY: 12 }}
         transition={{ duration: 300, type: 'timing' }}>
-        
-        <LinearGradient
-          colors={[colors123.primaryDark, colors123.primary, '#1D7A5C']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.heroCard}>
-          
+
+        <View
+
+
+
+          style={[styles.heroCard, { backgroundColor: colors123.primary }]}>
+
           <View style={styles.heroTopRow}>
             <View style={styles.heroIcon}>
               <MaterialCommunityIcons name={heroMeta.icon} size={25} color={colors123.surface} />
             </View>
-            <TouchableOpacity onPress={handleRefreshStatus} style={styles.heroRefreshButton}>
+            <TouchableOpacity accessibilityRole="button" onPress={handleRefreshStatus} style={styles.heroRefreshButton}>
               <MaterialCommunityIcons name="refresh" size={15} color={colors123.surface} />
               <Text style={styles.heroRefreshText}>{t("auto_refresh")}</Text>
             </TouchableOpacity>
@@ -288,8 +289,9 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
               <Text style={styles.heroStatValue}>{isActive ? subscriptionData?.daysRemaining ?? '-' : isTrial ? trialMeta.remainingDays : 0}</Text>
             </View>
           </View>
-        </LinearGradient>
+        </View>
       </MotiView>
+      ) : null}
 
       {isTrial ?
       <MotiView
@@ -297,7 +299,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
         from={{ opacity: 0, translateY: 12 }}
         transition={{ delay: 60, duration: 280, type: 'timing' }}
         style={styles.trialStatusCard}>
-        
+
           <View style={styles.trialStatusHeader}>
             <View style={[
           styles.trialStatusIcon,
@@ -308,13 +310,13 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
               name="calendar-clock-outline"
               size={24}
               color={trialTone === 'ending' ? colors123.error : colors123.primary} />
-            
+
             </View>
             <View style={styles.trialStatusCopy}>
               <Text style={styles.trialStatusEyebrow}>{t("auto_free_trial_active")}</Text>
               <Text style={styles.trialStatusTitle}>{trialText}</Text>
             </View>
-            <TouchableOpacity onPress={handleRefreshStatus} style={styles.refreshPill}>
+            <TouchableOpacity accessibilityRole="button" onPress={handleRefreshStatus} style={styles.refreshPill}>
               <MaterialCommunityIcons name="refresh" size={15} color={colors123.primary} />
               <Text style={styles.refreshPillText}>{t("auto_refresh")}</Text>
             </TouchableOpacity>
@@ -360,13 +362,13 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
         from={{ opacity: 0, scale: 0.96 }}
         transition={{ duration: 260, type: 'timing' }}
         style={styles.expiredCard}>
-        
+
           <View style={styles.expiredIcon}>
             <MaterialCommunityIcons
             name="lock-alert-outline"
             size={26}
             color={colors123.primary} />
-          
+
           </View>
           <Text style={styles.expiredTitle}>{t("auto_your_10_day_free_trial_is_completed")}</Text>
           <Text style={styles.expiredText}>{t("subscriptionExpiredDetails")}</Text>
@@ -376,7 +378,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
           onPress={handleRefreshStatus}
           style={styles.refreshButton}
           variant="secondary" />
-        
+
         </MotiView> :
       null}
 
@@ -386,7 +388,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
         from={{ opacity: 0, translateY: 12 }}
         transition={{ duration: 280, type: 'timing' }}
         style={styles.activeCard}>
-        
+
           <View style={styles.activeHeader}>
             <View style={styles.activeIconWrap}>
               <MaterialCommunityIcons name="shield-check" size={24} color={colors123.primary} />
@@ -431,7 +433,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
             onPress={handleRefreshStatus}
             style={styles.secondaryButton}
             variant="secondary" />
-          
+
           </View>
         </MotiView> :
       null}
@@ -444,7 +446,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
               name="shield-lock-outline"
               size={22}
               color={colors123.primary} />
-            
+
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.webBillingTitle}>{t("subscriptionStatusInfoTitle")}</Text>
@@ -458,7 +460,7 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
           onPress={handleRefreshStatus}
           style={styles.refreshButton}
           variant="secondary" />
-        
+
 
           <View style={styles.divider} />
           <Text style={styles.sectionTitle}>{t("auto_what_you_get")}</Text>
@@ -479,424 +481,401 @@ let cachedSubscriptionStyles = null;
 const getSubscriptionStyles = () => {
   if (!cachedSubscriptionStyles) {
     cachedSubscriptionStyles = StyleSheet.create({
-      container: {
-        flex: 1,
-        backgroundColor: colors123.background
-      },
-      contentContainer: {
-        padding: spacing.lg,
-        paddingBottom: spacing.xxl
-      },
-      loadingContainer: {
-        marginTop: spacing.lg,
-        alignItems: 'center'
-      },
-      heroCard: {
-        borderRadius: 26,
-        padding: spacing.lg,
-        marginBottom: spacing.md,
-        overflow: 'hidden',
-        ...shadows.card
-      },
-      heroTopRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        marginBottom: spacing.lg
-      },
-      heroIcon: {
-        width: 50,
-        height: 50,
-        borderRadius: 18,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(255,255,255,0.16)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.22)'
-      },
-      heroRefreshButton: {
-        minHeight: 36,
-        borderRadius: radius.pill,
-        paddingHorizontal: spacing.sm,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 5,
-        backgroundColor: 'rgba(255,255,255,0.14)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.18)'
-      },
-      heroRefreshText: {
-        fontFamily: fonts.semibold,
-        fontSize: 12,
-        color: colors123.surface
-      },
-      heroEyebrow: {
-        fontFamily: fonts.extrabold,
-        fontSize: 12,
-        color: colors123.accent,
-        textTransform: 'uppercase',
-        marginBottom: spacing.xs
-      },
-      heroTitle: {
-        fontFamily: fonts.extrabold,
-        fontSize: 27,
-        lineHeight: 33,
-        color: colors123.surface
-      },
-      heroDescription: {
-        marginTop: spacing.sm,
-        fontFamily: fonts.regular,
-        fontSize: 14,
-        lineHeight: 22,
-        color: 'rgba(255,255,255,0.82)'
-      },
-      heroStatsRow: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        marginTop: spacing.lg
-      },
-      heroStat: {
-        flex: 1,
-        borderRadius: 18,
-        padding: spacing.md,
-        backgroundColor: 'rgba(255,255,255,0.12)',
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.16)'
-      },
-      heroStatLabel: {
-        fontFamily: fonts.medium,
-        fontSize: 12,
-        color: 'rgba(255,255,255,0.74)'
-      },
-      heroStatValue: {
-        marginTop: 4,
-        fontFamily: fonts.extrabold,
-        fontSize: 16,
-        color: colors123.surface
-      },
-      trialStatusCard: {
-        backgroundColor: colors123.surface,
-        borderRadius: 24,
-        borderWidth: 1,
-        borderColor: colors123.borderLight,
-        padding: spacing.lg,
-        marginBottom: spacing.md,
-        ...shadows.card
-      },
-      trialStatusHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm
-      },
-      trialStatusIcon: {
-        width: 48,
-        height: 48,
-        borderRadius: 18,
-        backgroundColor: colors123.primarySoft,
-        alignItems: 'center',
-        justifyContent: 'center'
-      },
-      trialStatusIconAttention: {
-        backgroundColor: colors123.warningLight
-      },
-      trialStatusIconEnding: {
-        backgroundColor: colors123.dangerLight
-      },
-      trialStatusCopy: {
-        flex: 1
-      },
-      trialStatusEyebrow: {
-        fontFamily: fonts.extrabold,
-        fontSize: 11,
-        color: colors123.primary,
-        textTransform: 'uppercase'
-      },
-      trialStatusTitle: {
-        marginTop: 3,
-        fontFamily: fonts.extrabold,
-        fontSize: 18,
-        color: colors123.text
-      },
-      refreshPill: {
-        minHeight: 34,
-        borderRadius: 17,
-        paddingHorizontal: spacing.sm,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        backgroundColor: colors123.primarySoft
-      },
-      refreshPillText: {
-        fontFamily: fonts.semibold,
-        fontSize: 12,
-        color: colors123.primary
-      },
-      trialProgressTrack: {
-        height: 10,
-        borderRadius: 5,
-        backgroundColor: colors123.borderLight,
-        overflow: 'hidden',
-        marginTop: spacing.md
-      },
-      trialProgressFill: {
-        height: '100%',
-        borderRadius: 5,
-        backgroundColor: colors123.primary
-      },
-      trialProgressFillAttention: {
-        backgroundColor: colors123.warning
-      },
-      trialProgressFillEnding: {
-        backgroundColor: colors123.error
-      },
-      trialMetaGrid: {
-        flexDirection: 'row',
-        gap: spacing.sm,
-        marginTop: spacing.md
-      },
-      trialMetaItem: {
-        flex: 1,
-        borderRadius: 16,
-        backgroundColor: colors123.background,
-        padding: spacing.md,
-        borderWidth: 1,
-        borderColor: colors123.borderLight
-      },
-      trialMetaLabel: {
-        fontFamily: fonts.regular,
-        fontSize: 12,
-        color: colors123.textMuted
-      },
-      trialMetaValue: {
-        marginTop: 4,
-        fontFamily: fonts.extrabold,
-        fontSize: 14,
-        color: colors123.text
-      },
-      trialFooterRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginTop: spacing.sm
-      },
-      trialFooterText: {
-        fontFamily: fonts.semibold,
-        fontSize: 12,
-        color: colors123.textMuted
-      },
-      trialFooterTextEnding: {
-        color: colors123.error
-      },
-      trialBanner: {
-        backgroundColor: colors123.primarySoft,
-        borderRadius: 18,
-        borderWidth: 1,
-        borderColor: colors123.primary,
-        padding: spacing.md,
-        marginTop: spacing.md,
-        flexDirection: 'row',
-        gap: spacing.sm,
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      },
-      trialLabel: {
-        fontFamily: fonts.semibold,
-        color: colors123.primary,
-        fontSize: 14,
-        flex: 1
-      },
-      upgradeNow: {
-        fontFamily: fonts.semibold,
-        color: colors123.primary,
-        fontSize: 14
-      },
-      expiredCard: {
-        backgroundColor: colors123.surface,
-        borderRadius: 24,
-        borderWidth: 1,
-        borderColor: colors123.borderLight,
-        padding: spacing.lg,
-        marginBottom: spacing.md,
-        alignItems: 'center',
-        ...shadows.card
-      },
-      expiredIcon: {
-        width: 56,
-        height: 56,
-        borderRadius: 20,
-        backgroundColor: colors123.primarySoft,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: spacing.md
-      },
-      expiredTitle: {
-        fontFamily: fonts.extrabold,
-        fontSize: 20,
-        color: colors123.text,
-        textAlign: 'center'
-      },
-      expiredText: {
-        marginTop: spacing.sm,
-        fontFamily: fonts.regular,
-        fontSize: 14,
-        lineHeight: 21,
-        color: colors123.textMuted,
-        textAlign: 'center'
-      },
-      activeCard: {
-        backgroundColor: colors123.surface,
-        borderRadius: 20,
-        borderWidth: 1,
-        borderColor: colors123.borderLight,
-        padding: spacing.md,
-        marginBottom: spacing.md,
-        ...shadows.card
-      },
-      activeHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        marginBottom: spacing.md
-      },
-      activeIconWrap: {
-        width: 46,
-        height: 46,
-        borderRadius: 14,
-        backgroundColor: colors123.primarySoft,
-        alignItems: 'center',
-        justifyContent: 'center'
-      },
-      activeHeaderText: {
-        flex: 1
-      },
-      activeBadge: {
-        alignItems: 'center',
-        borderRadius: radius.pill,
-        paddingHorizontal: 10,
-        paddingVertical: 5,
-        backgroundColor: '#E8F8EF'
-      },
-      activeBadgeText: {
-        fontFamily: fonts.semibold,
-        color: colors123.success,
-        fontSize: 11
-      },
-      activeTitle: {
-        fontFamily: fonts.extrabold,
-        fontSize: 18,
-        color: colors123.text
-      },
-      activeSubtitle: {
-        marginTop: 3,
-        fontFamily: fonts.regular,
-        fontSize: 12,
-        color: colors123.textMuted
-      },
-      planDetailList: {
-        borderTopWidth: 1,
-        borderBottomWidth: 1,
-        borderColor: colors123.borderLight
-      },
-      rowGroup: {
-        minHeight: 46,
-        paddingVertical: 12,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderBottomWidth: 1,
-        borderBottomColor: colors123.borderLight,
-        gap: spacing.md
-      },
-      fieldLabel: {
-        fontFamily: fonts.medium,
-        color: colors123.textMuted,
-        fontSize: 13
-      },
-      fieldValue: {
-        fontFamily: fonts.semibold,
-        color: colors123.text,
-        fontSize: 13,
-        textAlign: 'right',
-        flexShrink: 1
-      },
-      divider: {
-        height: 1,
-        backgroundColor: colors123.borderStrong,
-        marginVertical: spacing.md
-      },
-      sectionTitle: {
-        fontFamily: fonts.extrabold,
-        color: colors123.text,
-        fontSize: 18,
-        marginBottom: spacing.sm
-      },
-      featureGrid: {
-        gap: 2,
-        backgroundColor: colors123.surface
-      },
-      featureTile: {
-        minHeight: 42,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: spacing.sm,
-        paddingVertical: 9,
-        borderBottomWidth: 1,
-        borderBottomColor: colors123.borderLight
-      },
-      featureLabel: {
-        flex: 1,
-        fontFamily: fonts.medium,
-        fontSize: 13,
-        color: colors123.text
-      },
-      featureLabelInactive: {
-        color: colors123.textSoft
-      },
-      buttonGrid: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: spacing.sm,
-        marginTop: spacing.md
-      },
-      secondaryButton: {
-        flex: 1
-      },
-      buySection: {
-        marginTop: spacing.sm
-      },
-      webBillingCard: {
-        flexDirection: 'row',
-        gap: spacing.md,
-        padding: spacing.md,
-        backgroundColor: colors123.primarySoft,
-        borderRadius: 22,
-        borderWidth: 1,
-        borderColor: colors123.borderLight,
-        marginBottom: spacing.lg
-      },
-      webBillingIcon: {
-        width: 44,
-        height: 44,
-        borderRadius: 16,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: colors123.surface
-      },
-      webBillingTitle: {
-        fontFamily: fonts.extrabold,
-        fontSize: 15,
-        color: colors123.text
-      },
-      webBillingText: {
-        marginTop: spacing.xs,
-        fontFamily: fonts.regular,
-        fontSize: 13,
-        lineHeight: 20,
-        color: colors123.textMuted
-      },
-      refreshButton: {
-        marginTop: spacing.sm
-      }
-    });
+  container: {
+    flex: 1,
+    backgroundColor: colors123.background,
+  },
+  contentContainer: {
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
+  },
+  loadingContainer: {
+    marginTop: spacing.lg,
+    alignItems: "center",
+  },
+  heroCard: {
+    borderRadius: 16,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    overflow: "hidden",
+    ...shadows.card,
+  },
+  heroTopRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: spacing.lg,
+  },
+  heroIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.16)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.22)",
+  },
+  heroRefreshButton: {
+    minHeight: 44,
+    borderRadius: radius.pill,
+    paddingHorizontal: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.18)",
+  },
+  heroRefreshText: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    color: colors123.surface,
+  },
+  heroEyebrow: {
+    fontFamily: fonts.extrabold,
+    fontSize: 12,
+    color: colors123.surface,
+    textTransform: "uppercase",
+    marginBottom: spacing.xs,
+  },
+  heroTitle: {
+    fontFamily: fonts.extrabold,
+    fontSize: 24,
+    lineHeight: 30,
+    color: colors123.surface,
+  },
+  heroDescription: {
+    marginTop: spacing.sm,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 22,
+    color: "rgba(255,255,255,0.82)",
+  },
+  heroStatsRow: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+  },
+  heroStat: {
+    flex: 1,
+    borderRadius: 18,
+    padding: spacing.md,
+    backgroundColor: "rgba(255,255,255,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.16)",
+  },
+  heroStatLabel: {
+    fontFamily: fonts.medium,
+    fontSize: 12,
+    color: "rgba(255,255,255,0.74)",
+  },
+  heroStatValue: {
+    marginTop: 4,
+    fontFamily: fonts.extrabold,
+    fontSize: 16,
+    color: colors123.surface,
+  },
+  trialStatusCard: {
+    backgroundColor: colors123.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors123.borderLight,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    ...shadows.card,
+  },
+  trialStatusHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+  },
+  trialStatusIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 18,
+    backgroundColor: colors123.primarySoft,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  trialStatusIconAttention: {
+    backgroundColor: colors123.warningLight,
+  },
+  trialStatusIconEnding: {
+    backgroundColor: colors123.dangerLight,
+  },
+  trialStatusCopy: {
+    flex: 1,
+  },
+  trialStatusEyebrow: {
+    fontFamily: fonts.extrabold,
+    fontSize: 12,
+    color: colors123.primary,
+    textTransform: "uppercase",
+  },
+  trialStatusTitle: {
+    marginTop: 3,
+    fontFamily: fonts.extrabold,
+    fontSize: 18,
+    color: colors123.text,
+  },
+  refreshPill: {
+    minHeight: 44,
+    borderRadius: 17,
+    paddingHorizontal: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: colors123.primarySoft,
+  },
+  refreshPillText: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    color: colors123.primary,
+  },
+  trialProgressTrack: {
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: colors123.borderLight,
+    overflow: "hidden",
+    marginTop: spacing.md,
+  },
+  trialProgressFill: {
+    height: "100%",
+    borderRadius: 5,
+    backgroundColor: colors123.primary,
+  },
+  trialProgressFillAttention: {
+    backgroundColor: colors123.warning,
+  },
+  trialProgressFillEnding: {
+    backgroundColor: colors123.error,
+  },
+  trialMetaGrid: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  trialMetaItem: {
+    flex: 1,
+    borderRadius: 16,
+    backgroundColor: colors123.background,
+    padding: spacing.md,
+    borderWidth: 1,
+    borderColor: colors123.borderLight,
+  },
+  trialMetaLabel: {
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors123.textMuted,
+  },
+  trialMetaValue: {
+    marginTop: 4,
+    fontFamily: fonts.extrabold,
+    fontSize: 14,
+    color: colors123.text,
+  },
+  trialFooterRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: spacing.sm,
+  },
+  trialFooterText: {
+    fontFamily: fonts.semibold,
+    fontSize: 12,
+    color: colors123.textMuted,
+  },
+  trialFooterTextEnding: {
+    color: colors123.error,
+  },
+  expiredCard: {
+    backgroundColor: colors123.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors123.borderLight,
+    padding: spacing.lg,
+    marginBottom: spacing.md,
+    alignItems: "center",
+    ...shadows.card,
+  },
+  expiredIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 20,
+    backgroundColor: colors123.primarySoft,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: spacing.md,
+  },
+  expiredTitle: {
+    fontFamily: fonts.extrabold,
+    fontSize: 20,
+    color: colors123.text,
+    textAlign: "center",
+  },
+  expiredText: {
+    marginTop: spacing.sm,
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors123.textMuted,
+    textAlign: "center",
+  },
+  activeCard: {
+    backgroundColor: colors123.surface,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors123.borderLight,
+    padding: spacing.md,
+    marginBottom: spacing.md,
+    ...shadows.card,
+  },
+  activeHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  activeIconWrap: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: colors123.primarySoft,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  activeHeaderText: {
+    flex: 1,
+  },
+  activeBadge: {
+    alignItems: "center",
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    backgroundColor: colors123.successLight,
+  },
+  activeBadgeText: {
+    fontFamily: fonts.semibold,
+    color: colors123.success,
+    fontSize: 11,
+  },
+  activeTitle: {
+    fontFamily: fonts.extrabold,
+    fontSize: 18,
+    color: colors123.text,
+  },
+  activeSubtitle: {
+    marginTop: 3,
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: colors123.textMuted,
+  },
+  planDetailList: {
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: colors123.borderLight,
+  },
+  rowGroup: {
+    minHeight: 46,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: colors123.borderLight,
+    gap: spacing.md,
+  },
+  fieldLabel: {
+    fontFamily: fonts.medium,
+    color: colors123.textMuted,
+    fontSize: 13,
+  },
+  fieldValue: {
+    fontFamily: fonts.semibold,
+    color: colors123.text,
+    fontSize: 13,
+    textAlign: "right",
+    flexShrink: 1,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors123.borderStrong,
+    marginVertical: spacing.md,
+  },
+  sectionTitle: {
+    fontFamily: fonts.extrabold,
+    color: colors123.text,
+    fontSize: 18,
+    marginBottom: spacing.sm,
+  },
+  featureGrid: {
+    gap: 2,
+    backgroundColor: colors123.surface,
+  },
+  featureTile: {
+    minHeight: 42,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    paddingVertical: 9,
+    borderBottomWidth: 1,
+    borderBottomColor: colors123.borderLight,
+  },
+  featureLabel: {
+    flex: 1,
+    fontFamily: fonts.medium,
+    fontSize: 13,
+    color: colors123.text,
+  },
+  featureLabelInactive: {
+    color: colors123.textSoft,
+  },
+  buttonGrid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  secondaryButton: {
+    flex: 1,
+  },
+  buySection: {
+    marginTop: spacing.sm,
+  },
+  webBillingCard: {
+    flexDirection: "row",
+    gap: spacing.md,
+    padding: spacing.md,
+    backgroundColor: colors123.primarySoft,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors123.borderLight,
+    marginBottom: spacing.lg,
+  },
+  webBillingIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors123.surface,
+  },
+  webBillingTitle: {
+    fontFamily: fonts.extrabold,
+    fontSize: 15,
+    color: colors123.text,
+  },
+  webBillingText: {
+    marginTop: spacing.xs,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    lineHeight: 20,
+    color: colors123.textMuted,
+  },
+  refreshButton: {
+    marginTop: spacing.sm,
+  },
+});
   }
   return cachedSubscriptionStyles;
 };

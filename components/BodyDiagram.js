@@ -1,15 +1,7 @@
+import { fonts } from "../utils/theme";
 import React, { useMemo } from "react";
 import { StyleSheet, View, Text } from "react-native";
-import Svg, {
-  G,
-  Circle,
-  Ellipse,
-  Path,
-  Line,
-  Defs,
-  LinearGradient,
-  Stop,
-} from "react-native-svg";
+import Svg, { G, Circle, Ellipse, Path, Line, Defs, Stop } from "react-native-svg";
 import { useLanguage } from "../context/LanguageContext";
 import { colors123, spacing } from "../utils/theme";
 
@@ -71,14 +63,14 @@ export default function BodyDiagram({
       <View style={styles.diagram}>
         <Svg height={svgHeight} width="100%" viewBox={viewBox}>
           <Defs>
-            <LinearGradient id="skinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <View id="skinGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <Stop offset="0%" stopColor="#F5DEB3" stopOpacity="1" />
               <Stop offset="100%" stopColor="#D2B48C" stopOpacity="1" />
-            </LinearGradient>
-            <LinearGradient id="focusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            </View>
+            <View id="focusGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <Stop offset="0%" stopColor={colors123.primary} stopOpacity="0.3" />
               <Stop offset="100%" stopColor={colors123.primary} stopOpacity="0.1" />
-            </LinearGradient>
+            </View>
           </Defs>
 
           {/* Draw body silhouette */}
@@ -125,7 +117,7 @@ export default function BodyDiagram({
           {/* Highlighted zones */}
           {Object.entries(bodyZones).map(([fieldName, zone]) => {
             const isFocused = focusedField === fieldName;
-            
+
             return (
               <G key={fieldName}>
                 {isFocused && (
@@ -192,7 +184,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontWeight: '600',
+    fontFamily: fonts.semibold,
     color: colors123.text,
     marginBottom: spacing.md,
   },
@@ -201,16 +193,16 @@ const styles = StyleSheet.create({
     marginBottom: spacing.xs,
   },
   diagram: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: colors123.surface,
     borderRadius: 8,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
     borderColor: colors123.border,
   },
   legend: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: spacing.md,
     paddingHorizontal: spacing.md,
   },
@@ -224,6 +216,6 @@ const styles = StyleSheet.create({
   legendText: {
     fontSize: 13,
     color: colors123.text,
-    fontWeight: '500',
+    fontFamily: fonts.medium,
   },
 });
