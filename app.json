@@ -43,8 +43,8 @@
       "googleAndroidClientId": "420205337421-thnobmhad3jrjahomfhkpp3h3omehj68.apps.googleusercontent.com",
       "googleIosClientId": "",
       "enableMobileOtpLogin": false,
-      "msg91WidgetId": "366662674a32393333363435",
-      "msg91WidgetTokenAuth": "521434T7vKB0UE6a1e8857P1"
+      "msg91WidgetId": "",
+      "msg91WidgetTokenAuth": ""
     }
   }
 }
