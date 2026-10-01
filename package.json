@@ -8,7 +8,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "test:ui": "node --test scripts/ui-foundation.test.cjs"
+    "test:ui": "node --test scripts/ui-foundation.test.cjs",
+    "test:services": "node --test scripts/startup-services.test.cjs"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",

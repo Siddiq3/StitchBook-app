@@ -1,3 +1,4 @@
+import { getNativeGoogleModule, getMsg91Module } from "../services/nativeAuthModules";
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -29,32 +30,6 @@ import { authService } from '../services/authService';
 const googleWebClientId = Constants.expoConfig?.extra?.googleWebClientId || '';
 const msg91WidgetId = Constants.expoConfig?.extra?.msg91WidgetId || '';
 const msg91WidgetTokenAuth = Constants.expoConfig?.extra?.msg91WidgetTokenAuth || '';
-let nativeGoogleModule = null;
-let msg91Module = null;
-
-const getNativeGoogleModule = () => {
-  if (Platform.OS !== 'android') return null;
-  if (nativeGoogleModule) return nativeGoogleModule;
-
-  try {
-    nativeGoogleModule = require('@react-native-google-signin/google-signin');
-    return nativeGoogleModule;
-  } catch (error) {
-    return null;
-  }
-};
-
-const getMsg91Module = () => {
-  if (msg91Module) return msg91Module;
-
-  try {
-    msg91Module = require('@msg91comm/sendotp-react-native');
-    return msg91Module;
-  } catch (error) {
-    return null;
-  }
-};
-
 const extractMsg91AccessToken = (response) =>
   response?.accessToken ||
   response?.access_token ||
@@ -214,7 +189,7 @@ export default function SettingsScreen({ navigation }) {
     try {
       const googleModule = getNativeGoogleModule();
       if (!googleModule?.GoogleSignin) {
-        throw new Error('Please install the latest StitchBook APK to connect Google.');
+        throw new Error('Connecting Google is unavailable in this preview. Please use the latest installed StitchBook app.');
       }
 
       const { GoogleSignin } = googleModule;

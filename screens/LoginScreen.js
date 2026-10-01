@@ -1,3 +1,4 @@
+import { getNativeGoogleModule, getMsg91Module } from "../services/nativeAuthModules";
 import { StatusBar } from "expo-status-bar";
 import { fonts } from "../utils/theme";
 import React, { useEffect, useState } from "react";
@@ -32,32 +33,6 @@ const msg91WidgetId = Constants.expoConfig?.extra?.msg91WidgetId || "";
 const msg91WidgetTokenAuth = Constants.expoConfig?.extra?.msg91WidgetTokenAuth || "";
 const enableMobileOtpLogin = Constants.expoConfig?.extra?.enableMobileOtpLogin === true;
 const fallbackGoogleClientId = "missing-google-client-id.apps.googleusercontent.com";
-let nativeGoogleModule = null;
-let msg91Module = null;
-
-const getNativeGoogleModule = () => {
-  if (Platform.OS !== "android") return null;
-  if (nativeGoogleModule) return nativeGoogleModule;
-
-  try {
-    nativeGoogleModule = require("@react-native-google-signin/google-signin");
-    return nativeGoogleModule;
-  } catch (error) {
-    return null;
-  }
-};
-
-const getMsg91Module = () => {
-  if (msg91Module) return msg91Module;
-
-  try {
-    msg91Module = require("@msg91comm/sendotp-react-native");
-    return msg91Module;
-  } catch (error) {
-    return null;
-  }
-};
-
 const extractMsg91AccessToken = (response) =>
   response?.accessToken ||
   response?.access_token ||
@@ -118,7 +93,7 @@ export default function LoginScreen() {
   }, []);
 
   useEffect(() => {
-    if (!msg91WidgetId || !msg91WidgetTokenAuth) return;
+    if (!shouldShowMobileOtpLogin || !msg91WidgetId || !msg91WidgetTokenAuth) return;
 
     const msg91 = getMsg91Module();
     msg91?.OTPWidget?.initializeWidget(msg91WidgetId, msg91WidgetTokenAuth);
@@ -188,7 +163,7 @@ export default function LoginScreen() {
       try {
         const googleModule = getNativeGoogleModule();
         if (!googleModule?.GoogleSignin) {
-          throw new Error("Please install the latest StitchBook APK to use Google login.");
+          throw new Error("Google login is unavailable in this preview. Please use the latest installed StitchBook app.");
         }
 
         const { GoogleSignin, statusCodes } = googleModule;

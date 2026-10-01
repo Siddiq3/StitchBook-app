@@ -1,7 +1,7 @@
 import axios from "axios";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
-import storage from "./storage";
+import storage from "./authStorage";
 
 const PRODUCTION_API_BASE_URL = "https://stitchbook-backend.onrender.com/api";
 
