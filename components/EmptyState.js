@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
 
 export default function EmptyState({ icon = "hanger", title, description, message, action }) {

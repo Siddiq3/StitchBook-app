@@ -10,7 +10,7 @@ import {
   AppState } from
 'react-native';
 import { format, parseISO } from 'date-fns';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MotiView } from '../components/AccessibleMotionView';
 import { useStitchPro } from '../context/StitchProContext';
 import { useToast } from '../context/ToastContext';

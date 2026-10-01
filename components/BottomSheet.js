@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
 
 export default function BottomSheet({

@@ -4,61 +4,61 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 export const COLORS = {
   // Roles shared by every mobile surface; compatibility aliases remain below.
-  primary: "#1A56DB",
-  primaryLight: "#EEF3FF",
-  primaryDark: "#1745B0",
-  accent: "#6366F1",
+  primary: "#C2410C",
+  primaryLight: "#FEF1EA",
+  primaryDark: "#9A3412",
+  accent: "#9A3412",
 
   // Semantic
   success: "#15803D",
   successLight: "#F0FDF4",
   warning: "#B45309",
   warningLight: "#FFFBEB",
-  danger: "#B91C1C",
+  danger: "#BE123C",
   dangerLight: "#FEF2F2",
   info: "#0369A1",
   infoLight: "#F0F9FF",
 
   // Neutrals (slate/ash scale)
-  text: "#111827",
-  textSecondary: "#4B5563",
-  textMuted: "#5F6673",
-  border: "#CBD0D9",
-  borderLight: "#E2E5EB",
-  background: "#F7F8FA",
+  text: "#101014",
+  textSecondary: "#45454F",
+  textMuted: "#5B5B66",
+  border: "#D3D3D9",
+  borderLight: "#E6E6EA",
+  background: "#F4F4F6",
   surface: "#FFFFFF",
   overlay: "rgba(0,0,0,0.5)",
 
   // Status badge backgrounds + text (exact pairs)
-  pendingBg: "#EFF1F5",
-  pendingText: "#4B5563",
+  pendingBg: "#EEEEF1",
+  pendingText: "#45454F",
   progressBg: "#EFF6FF",
-  progressText: "#1A56DB",
+  progressText: "#C2410C",
   readyBg: "#F0FDF4",
   readyText: "#15803D",
   deliveredBg: "#F0FDF4",
   deliveredText: "#166534",
   urgentBg: "#FEF2F2",
-  urgentText: "#B91C1C",
+  urgentText: "#BE123C",
 
   // Avatar colors123 (rotate through these)
   avatarColors: [
-    "#1A56DB",
-    "#6366F1",
+    "#C2410C",
+    "#9A3412",
     "#0F766E",
     "#B45309",
     "#0369A1",
     "#15803D",
-    "#B91C1C",
+    "#BE123C",
     "#475569",
   ],
 
   // Stat card colors123 (one per card)
-  statPrimary: "#1A56DB",
+  statPrimary: "#C2410C",
   statSuccess: "#15803D",
   statWarning: "#B45309",
-  statPurple: "#6366F1",
-  statDanger: "#B91C1C",
+  statPurple: "#9A3412",
+  statDanger: "#BE123C",
   statInfo: "#0369A1",
 };
 
@@ -83,9 +83,9 @@ export const colors123 = {
   dangerSoft: COLORS.dangerLight,
   dangerLight: COLORS.dangerLight,
   background: COLORS.background,
-  backgroundAccent: "#EEF3FF",
+  backgroundAccent: "#FEF1EA",
   surface: COLORS.surface,
-  surfaceMuted: "#EFF1F5",
+  surfaceMuted: "#EEEEF1",
   card: COLORS.surface,
   border: COLORS.border,
   borderLight: COLORS.borderLight,
@@ -109,7 +109,7 @@ export const colors123 = {
   urgentText: COLORS.urgentText,
   error: COLORS.danger,
   transparent: "transparent",
-  bgInput: "#F7F8FA",
+  bgInput: "#F4F4F6",
 };
 
 export const FONTS = {

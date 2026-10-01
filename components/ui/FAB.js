@@ -1,7 +1,7 @@
 import { fonts } from "../../utils/theme";
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 import { colors123, SIZES, SHADOWS } from '../../utils/theme';
 

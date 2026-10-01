@@ -2,7 +2,7 @@ import InlineAlert from "../components/InlineAlert";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl, Alert } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
 import AppButton from "../components/AppButton";

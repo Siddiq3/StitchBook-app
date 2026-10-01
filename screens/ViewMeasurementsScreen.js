@@ -10,7 +10,7 @@ import {
   View,
   Pressable,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, parseISO } from "date-fns";
 import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";

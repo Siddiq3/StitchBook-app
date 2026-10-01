@@ -1,7 +1,7 @@
 import { fonts } from "../../utils/theme";
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import PrimaryButton from './PrimaryButton';
 import { colors123, SIZES, normalize } from '../../utils/theme';
 

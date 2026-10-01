@@ -14,7 +14,7 @@ import {
   TextInput } from
 "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MotiView } from "../components/AccessibleMotionView";
 import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";

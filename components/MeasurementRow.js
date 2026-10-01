@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { StyleSheet, TextInput, View, Text, Pressable } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { colors123, fonts, spacing } from "../utils/theme";import { useLanguage } from "../context/LanguageContext";
 
 export default function MeasurementRow({

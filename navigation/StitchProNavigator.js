@@ -1,3 +1,4 @@
+import AccountRecoveryScreen from '../screens/AccountRecoveryScreen';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { useStitchPro } from '../context/StitchProContext';
@@ -18,6 +19,10 @@ const StitchProNavigator = () => {
     isBooting,
     isAuthenticated,
     shop,
+    shopError,
+    retryShop,
+    retryBoot,
+    authError,
   } = useStitchPro();
 
   const {
@@ -38,6 +43,10 @@ const StitchProNavigator = () => {
         <SplashScreen />
       </NavigationContainer>
     );
+  }
+
+  if (shopError || (!isAuthenticated && authError)) {
+    return <AccountRecoveryScreen message={shopError || authError} onRetry={shopError ? retryShop : retryBoot} />;
   }
 
   // 2. Not logged in → show pre-auth flow

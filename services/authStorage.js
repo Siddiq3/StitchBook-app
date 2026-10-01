@@ -33,10 +33,12 @@ const authStorage = {
     return raw ? JSON.parse(raw) : null;
   },
   clearAll: async () => {
+    const allKeys = await AsyncStorage.getAllKeys();
+    const measurementKeys = allKeys.filter((key) => key.startsWith("measurement_"));
     await Promise.all([
       SecureStore.deleteItemAsync(KEYS.TOKEN),
       SecureStore.deleteItemAsync(KEYS.REFRESH),
-      AsyncStorage.multiRemove([KEYS.USER, KEYS.SHOP, KEYS.MEASUREMENTS]),
+      AsyncStorage.multiRemove([KEYS.USER, KEYS.SHOP, KEYS.MEASUREMENTS, ...measurementKeys]),
     ]);
   },
 };

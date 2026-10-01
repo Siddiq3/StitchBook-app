@@ -1,3 +1,4 @@
+import PrivateImage from './PrivateImage';
 import React, { useState, useEffect } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import { colors123, fonts } from "../utils/theme";
@@ -32,7 +33,7 @@ export default function AvatarBadge({
 
   if (photoUrl && !imageFailed)
     return (
-      <Image
+      <PrivateImage
         accessibilityLabel={name}
         source={{ uri: photoUrl }}
         onError={() => setImageFailed(true)}

@@ -87,6 +87,7 @@ test("extracted auth persistence preserves keys, tokens and logout cleanup", asy
     "@react-native-async-storage/async-storage": {
       setItem: async (k, v) => local.set(k, v),
       getItem: async (k) => local.get(k) ?? null,
+      getAllKeys: async () => [...local.keys()],
       multiRemove: async (keys) => keys.forEach((k) => local.delete(k)),
     },
   }).default;
@@ -100,12 +101,14 @@ test("extracted auth persistence preserves keys, tokens and logout cleanup", asy
   assert.equal(secure.get("auth_refresh"), "rotated");
   await storage.saveShop({ id: 7 });
   local.set("measurements_cache", "cached");
+  local.set("measurement_7_shirt_123", "private");
   local.set("unrelated", "preserved");
   await storage.clearAll();
   assert.equal(secure.size, 0);
   assert.equal(await storage.getUser(), null);
   assert.equal(await storage.getShop(), null);
   assert.equal(local.has("measurements_cache"), false);
+  assert.equal(local.has("measurement_7_shirt_123"), false);
   assert.equal(local.get("unrelated"), "preserved");
 });
 

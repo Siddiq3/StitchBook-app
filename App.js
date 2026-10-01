@@ -5,12 +5,10 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
 import { useFonts } from "expo-font";
-import {
-  Inter_400Regular,
-  Inter_500Medium,
-  Inter_600SemiBold,
-  Inter_700Bold,
-} from "@expo-google-fonts/inter";
+import { Inter_400Regular } from '@expo-google-fonts/inter/400Regular';
+import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium';
+import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold';
+import { Inter_700Bold } from '@expo-google-fonts/inter/700Bold';
 import { StitchProProvider } from "./context/StitchProContext";
 import { LanguageProvider } from "./context/LanguageContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -18,7 +16,7 @@ import StitchProNavigator from "./navigation/StitchProNavigator";
 import { colors123 } from "./utils/theme";
 
 export default function StitchProApp() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Inter_400Regular,
     Inter_500Medium,
     Inter_600SemiBold,
@@ -33,7 +31,7 @@ export default function StitchProApp() {
     }
   }, []);
 
-  if (!fontsLoaded) {
+  if (!fontsLoaded && !fontError) {
     return <View accessible accessibilityLabel="Loading StitchBook" accessibilityState={{ busy: true }} style={{ flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: appBackground }}><ActivityIndicator color={colors123.primary} /></View>;
   }
 

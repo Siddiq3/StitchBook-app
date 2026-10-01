@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   StyleSheet } from
 "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { MotiView } from "./AccessibleMotionView";
 import BottomSheet from "./BottomSheet";
 import AppButton from "./AppButton";

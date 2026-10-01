@@ -6,7 +6,7 @@ import { fonts } from "../../utils/theme";
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import {
   BRAND_COLORS,
   TEXT_STYLES,

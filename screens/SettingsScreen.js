@@ -15,7 +15,7 @@ import {
   KeyboardAvoidingView,
   Platform } from
 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Constants from 'expo-constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors123, spacing, fonts, radius } from '../utils/theme';
@@ -526,6 +526,8 @@ export default function SettingsScreen({ navigation }) {
         </View>
         */}
 
+        <AppButton label="Devices and sessions" variant="secondary" onPress={() => navigation.navigate("Sessions")} />
+        <AppButton label="Delete account" variant="danger" onPress={() => navigation.navigate('DeleteAccount')} />
         {/* Settings Menu */}
         <View style={styles.settingsMenu}>
           <Text style={styles.sectionTitle}>{t("shopDetails")}</Text>

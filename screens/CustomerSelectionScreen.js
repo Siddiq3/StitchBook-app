@@ -3,7 +3,7 @@ import IconInput from "../components/IconInput";
 import InlineAlert from "../components/InlineAlert";
 import React, { useState, useCallback, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, FlatList, ActivityIndicator, RefreshControl } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useStitchPro } from "../context/StitchProContext";
 import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
 import AvatarCircle from "../components/AvatarCircle";

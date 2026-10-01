@@ -9,7 +9,9 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test:ui": "node --test scripts/ui-foundation.test.cjs",
-    "test:services": "node --test scripts/startup-services.test.cjs"
+    "test:services": "node --test scripts/startup-services.test.cjs",
+    "test": "node --test scripts/*.test.cjs",
+    "test:release": "node --test scripts/release-config.test.cjs"
   },
   "dependencies": {
     "@expo-google-fonts/inter": "^0.4.2",
@@ -24,7 +26,7 @@
     "@react-navigation/bottom-tabs": "^6.5.8",
     "@react-navigation/native": "^6.1.10",
     "@react-navigation/native-stack": "^6.9.13",
-    "axios": "^1.15.2",
+    "axios": "^1.20.0",
     "date-fns": "^2.30.0",
     "expo": "~53.0.27",
     "expo-application": "~6.1.5",
@@ -48,11 +50,25 @@
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",
-    "react-native-svg": "^15.15.4",
+    "react-native-svg": "^15.11.2",
     "react-native-web": "^0.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "prettier": "^2.4.1"
+  },
+  "expo": {
+    "doctor": {
+      "appConfigFieldsNotSyncedCheck": {
+        "enabled": false
+      }
+    }
+  },
+  "overrides": {
+    "postcss": "^8.5.23",
+    "xcode": {
+      "uuid": "^11.1.1"
+    },
+    "decode-uri-component": "^0.4.3"
   }
 }

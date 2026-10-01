@@ -12,7 +12,7 @@ import {
   Platform,
   useSafeAreaInsets,
 } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Text } from 'react-native';
 import {
   BRAND_COLORS,

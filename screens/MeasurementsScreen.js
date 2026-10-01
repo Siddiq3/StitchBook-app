@@ -3,7 +3,7 @@ import EmptyState from "../components/EmptyState";
 import InlineAlert from "../components/InlineAlert";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
 import AppCard from "../components/AppCard";

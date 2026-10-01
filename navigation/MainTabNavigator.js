@@ -1,3 +1,6 @@
+import SessionsScreen from '../screens/SessionsScreen';
+import DeleteAccountScreen from '../screens/DeleteAccountScreen';
+import AccountRecoveryScreen from '../screens/AccountRecoveryScreen';
 import RecordMeasurementScreen from "../screens/RecordMeasurementScreen";
 import ViewMeasurementsScreen from "../screens/ViewMeasurementsScreen";
 import MeasurementsScreen from "../screens/MeasurementsScreen";
@@ -6,7 +9,7 @@ import React, { Suspense, useEffect, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import DashboardScreen from '../screens/DashboardScreen';
@@ -109,7 +112,7 @@ function StudioTabs() {
 }
 
 export default function MainTabNavigator() {
-  const { subscription, subscriptionLoading, fetchSubscription } = useStitchPro();
+  const { subscription, subscriptionLoading, subscriptionState, fetchSubscription } = useStitchPro();
   const requestedSubscription = useRef(false);
 
   useEffect(() => {
@@ -129,8 +132,14 @@ export default function MainTabNavigator() {
 
   }
 
+  if (subscriptionState === "error") {
+    return <AccountRecoveryScreen message="Could not verify subscription. Your shop data is safe." onRetry={() => fetchSubscription().catch(() => {})} />;
+  }
+
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="StudioTabs" screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Sessions" component={SessionsScreen} options={{headerShown:true,title:"Devices and sessions"}} />
+      <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{headerShown:true,title:"Delete account"}} />
       <Stack.Screen name="StudioTabs" component={StudioTabs} />
       <Stack.Screen name="RecordMeasurement" component={RecordMeasurementScreen} options={{ headerShown: true, title: 'Record measurement', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />
       <Stack.Screen name="ViewMeasurements" component={ViewMeasurementsScreen} options={{ headerShown: true, title: 'Measurement history', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />

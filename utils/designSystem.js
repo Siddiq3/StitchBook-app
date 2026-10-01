@@ -61,11 +61,11 @@ const text = (fontSize, lineHeight, fontFamily = fonts.regular) => ({
   fontFamily,
 });
 export const TEXT_STYLES = {
-  displayLarge: text(30, 36, fonts.bold),
+  displayLarge: text(34, 40, fonts.bold),
   displayMedium: text(30, 36, fonts.bold),
   headingLarge: text(24, 30, fonts.semibold),
   headingMedium: text(20, 26, fonts.semibold),
-  headingSmall: text(17, 23, fonts.semibold),
+  headingSmall: text(18, 24, fonts.semibold),
   bodyLarge: text(17, 25),
   bodyMedium: text(15, 22),
   bodySmall: text(13, 20),

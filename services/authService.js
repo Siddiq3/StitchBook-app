@@ -78,6 +78,8 @@ export const authService = {
   },
 
   logout: async () => {
-    await storage.clearAll();
+    try { await authApi.logout(); }
+    catch { /* Offline sign-out still clears this device; server revocation requires connectivity. */ }
+    finally { await storage.clearAll(); }
   },
 };

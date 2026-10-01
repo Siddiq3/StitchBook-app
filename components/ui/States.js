@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from "react-native";
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Button from './Button';
 import {
   BRAND_COLORS,

@@ -10,7 +10,7 @@ import {
   Text,
   View } from
 "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, isValid, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
 import AppButton from "../components/AppButton";

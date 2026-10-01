@@ -1,0 +1,79 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const { createRequire } = require('node:module');
+const root = require('node:path').resolve(__dirname, '..');
+const req = createRequire(root + '/package.json');
+function load(file, imports) {
+  const {code} = req('@babel/core').transformSync(fs.readFileSync(root + '/' + file, 'utf8'), {
+    configFile:false, babelrc:false,
+    presets:[[req.resolve('@babel/preset-react'), {runtime:'classic'}]],
+    plugins:[req.resolve('@babel/plugin-transform-modules-commonjs')],
+  });
+  const exports = {};
+  vm.runInNewContext(code, {exports, setTimeout, clearTimeout, console, require(name) {
+    assert.ok(name in imports, 'Unexpected import ' + name); return imports[name];
+  }});
+  return exports;
+}
+function provider({shopError, subscriptionError} = {}) {
+  let state, cleared = 0;
+  const effects = [];
+  const session = {token:'test-token',user:{id:1},shop:{id:7}};
+  const react = {
+    createContext:() => ({Provider:'provider'}),
+    useState(initial) {state = initial; return [state, updater => {state = typeof updater === 'function' ? updater(state) : updater;}];},
+    useEffect: callback => effects.push(callback),
+    useCallback:callback => callback,
+    createElement:(_type,props) => props,
+  };
+  const api = {
+    shopApi:{get:async () => {if(shopError) throw shopError; return {data:{data:session.shop}};}},
+    subscriptionApi:{getStatus:async () => {if(subscriptionError) throw subscriptionError; return {data:{data:{isActive:true}}};}},
+    customerApi:{getAll:async () => ({data:{data:{customers:[{id:3}],pagination:{total:1}}}})},
+    orderApi:{getAll:async () => ({data:{data:{orders:[{id:4}],pagination:{total:1}}}})},
+  };
+  const module = load('context/StitchProContext.js', {
+    react,
+    '../services/authService':{authService:{restoreSession:async () => session,loginWithGoogle:async () => session}},
+    '../services/storage':{storage:{saveShop:async()=>{},clearAll:async()=>{cleared++;}}},
+    '../services/api':api,
+  });
+  const value = module.StitchProProvider({children:null}).value;
+  return {value, effects, state:()=>state, cleared:()=>cleared};
+}
+const networkError = () => new Error('Network unavailable');
+test('successful login retains authenticated session and shop', async()=>{
+  const p=provider(); await p.value.loginWithGoogle('test-id-token');
+  assert.equal(p.state().isAuthenticated,true); assert.equal(p.state().shop.id,7);
+});
+test('customer and order API payloads populate state', async()=>{
+  const p=provider(); await p.value.fetchCustomers(); await p.value.fetchOrders();
+  assert.equal(p.state().customers[0].id,3); assert.equal(p.state().orders[0].id,4);
+  assert.equal(p.state().customersLoading,false); assert.equal(p.state().ordersLoading,false);
+});
+test('subscription network failure must not turn successful login into auth failure', async()=>{
+  const p=provider({subscriptionError:networkError()});
+  await p.value.loginWithGoogle('test-id-token').catch(()=>{});
+  assert.equal(p.state().isAuthenticated,true,'Valid Google login was incorrectly marked unauthenticated');
+});
+test('temporary subscription outage during boot must preserve stored credentials', async()=>{
+  const p=provider({subscriptionError:networkError()}); p.effects[0]();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(p.cleared(),0,'Boot erased valid credentials after subscription fetch failed');
+});
+test('temporary shop outage must retain restored shop instead of sending user to onboarding', async()=>{
+  const p=provider({shopError:networkError()}); p.effects[0]();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(p.state().shop?.id,7,'Cached shop was discarded on a network error');
+});
+test('logout must remove locally saved customer measurement records', async()=>{
+  const local = new Map([['measurement_3_shirt_123',{chest:40}],['unrelated','keep']]);
+  const storage=load('services/authStorage.js',{
+    'expo-secure-store':{deleteItemAsync:async()=>{}},
+    '@react-native-async-storage/async-storage':{getAllKeys:async()=>[...local.keys()],multiRemove:async keys=>keys.forEach(key=>local.delete(key))},
+  }).default;
+  await storage.clearAll();
+  assert.equal(local.has('measurement_3_shirt_123'),false,'Customer measurements survive logout');
+});

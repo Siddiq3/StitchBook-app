@@ -97,7 +97,8 @@ api.interceptors.response.use(
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
         }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
+          originalRequest._retry = true;
+        originalRequest.headers.Authorization = `Bearer ${token}`;
           return api(originalRequest);
         });
       }
@@ -114,7 +115,7 @@ api.interceptors.response.use(
 
         const response = await axios.post(`${BASE_URL}/auth/refresh-token`, {
           refreshToken
-        });
+        }, { timeout: 30000 });
 
         const newToken = response.data.data.token;
         const newRefreshToken = response.data.data.refreshToken;
@@ -129,8 +130,8 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (err) {
         processQueue(err, null);
-        await storage.clearAll();
-        throw error;
+        if ([401, 403].includes(err.response?.status)) await storage.clearAll();
+        throw err;
       } finally {
         isRefreshing = false;
       }
@@ -142,6 +143,10 @@ api.interceptors.response.use(
 
 // ── AUTH ──────────────────────────────
 export const authApi = {
+  logout: () => api.post("/auth/logout"),
+  logoutAll: () => api.post("/auth/logout-all"),
+  sessions: () => api.get("/auth/sessions"),
+  revokeSession: (id) => api.delete(`/auth/session/${id}`),
   login: (firebaseToken) => api.post("/auth/login", { firebaseToken }),
   google: (idToken) =>
   api.post("/auth/google", {

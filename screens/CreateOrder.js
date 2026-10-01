@@ -2,7 +2,7 @@ import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, FlatList, TextInput, ActivityIndicator, Platform, Alert } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from '@expo/vector-icons/Ionicons';
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";

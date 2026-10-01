@@ -42,6 +42,8 @@ const INITIAL = {
   user: null,
   token: null,
   shop: null,
+  shopError: null,
+  subscriptionState: "idle",
   authError: null,
 
   // Customers
@@ -141,15 +143,16 @@ export const StitchProProvider = ({ children }) => {
       set({
         user: session.user,
         token: session.token,
-        isAuthenticated: true
+        isAuthenticated: true,
+        shop: session.shop || null
       });
 
       // Fetch shop to decide: onboarding or main app
       await fetchShopSilently();
-      await fetchSubscription();
+      await fetchSubscription().catch(() => {});
     } catch (err) {
 
-      await storage.clearAll();
+      set({ authError: "Could not restore your account. Please try again.", isAuthenticated: false });
     } finally {
       set({ isBooting: false });
 
@@ -162,6 +165,7 @@ export const StitchProProvider = ({ children }) => {
 
   const fetchShopSilently = async () => {
 
+    set({ shopError: null });
     try {
       const res = await shopApi.get();
       const shop = res.data.data;
@@ -176,8 +180,7 @@ export const StitchProProvider = ({ children }) => {
 
         set({ shop: null });
       } else {
-
-        set({ shop: null });
+        set({ shopError: "Could not load your shop. Check your connection and try again." });
       }
     }
   };
@@ -208,7 +211,7 @@ export const StitchProProvider = ({ children }) => {
 
       // Then fetch shop
       await fetchShopSilently();
-      await fetchSubscription();
+      await fetchSubscription().catch(() => {});
 
 
     } catch (err) {
@@ -290,20 +293,20 @@ export const StitchProProvider = ({ children }) => {
   // ════════════════════════════════════════
 
   const fetchSubscription = useCallback(async () => {
-    set({ subscriptionLoading: true, subscriptionError: null });
+    set({ subscriptionLoading: true, subscriptionError: null, subscriptionState: "loading" });
     try {
       const res = await subscriptionApi.getStatus();
       const subscription = res.data?.data || res.data;
-      set({ subscription, subscriptionLoading: false });
+      set({ subscription, subscriptionLoading: false, subscriptionState: "ready" });
       return subscription;
     } catch (err) {
       const status = err.response?.status;
       if (status === 404) {
-        set({ subscription: null, subscriptionLoading: false });
+        set({ subscription: null, subscriptionLoading: false, subscriptionState: "ready" });
         return null;
       }
 
-      set({ subscription: null, subscriptionLoading: false, subscriptionError: err.message });
+      set({ subscription: null, subscriptionLoading: false, subscriptionError: "Could not verify subscription. Please try again.", subscriptionState: "error" });
       throw err;
     }
   }, []);
@@ -1097,6 +1100,8 @@ export const StitchProProvider = ({ children }) => {
         ...state,
 
         // Auth
+        retryShop: fetchShopSilently,
+        retryBoot: bootApp,
         logout,
         loginWithGoogle,
         loginWithMsg91Widget,

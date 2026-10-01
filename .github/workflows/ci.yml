@@ -1,0 +1,45 @@
+name: Mobile verification
+on: [push, pull_request]
+permissions:
+  contents: read
+concurrency:
+  group: mobile-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npx expo install --check
+      - run: npx expo-doctor
+      - run: npx expo export --platform android --output-dir dist-ci
+      - run: npm audit --omit=dev
+  native-release:
+    runs-on: ubuntu-latest
+    env:
+      EXPO_PUBLIC_API_BASE_URL: https://stitchbook-backend.onrender.com/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: android-actions/setup-android@v3
+      - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0' 'ndk;27.1.12297006'
+      - run: npm ci
+      - run: cd android && ./gradlew :app:bundleRelease --no-daemon
+      - uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-release-verification
+          path: android/app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
