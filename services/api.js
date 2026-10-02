@@ -85,6 +85,8 @@ api.interceptors.response.use(
     "/auth/google",
     "/auth/register",
     "/auth/login",
+    "/auth/forgot-password",
+    "/auth/reset-password",
     "/auth/firebase",
     "/auth/msg91-widget",
     "/auth/refresh-token"].
@@ -151,6 +153,8 @@ export const authApi = {
   revokeSession: (id) => api.delete(`/auth/session/${id}`),
   register: (data) => api.post("/auth/register", { ...data, platform: Platform.OS, device: Platform.OS }),
   login: (identifier, password) => api.post("/auth/login", { identifier, password, platform: Platform.OS, device: Platform.OS }),
+  requestPasswordReset: (email) => api.post("/auth/forgot-password", { email }),
+  resetPassword: (email, otp, newPassword) => api.post("/auth/reset-password", { email, otp, newPassword }),
   setPassword: (currentPassword, newPassword) => api.post("/auth/password", { currentPassword, newPassword }),
   firebase: (firebaseToken) => api.post("/auth/firebase", { firebaseToken }),
   google: (idToken) =>

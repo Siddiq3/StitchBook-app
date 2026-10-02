@@ -10,6 +10,7 @@ import { navigationTheme } from '../utils/theme';
 import SplashScreen           from '../screens/SplashScreen';
 import LoginScreen            from '../screens/LoginScreen';
 import RegisterScreen         from '../screens/RegisterScreen';
+import ForgotPasswordScreen   from '../screens/ForgotPasswordScreen';
 import OnboardingScreen       from '../screens/OnboardingScreen';
 
 // ── Main app (has its own NavigationContainer + tabs) ──
@@ -60,6 +61,7 @@ const StitchProNavigator = () => {
         <AuthStack.Navigator screenOptions={{ headerShown: false }}>
           <AuthStack.Screen name="Login" component={LoginScreen} />
           <AuthStack.Screen name="Register" component={RegisterScreen} />
+          <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
         </AuthStack.Navigator>
       </NavigationContainer>
     );
