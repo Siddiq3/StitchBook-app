@@ -28,3 +28,18 @@ test('legacy authenticated accounts can reach password setup from settings',()=>
   assert.match(settings,/navigation\.navigate\("Password"\)/);
   assert.match(navigation,/name="Password"/);
 });
+
+
+test('forgot password flow is linked from login and wired to public recovery APIs',()=>{
+  const login=read('screens/LoginScreen.js');
+  const recovery=read('screens/ForgotPasswordScreen.js');
+  const api=read('services/api.js');
+  const navigation=read('navigation/StitchProNavigator.js');
+  assert.match(login,/Forgot password\?/);
+  assert.match(login,/ForgotPassword/);
+  assert.match(recovery,/Send verification code/);
+  assert.match(recovery,/Reset password/);
+  assert.match(api,/\/auth\/forgot-password/);
+  assert.match(api,/\/auth\/reset-password/);
+  assert.match(navigation,/name="ForgotPassword"/);
+});
