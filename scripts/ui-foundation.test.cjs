@@ -60,11 +60,11 @@ test("status labels and tones support API and legacy spelling", () => {
   assert.equal(theme.getStatusTone("future_stage").labelKey, undefined);
 });
 test("premium SaaS visual tokens stay consistent", () => {
-  assert.equal(theme.COLORS.primary, "#E2511E");
-  assert.equal(theme.COLORS.primaryLight, "#FEF1EA");
-  assert.equal(theme.COLORS.background, "#F4F4F6");
+  assert.equal(theme.COLORS.primary, "#C24924");
+  assert.equal(theme.COLORS.primaryLight, "#FFF1EB");
+  assert.equal(theme.COLORS.background, "#F7F5F2");
   assert.equal(theme.COLORS.surface, "#FFFFFF");
-  assert.equal(theme.COLORS.text, "#101014");
+  assert.equal(theme.COLORS.text, "#1F1A17");
   assert.equal(theme.spacing.xxs, 4);
   assert.equal(theme.spacing.xs, 8);
   assert.equal(theme.spacing.sm, 12);
@@ -73,11 +73,11 @@ test("premium SaaS visual tokens stay consistent", () => {
   assert.equal(theme.spacing.xl, 32);
   assert.equal(theme.spacing.xxl, 48);
   assert.equal(theme.radius.sm, 12);
-  assert.equal(theme.radius.md, 18);
-  assert.equal(theme.radius.lg, 22);
-  assert.equal(theme.radius.xl, 28);
+  assert.equal(theme.radius.md, 14);
+  assert.equal(theme.radius.lg, 18);
+  assert.equal(theme.radius.xl, 22);
   assert.equal(theme.SIZES.buttonHSm, 44);
-  assert.equal(theme.SIZES.inputH, 50);
+  assert.equal(theme.SIZES.inputH, 48);
 });
 
 test("compatibility tokens share one palette and loaded font families", () => {
