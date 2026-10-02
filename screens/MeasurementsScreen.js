@@ -318,8 +318,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.background,
   },
   heroCard: {
-    borderRadius: 16,
-    padding: spacing.lg,
+    borderRadius: radius.lg,
+    padding: spacing.md,
     gap: spacing.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
   },
   heroPill: {
     minWidth: 82,
-    borderRadius: 18,
+    borderRadius: radius.md,
     backgroundColor: colors123.primary,
     paddingHorizontal: 12,
     paddingVertical: 12,
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.82)",
   },
   heroPreview: {
-    borderRadius: 16,
+    borderRadius: radius.md,
     backgroundColor: colors123.surfaceMuted,
     borderWidth: 1,
     borderColor: colors123.borderLight,
@@ -400,7 +400,7 @@ const styles = StyleSheet.create({
   },
   heroFigureWrap: {
     marginTop: spacing.xs,
-    borderRadius: 14,
+    borderRadius: radius.md,
     backgroundColor: colors123.surface,
     overflow: "visible",
   },
@@ -429,12 +429,11 @@ const styles = StyleSheet.create({
   },
   recordCard: {
     backgroundColor: colors123.surface,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
     gap: spacing.sm,
-    ...shadows.card,
   },
   pressedCard: {
     opacity: 0.88,
@@ -491,7 +490,7 @@ const styles = StyleSheet.create({
   },
   snapshotPill: {
     flex: 1,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     backgroundColor: colors123.surfaceMuted,
     borderWidth: 1,
     borderColor: colors123.borderLight,
