@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 28,
+    paddingHorizontal: 24,
     backgroundColor: colors123.background,
   },
   machineWrap: {
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     height: 210,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: 20,
+    borderRadius: 28,
     backgroundColor: colors123.surface,
     shadowColor: colors123.primary,
     shadowOffset: { width: 0, height: 16 },
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     height: 78,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 18,
+    marginTop: 20,
   },
   wordmarkLogo: {
     width: "100%",
