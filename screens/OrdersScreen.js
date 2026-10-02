@@ -384,7 +384,8 @@ const styles = StyleSheet.create({
     minHeight: 76,
     justifyContent: "center",
     borderWidth: 1,
-    borderRadius: 16,
+    borderColor: colors123.borderLight,
+    borderRadius: radius.md,
     backgroundColor: colors123.surface,
   },
   miniStatLabel: {
@@ -403,10 +404,10 @@ const styles = StyleSheet.create({
   },
   orderCard: {
     gap: 10,
-    borderWidth: 0,
-    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors123.borderLight,
+    borderRadius: radius.md,
     backgroundColor: colors123.surface,
-    ...shadows.soft,
   },
   orderHeader: {
     flexDirection: "row",
@@ -468,8 +469,8 @@ const styles = StyleSheet.create({
   amountPanel: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
-    backgroundColor: colors123.background,
+    borderRadius: radius.md,
+    backgroundColor: colors123.surfaceMuted,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     paddingVertical: spacing.sm,
@@ -538,7 +539,7 @@ const styles = StyleSheet.create({
   openDetailsRow: {
     marginTop: spacing.xs,
     minHeight: 36,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     backgroundColor: colors123.primarySoft,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
