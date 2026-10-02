@@ -1,6 +1,7 @@
 import AccountRecoveryScreen from '../screens/AccountRecoveryScreen';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useStitchPro } from '../context/StitchProContext';
 import { useLanguage } from '../context/LanguageContext';
 import { navigationTheme } from '../utils/theme';
@@ -8,10 +9,13 @@ import { navigationTheme } from '../utils/theme';
 // ── Pre-auth screens (no navigation needed) ──
 import SplashScreen           from '../screens/SplashScreen';
 import LoginScreen            from '../screens/LoginScreen';
+import RegisterScreen         from '../screens/RegisterScreen';
 import OnboardingScreen       from '../screens/OnboardingScreen';
 
 // ── Main app (has its own NavigationContainer + tabs) ──
 import MainTabNavigator    from './MainTabNavigator';
+
+const AuthStack = createNativeStackNavigator();
 
 const StitchProNavigator = () => {
   const [isSplashReady, setIsSplashReady] = useState(false);
@@ -53,7 +57,10 @@ const StitchProNavigator = () => {
   if (!isAuthenticated) {
     return (
       <NavigationContainer theme={activeTheme}>
-        <LoginScreen />
+        <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+          <AuthStack.Screen name="Login" component={LoginScreen} />
+          <AuthStack.Screen name="Register" component={RegisterScreen} />
+        </AuthStack.Navigator>
       </NavigationContainer>
     );
   }
