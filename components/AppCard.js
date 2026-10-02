@@ -19,11 +19,11 @@ export default function AppCard({ children, style, padded = true, variant = "def
 const styles = StyleSheet.create({
   base: {
     backgroundColor: colors123.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
   },
-  padded: { padding: spacing.md },
+  padded: { paddingHorizontal: spacing.md, paddingVertical: 14 },
   muted: { backgroundColor: colors123.surfaceMuted, borderColor: colors123.borderLight },
   accent: { backgroundColor: colors123.primarySoft, borderColor: colors123.borderLight },
 });
