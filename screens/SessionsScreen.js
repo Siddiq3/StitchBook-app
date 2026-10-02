@@ -29,4 +29,4 @@ export default function SessionsScreen(){
     <AppButton label="Sign out all devices" variant="danger" onPress={async()=>{try{await authApi.logoutAll();await logout();}catch{setError('Could not sign out all devices. Please try again.');}}}/>
   </ScrollView>;
 }
-const styles=StyleSheet.create({page:{flexGrow:1,padding:spacing.xl,gap:spacing.md,backgroundColor:colors123.background},title:{fontFamily:fonts.bold,fontSize:24,lineHeight:30,color:colors123.text},body:{fontFamily:fonts.regular,fontSize:15,lineHeight:23,color:colors123.textSecondary}});
+const styles=StyleSheet.create({page:{flexGrow:1,padding:20,gap:spacing.md,backgroundColor:colors123.background},title:{fontFamily:fonts.bold,fontSize:24,lineHeight:30,color:colors123.text},body:{fontFamily:fonts.regular,fontSize:15,lineHeight:23,color:colors123.textSecondary}});
