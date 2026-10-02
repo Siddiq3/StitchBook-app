@@ -2,8 +2,29 @@ import { authApi } from './api';
 import { storage } from './storage';
 
 export const authService = {
+  registerWithPassword: async (data) => {
+    const res = await authApi.register(data);
+    const { token, refreshToken, user } = res.data.data;
+    await storage.saveAuth(token, refreshToken, user);
+    return { token, refreshToken, user };
+  },
+
+  loginWithPassword: async (identifier, password) => {
+    const res = await authApi.login(identifier, password);
+    const { token, refreshToken, user } = res.data.data;
+    await storage.saveAuth(token, refreshToken, user);
+    return { token, refreshToken, user };
+  },
+
+  setPassword: async (currentPassword, newPassword) => {
+    const res = await authApi.setPassword(currentPassword, newPassword);
+    const user = res.data.data?.user;
+    if (user) await storage.setUser(user);
+    return res.data.data;
+  },
+
   loginWithFirebase: async (firebaseToken) => {
-    const res = await authApi.login(firebaseToken);
+    const res = await authApi.firebase(firebaseToken);
     const { token, refreshToken, user } = res.data.data;
     await storage.saveAuth(token, refreshToken, user);
     return { token, refreshToken, user };
