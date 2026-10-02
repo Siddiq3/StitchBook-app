@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#F5F7FA"
+      "backgroundColor": "#F4F4F6"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -21,12 +21,9 @@
     },
     "android": {
       "package": "com.stitchbook.app",
-      "compileSdkVersion": 36,
-      "targetSdkVersion": 36,
-      "buildToolsVersion": "36.0.0",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#1A56DB"
+        "backgroundColor": "#E2511E"
       }
     },
     "web": {

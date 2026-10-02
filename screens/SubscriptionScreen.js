@@ -486,7 +486,8 @@ const getSubscriptionStyles = () => {
     backgroundColor: colors123.background,
   },
   contentContainer: {
-    padding: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.md,
     paddingBottom: spacing.xxl,
   },
   loadingContainer: {
@@ -494,8 +495,8 @@ const getSubscriptionStyles = () => {
     alignItems: "center",
   },
   heroCard: {
-    borderRadius: 16,
-    padding: spacing.lg,
+    borderRadius: radius.lg,
+    padding: spacing.md,
     marginBottom: spacing.md,
     overflow: "hidden",
     ...shadows.card,
@@ -509,7 +510,7 @@ const getSubscriptionStyles = () => {
   heroIcon: {
     width: 50,
     height: 50,
-    borderRadius: 18,
+    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255,255,255,0.16)",
@@ -559,7 +560,7 @@ const getSubscriptionStyles = () => {
   },
   heroStat: {
     flex: 1,
-    borderRadius: 18,
+    borderRadius: radius.md,
     padding: spacing.md,
     backgroundColor: "rgba(255,255,255,0.12)",
     borderWidth: 1,
@@ -578,10 +579,10 @@ const getSubscriptionStyles = () => {
   },
   trialStatusCard: {
     backgroundColor: colors123.surface,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    padding: spacing.lg,
+    padding: spacing.md,
     marginBottom: spacing.md,
     ...shadows.card,
   },
@@ -621,7 +622,7 @@ const getSubscriptionStyles = () => {
   },
   refreshPill: {
     minHeight: 44,
-    borderRadius: 17,
+    borderRadius: radius.pill,
     paddingHorizontal: spacing.sm,
     flexDirection: "row",
     alignItems: "center",
@@ -658,8 +659,8 @@ const getSubscriptionStyles = () => {
   },
   trialMetaItem: {
     flex: 1,
-    borderRadius: 16,
-    backgroundColor: colors123.background,
+    borderRadius: radius.md,
+    backgroundColor: colors123.surfaceMuted,
     padding: spacing.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
@@ -690,10 +691,10 @@ const getSubscriptionStyles = () => {
   },
   expiredCard: {
     backgroundColor: colors123.surface,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    padding: spacing.lg,
+    padding: spacing.md,
     marginBottom: spacing.md,
     alignItems: "center",
     ...shadows.card,
@@ -723,7 +724,7 @@ const getSubscriptionStyles = () => {
   },
   activeCard: {
     backgroundColor: colors123.surface,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
@@ -847,7 +848,7 @@ const getSubscriptionStyles = () => {
     gap: spacing.md,
     padding: spacing.md,
     backgroundColor: colors123.primarySoft,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     marginBottom: spacing.lg,
@@ -855,7 +856,7 @@ const getSubscriptionStyles = () => {
   webBillingIcon: {
     width: 44,
     height: 44,
-    borderRadius: 16,
+    borderRadius: radius.md,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors123.surface,

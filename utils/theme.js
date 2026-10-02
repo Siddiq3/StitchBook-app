@@ -2,38 +2,43 @@ import { Dimensions, PixelRatio } from "react-native";
 
 const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
+/**
+ * StitchBook visual system
+ * Warm tailoring identity + restrained neutral operational surfaces.
+ * Business logic should consume semantic roles instead of one-off colors.
+ */
 export const COLORS = {
-  // Roles shared by every mobile surface; compatibility aliases remain below.
-  primary: "#C2410C",
+  primary: "#E2511E",
+  primaryPressed: "#B83E15",
   primaryLight: "#FEF1EA",
-  primaryDark: "#9A3412",
-  accent: "#9A3412",
+  primaryDark: "#B83E15",
+  accent: "#E2511E",
 
-  // Semantic
   success: "#15803D",
   successLight: "#F0FDF4",
   warning: "#B45309",
   warningLight: "#FFFBEB",
   danger: "#BE123C",
   dangerLight: "#FEF2F2",
-  info: "#0369A1",
-  infoLight: "#F0F9FF",
+  info: "#1D4ED8",
+  infoLight: "#EFF6FF",
 
-  // Neutrals (slate/ash scale)
   text: "#101014",
   textSecondary: "#45454F",
   textMuted: "#5B5B66",
+  textDisabled: "#8A8A95",
   border: "#D3D3D9",
   borderLight: "#E6E6EA",
+  borderSubtle: "#EEEEF1",
   background: "#F4F4F6",
   surface: "#FFFFFF",
-  overlay: "rgba(0,0,0,0.5)",
+  surfaceMuted: "#EEEEF1",
+  overlay: "rgba(16,16,20,0.52)",
 
-  // Status badge backgrounds + text (exact pairs)
   pendingBg: "#EEEEF1",
   pendingText: "#45454F",
   progressBg: "#EFF6FF",
-  progressText: "#C2410C",
+  progressText: "#1D4ED8",
   readyBg: "#F0FDF4",
   readyText: "#15803D",
   deliveredBg: "#F0FDF4",
@@ -41,35 +46,33 @@ export const COLORS = {
   urgentBg: "#FEF2F2",
   urgentText: "#BE123C",
 
-  // Avatar colors123 (rotate through these)
   avatarColors: [
-    "#C2410C",
-    "#9A3412",
+    "#E2511E",
+    "#B83E15",
     "#0F766E",
     "#B45309",
-    "#0369A1",
+    "#1D4ED8",
     "#15803D",
     "#BE123C",
     "#475569",
   ],
 
-  // Stat card colors123 (one per card)
-  statPrimary: "#C2410C",
+  statPrimary: "#E2511E",
   statSuccess: "#15803D",
   statWarning: "#B45309",
-  statPurple: "#9A3412",
+  statPurple: "#7C3AED",
   statDanger: "#BE123C",
-  statInfo: "#0369A1",
+  statInfo: "#1D4ED8",
 };
 
-// Legacy color mapping for existing code compatibility
 export const colors123 = {
   primary: COLORS.primary,
+  primaryPressed: COLORS.primaryPressed,
   primaryDark: COLORS.primaryDark,
   primarySoft: COLORS.primaryLight,
   primaryLight: COLORS.primaryLight,
   accent: COLORS.accent,
-  secondary: COLORS.accent,
+  secondary: COLORS.textSecondary,
   success: COLORS.success,
   successSoft: COLORS.successLight,
   successLight: COLORS.successLight,
@@ -82,20 +85,24 @@ export const colors123 = {
   danger: COLORS.danger,
   dangerSoft: COLORS.dangerLight,
   dangerLight: COLORS.dangerLight,
+  error: COLORS.danger,
   background: COLORS.background,
-  backgroundAccent: "#FEF1EA",
+  backgroundAccent: COLORS.primaryLight,
   surface: COLORS.surface,
-  surfaceMuted: "#EEEEF1",
+  surfaceElevated: COLORS.surface,
+  surfaceMuted: COLORS.surfaceMuted,
   card: COLORS.surface,
   border: COLORS.border,
   borderLight: COLORS.borderLight,
+  borderSubtle: COLORS.borderSubtle,
   borderStrong: COLORS.border,
   text: COLORS.text,
   textSecondary: COLORS.textSecondary,
   textMuted: COLORS.textMuted,
+  textDisabled: COLORS.textDisabled,
   textSoft: COLORS.textSecondary,
   white: COLORS.surface,
-  shadow: "rgba(15,23,42,0.08)",
+  shadow: "rgba(16,16,20,0.08)",
   overlay: COLORS.overlay,
   pendingBg: COLORS.pendingBg,
   pendingText: COLORS.pendingText,
@@ -107,9 +114,8 @@ export const colors123 = {
   deliveredText: COLORS.deliveredText,
   urgentBg: COLORS.urgentBg,
   urgentText: COLORS.urgentText,
-  error: COLORS.danger,
   transparent: "transparent",
-  bgInput: "#F4F4F6",
+  bgInput: COLORS.surface,
 };
 
 export const FONTS = {
@@ -117,84 +123,90 @@ export const FONTS = {
   medium: "500",
   semibold: "600",
   bold: "700",
-  extraBold: "800",
+  extraBold: "700",
 };
 
 export const SIZES = {
-  // Text sizes
-  xs: 11,
-  sm: 12,
-  base: 14,
-  md: 15,
-  lg: 16,
-  xl: 18,
-  xxl: 20,
-  xxxl: 22,
-  huge: 28,
+  xs: 12,
+  sm: 13,
+  base: 15,
+  md: 15.5,
+  lg: 18,
+  xl: 20,
+  xxl: 22,
+  xxxl: 24,
+  huge: 34,
 
-  // Spacing
   xs2: 4,
   xs3: 6,
   sm2: 8,
-  sm3: 10,
+  sm3: 12,
   md2: 12,
   md3: 16,
-  lg2: 20,
+  lg2: 24,
   lg3: 24,
   xl2: 32,
-  xl3: 40,
+  xl3: 48,
 
-  // Radius
-  radiusSm: 8,
-  radiusMd: 12,
-  radiusLg: 16,
-  radiusXl: 20,
+  radiusSm: 12,
+  radiusMd: 18,
+  radiusLg: 22,
+  radiusXl: 28,
   radiusFull: 999,
 
-  // Heights
-  inputH: 48,
-  buttonH: 52,
+  inputH: 50,
+  buttonH: 50,
   buttonHSm: 44,
-  tabBarH: 64,
+  tabBarH: 68,
   headerH: 56,
 };
 
-// Legacy spacing mapping for existing code
 export const spacing = {
   xxs: 4,
   xs: 8,
   sm: 12,
   md: 16,
-  lg: 20,
-  xl: 24,
-  xxl: 32,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+  xxxl: 64,
 };
 
-// Legacy radius mapping for existing code
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
+  xs: 6,
+  sm: 12,
+  md: 18,
+  lg: 22,
+  xl: 28,
   pill: 999,
 };
 
-// Legacy fonts mapping for existing code
 export const fonts = {
   xs: { fontSize: 12 },
   sm: { fontSize: 13 },
-  base: { fontSize: 15 },
-  lg: { fontSize: 16 },
-  xl: { fontSize: 18 },
-  xxl: { fontSize: 20 },
+  base: { fontSize: 15.5 },
+  lg: { fontSize: 18 },
+  xl: { fontSize: 20 },
+  xxl: { fontSize: 24 },
+  display: { fontSize: 34 },
   regular: "Inter_400Regular",
   medium: "Inter_500Medium",
   semibold: "Inter_600SemiBold",
   bold: "Inter_700Bold",
-  extrabold: "Inter_600SemiBold",
+  extrabold: "Inter_700Bold",
 };
 
-// Elevation is reserved for floating layers. Existing card aliases stay flat.
+export const typography = {
+  display: { fontSize: 34, lineHeight: 40, fontFamily: fonts.bold, letterSpacing: -1 },
+  h1: { fontSize: 24, lineHeight: 30, fontFamily: fonts.bold, letterSpacing: -0.6 },
+  h2: { fontSize: 22, lineHeight: 30, fontFamily: fonts.semibold, letterSpacing: -0.4 },
+  h3: { fontSize: 18, lineHeight: 26, fontFamily: fonts.semibold },
+  body: { fontSize: 15.5, lineHeight: 23, fontFamily: fonts.regular },
+  small: { fontSize: 14, lineHeight: 21, fontFamily: fonts.regular },
+  label: { fontSize: 13, lineHeight: 18, fontFamily: fonts.semibold },
+  caption: { fontSize: 12, lineHeight: 18, fontFamily: fonts.regular },
+};
+
 const flatShadow = { shadowOpacity: 0, shadowRadius: 0, elevation: 0 };
 export const SHADOWS = {
   none: flatShadow,
@@ -203,34 +215,27 @@ export const SHADOWS = {
   md: flatShadow,
   lg: {
     shadowColor: COLORS.text,
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 6,
+    shadowRadius: 18,
+    elevation: 7,
   },
   xl: {
     shadowColor: COLORS.text,
-    shadowOffset: { width: 0, height: 8 },
+    shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.16,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowRadius: 28,
+    elevation: 10,
   },
   colored: () => flatShadow,
 };
-export const shadows = {
-  card: SHADOWS.none,
-  soft: SHADOWS.none,
-  floating: SHADOWS.lg,
-};
 
-// Responsive helpers
+export const shadows = { card: SHADOWS.none, soft: SHADOWS.none, floating: SHADOWS.lg };
+
+export const motion = { fast: 180, base: 280, slow: 440 };
 export const wp = (percent) => (SCREEN_W * percent) / 100;
 export const hp = (percent) => (SCREEN_H * percent) / 100;
-
-export const normalize = (size) => {
-  return Math.round(PixelRatio.roundToNearestPixel(size));
-};
-
+export const normalize = (size) => Math.round(PixelRatio.roundToNearestPixel(size));
 export { SCREEN_W, SCREEN_H };
 
 export const navigationTheme = {
@@ -240,92 +245,34 @@ export const navigationTheme = {
     background: COLORS.background,
     card: COLORS.surface,
     text: COLORS.text,
-    border: COLORS.border,
+    border: COLORS.borderLight,
     notification: COLORS.danger,
   },
 };
 
 export const normalizeStatus = (status = "") =>
-  String(status)
-    .trim()
-    .toLowerCase()
-    .replace(/[\s-]+/g, "_");
+  String(status).trim().toLowerCase().replace(/[\s-]+/g, "_");
+
 export const statusToneMap = {
-  pending: {
-    bg: colors123.pendingBg,
-    color: colors123.pendingText,
-    border: colors123.borderLight,
-    labelKey: "pending",
-  },
-  new: {
-    bg: colors123.pendingBg,
-    color: colors123.pendingText,
-    border: colors123.borderLight,
-    labelKey: "pending",
-  },
-  started: {
-    bg: colors123.pendingBg,
-    color: colors123.pendingText,
-    border: colors123.borderLight,
-    labelKey: "pending",
-  },
-  cutting: {
-    bg: colors123.progressBg,
-    color: colors123.progressText,
-    border: colors123.primaryLight,
-    labelKey: "cutting",
-  },
-  stitching: {
-    bg: colors123.progressBg,
-    color: colors123.progressText,
-    border: colors123.primaryLight,
-    labelKey: "stitching",
-  },
-  in_progress: {
-    bg: colors123.progressBg,
-    color: colors123.progressText,
-    border: colors123.primaryLight,
-    labelKey: "inProgress",
-  },
-  ready: {
-    bg: colors123.readyBg,
-    color: colors123.readyText,
-    border: colors123.successLight,
-    labelKey: "ready",
-  },
-  delivered: {
-    bg: colors123.deliveredBg,
-    color: colors123.deliveredText,
-    border: colors123.successLight,
-    labelKey: "delivered",
-  },
-  urgent: {
-    bg: colors123.urgentBg,
-    color: colors123.urgentText,
-    border: colors123.dangerLight,
-    labelKey: "urgent",
-  },
-  overdue: {
-    bg: colors123.urgentBg,
-    color: colors123.urgentText,
-    border: colors123.dangerLight,
-    labelKey: "overdue",
-  },
-  cancelled: {
-    bg: colors123.urgentBg,
-    color: colors123.urgentText,
-    border: colors123.dangerLight,
-    labelKey: "cancelled",
-  },
+  pending: { bg: colors123.pendingBg, color: colors123.pendingText, border: colors123.borderLight, labelKey: "pending" },
+  new: { bg: colors123.pendingBg, color: colors123.pendingText, border: colors123.borderLight, labelKey: "pending" },
+  started: { bg: colors123.pendingBg, color: colors123.pendingText, border: colors123.borderLight, labelKey: "pending" },
+  cutting: { bg: colors123.infoLight, color: colors123.info, border: colors123.borderLight, labelKey: "cutting" },
+  stitching: { bg: colors123.primaryLight, color: colors123.primaryDark, border: colors123.borderLight, labelKey: "stitching" },
+  in_progress: { bg: colors123.infoLight, color: colors123.info, border: colors123.borderLight, labelKey: "inProgress" },
+  ready: { bg: colors123.readyBg, color: colors123.readyText, border: colors123.borderLight, labelKey: "ready" },
+  delivered: { bg: colors123.deliveredBg, color: colors123.deliveredText, border: colors123.borderLight, labelKey: "delivered" },
+  urgent: { bg: colors123.urgentBg, color: colors123.urgentText, border: colors123.borderLight, labelKey: "urgent" },
+  overdue: { bg: colors123.urgentBg, color: colors123.urgentText, border: colors123.borderLight, labelKey: "overdue" },
+  cancelled: { bg: colors123.urgentBg, color: colors123.urgentText, border: colors123.borderLight, labelKey: "cancelled" },
 };
+
 export function getStatusTone(status) {
-  return (
-    statusToneMap[normalizeStatus(status)] || {
-      bg: colors123.surfaceMuted,
-      color: colors123.textSecondary,
-      border: colors123.borderLight,
-    }
-  );
+  return statusToneMap[normalizeStatus(status)] || {
+    bg: colors123.surfaceMuted,
+    color: colors123.textSecondary,
+    border: colors123.borderLight,
+  };
 }
 
 export function formatCurrency(amount) {
@@ -342,11 +289,5 @@ export function formatCompactCurrency(amount) {
 }
 
 export function getInitials(name = "") {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((chunk) => chunk[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+  return name.split(" ").filter(Boolean).map((chunk) => chunk[0]).join("").slice(0, 2).toUpperCase();
 }

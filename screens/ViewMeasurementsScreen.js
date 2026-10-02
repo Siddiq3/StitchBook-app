@@ -420,7 +420,8 @@ export default function ViewMeasurementsScreen({
 const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   center: {
     flex: 1,
@@ -432,10 +433,10 @@ const styles = StyleSheet.create({
   },
   outfitGroup: {
     marginBottom: spacing.lg,
-    borderRadius: 16,
+    borderRadius: radius.lg,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: colors123.border,
+    borderColor: colors123.borderLight,
   },
   outfitHeader: {
     flexDirection: "row",
@@ -464,7 +465,7 @@ const styles = StyleSheet.create({
     color: colors123.textMuted,
   },
   outfitContent: {
-    backgroundColor: colors123.background,
+    backgroundColor: colors123.surfaceMuted,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.lg,
     gap: spacing.lg,
@@ -473,9 +474,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors123.border,
+    borderColor: colors123.borderLight,
   },
   previewTitle: {
     fontSize: 12,
@@ -496,7 +497,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: spacing.sm,
     backgroundColor: colors123.surfaceMuted,
-    borderRadius: 16,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
   },
@@ -566,9 +567,9 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.xs,
     backgroundColor: colors123.surface,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     borderWidth: 1,
-    borderColor: colors123.border,
+    borderColor: colors123.borderLight,
   },
   measurementGridCopy: {
     flex: 1,

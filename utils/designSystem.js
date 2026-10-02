@@ -8,6 +8,7 @@ import {
   spacing,
   radius,
   SHADOWS,
+  typography,
   SCREEN_W,
   SCREEN_H,
 } from "./theme";
@@ -19,6 +20,7 @@ export {
   spacing,
   radius,
   SHADOWS,
+  typography,
   shadows,
   wp,
   hp,
@@ -41,10 +43,11 @@ export const BRAND_COLORS = {
   overlayLight: "rgba(17,24,39,0.08)",
   overlayTint: COLORS.primaryLight,
 };
-export const SPACING = { ...spacing, xxxl: 40, huge: 48, massive: 64 };
+export const SPACING = { ...spacing, huge: 48, massive: 64 };
 export const RADIUS = { ...radius, none: 0, xxl: radius.xl, full: radius.pill };
 export const TYPOGRAPHY = {
-  sizes: { ...SIZES, display: 30, hero: 30 },
+  styles: typography,
+  sizes: { ...SIZES, display: 34, hero: 34 },
   weights: FONTS,
   lineHeights: {
     tight: 1.2,
@@ -95,7 +98,7 @@ export const SCREEN = {
   isSmallDevice: SCREEN_W < 380,
   isLargeDevice: SCREEN_W >= 600,
 };
-export const ANIMATIONS = { fast: 150, normal: 200, slow: 200, slower: 200 };
+export const ANIMATIONS = { fast: 180, normal: 280, slow: 440, slower: 440 };
 export const OPACITIES = {
   disabled: 0.5,
   hover: 0.08,

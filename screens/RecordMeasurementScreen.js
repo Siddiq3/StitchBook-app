@@ -356,8 +356,8 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
-    paddingBottom: spacing.xl * 2,
+    paddingTop: spacing.md,
+    paddingBottom: spacing.xxl,
   },
   headerButton: {
     padding: spacing.md,
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: colors123.border,
+    borderBottomColor: colors123.borderLight,
   },
   headerTitle: {
     fontSize: 20,
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     backgroundColor: colors123.primaryLight,
-    borderRadius: 6,
+    borderRadius: radius.sm,
     marginTop: spacing.sm,
   },
   headerTagText: {
@@ -406,10 +406,11 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
-    borderRadius: 6,
+    minHeight: 44,
+    borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors123.border,
-    backgroundColor: colors123.background,
+    borderColor: colors123.borderLight,
+    backgroundColor: colors123.surface,
   },
   modeBadgeActive: {
     backgroundColor: colors123.primary,
@@ -440,9 +441,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     backgroundColor: colors123.infoLight,
-    borderRadius: 8,
-    borderLeftWidth: 4,
-    borderLeftColor: colors123.primary,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors123.borderLight,
   },
   summaryRow: {
     flexDirection: "row",

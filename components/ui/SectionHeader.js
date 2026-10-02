@@ -1,45 +1,24 @@
-import { fonts } from "../../utils/theme";
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { colors123, SIZES, normalize } from '../../utils/theme';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
+import { colors123, typography, spacing, radius } from '../../utils/theme';
 
 export default function SectionHeader({ title, actionLabel, onAction }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>{title}</Text>
-
-      {actionLabel && onAction && (
-        <TouchableOpacity onPress={onAction} activeOpacity={0.7} style={styles.actionButton}>
+      {actionLabel && onAction ? (
+        <Pressable accessibilityRole="button" onPress={onAction} style={({pressed})=>[styles.actionButton,pressed&&styles.pressed]}>
           <Text style={styles.action}>{actionLabel}</Text>
-        </TouchableOpacity>
-      )}
+        </Pressable>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: SIZES.md2,
-    marginTop: SIZES.lg2,
-    paddingHorizontal: SIZES.lg2,
-  },
-  title: {
-    fontSize: normalize(SIZES.lg),
-    fontFamily: fonts.semibold,
-    color: colors123.text,
-  },
-  actionButton: {
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-    borderRadius: SIZES.radiusFull,
-    backgroundColor: colors123.primarySoft,
-  },
-  action: {
-    fontSize: normalize(SIZES.sm),
-    color: colors123.primary,
-    fontFamily: fonts.semibold,
-  },
+  container: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: spacing.sm, marginBottom: spacing.sm, marginTop: spacing.lg },
+  title: { ...typography.h3, color: colors123.text, flex: 1 },
+  actionButton: { minHeight: 40, justifyContent: 'center', paddingHorizontal: 12, borderRadius: radius.pill, backgroundColor: colors123.primarySoft },
+  action: { ...typography.label, color: colors123.primary },
+  pressed: { opacity: .8 },
 });

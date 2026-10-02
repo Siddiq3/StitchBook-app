@@ -1,24 +1,16 @@
 import React from "react";
 import { StyleSheet, View } from "react-native";
-import { colors123, shadows, spacing, radius } from "../utils/theme";
+import { colors123, spacing, radius } from "../utils/theme";
 
-export default function AppCard({
-  children,
-  style,
-  padded = true,
-  variant = "default",
-  ...props
-}) {
+export default function AppCard({ children, style, padded = true, variant = "default", ...props }) {
   return (
-    <View
-      {...props}
-      style={[
-        styles.base,
-        padded && styles.padded,
-        variant === "muted" && styles.muted,
-        style,
-      ]}
-    >
+    <View {...props} style={[
+      styles.base,
+      padded && styles.padded,
+      variant === "muted" && styles.muted,
+      variant === "accent" && styles.accent,
+      style,
+    ]}>
       {children}
     </View>
   );
@@ -30,14 +22,8 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    ...shadows.card,
   },
-  padded: {
-    padding: spacing.md,
-  },
-  muted: {
-    backgroundColor: colors123.surfaceMuted,
-    borderColor: colors123.borderLight,
-    ...shadows.soft,
-  },
+  padded: { padding: spacing.md },
+  muted: { backgroundColor: colors123.surfaceMuted, borderColor: colors123.borderLight },
+  accent: { backgroundColor: colors123.primarySoft, borderColor: colors123.borderLight },
 });
