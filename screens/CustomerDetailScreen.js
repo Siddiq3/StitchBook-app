@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
     paddingBottom: 112,
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   header: {
     flexDirection: "row",
@@ -516,7 +516,7 @@ const styles = StyleSheet.create({
   backButton: {
     width: 44,
     height: 44,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
   createOrderButton: {
     width: 44,
     height: 44,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     backgroundColor: colors123.primary,
     justifyContent: "center",
     alignItems: "center",
@@ -547,11 +547,11 @@ const styles = StyleSheet.create({
   // Customer Info Card
   customerCard: {
     backgroundColor: colors123.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
     ...shadows.card,
   },
   customerCardHeader: {
@@ -609,18 +609,18 @@ const styles = StyleSheet.create({
 
   // Action Cards
   actionCardsRow: {
-    gap: spacing.md,
-    marginBottom: spacing.lg,
+    gap: spacing.sm,
+    marginBottom: spacing.md,
   },
   actionCard: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: colors123.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
-    gap: spacing.md,
+    gap: spacing.sm,
     ...shadows.card,
   },
   actionCardIcon: {
@@ -642,10 +642,10 @@ const styles = StyleSheet.create({
 
   // Sections
   section: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   sectionHeader: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   sectionTitle: {
     fontFamily: fonts.bold,
@@ -662,13 +662,12 @@ const styles = StyleSheet.create({
   // Empty State
   emptyStateCard: {
     backgroundColor: colors123.surface,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    padding: spacing.lg,
+    borderRadius: radius.md,
+    borderWidth: 0,
+    padding: spacing.md,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 200,
+    minHeight: 160,
     ...shadows.soft,
   },
   emptyStateTitle: {
@@ -705,11 +704,11 @@ const styles = StyleSheet.create({
 
   // Measurements
   measurementsList: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   measurementCard: {
     backgroundColor: colors123.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
@@ -755,7 +754,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.xs,
-    minHeight: 64,
+    minHeight: 56,
   },
   measurementGridCopy: {
     flex: 1,
@@ -791,7 +790,7 @@ const styles = StyleSheet.create({
 
   // Orders
   ordersList: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   orderCard: {
     backgroundColor: colors123.surface,
