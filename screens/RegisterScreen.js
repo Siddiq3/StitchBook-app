@@ -52,19 +52,23 @@ export default function RegisterScreen({navigation}){
         <IconInput label="Your name" icon="account-outline" value={form.name} onChangeText={set('name')} placeholder="Full name" autoCapitalize="words" autoComplete="name"/>
         <IconInput label="Email address" icon="email-outline" value={form.email} onChangeText={set('email')} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email"/>
         <IconInput label="Mobile number" icon="phone-outline" value={form.phone} onChangeText={set('phone')} placeholder="98765 43210" keyboardType="phone-pad" autoComplete="tel"/>
-        <View style={s.fieldGroup}>
-          <Text style={s.label}>Password</Text>
-          <View style={s.passwordField}>
-            <Ionicons name="lock-closed-outline" size={19} color={colors123.textMuted}/>
-            <View style={s.inputGrow}>
-              <IconInput style={s.innerField} inputStyle={s.innerInput} value={form.password} onChangeText={set('password')} placeholder="Create a password" secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password"/>
-            </View>
+        <IconInput
+          label="Password"
+          icon="lock-closed-outline"
+          value={form.password}
+          onChangeText={set('password')}
+          placeholder="Create a password"
+          secureTextEntry={!showPassword}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="new-password"
+          hint="8 or more characters, with a letter and a number."
+          right={
             <TouchableOpacity accessibilityRole="button" accessibilityLabel={showPassword?'Hide password':'Show password'} onPress={()=>setShowPassword(v=>!v)} hitSlop={10}>
               <Ionicons name={showPassword?'eye-off-outline':'eye-outline'} size={20} color={colors123.textMuted}/>
             </TouchableOpacity>
-          </View>
-          <Text style={s.hint}>8 or more characters, with a letter and a number.</Text>
-        </View>
+          }
+        />
         <IconInput label="Confirm password" icon="lock-check-outline" value={form.confirm} onChangeText={set('confirm')} placeholder="Re-enter your password" secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" returnKeyType="go" onSubmitEditing={submit}/>
         {error?<Text accessibilityLiveRegion="polite" style={s.error}>{error}</Text>:null}
         <AppButton label="Create account" loading={loading} onPress={submit}/>
@@ -86,13 +90,6 @@ const s=StyleSheet.create({
   title:{...typography.h1,color:colors123.text,marginTop:spacing.sm},
   subtitle:{...typography.small,color:colors123.textMuted,marginTop:6,marginBottom:spacing.lg},
   card:{backgroundColor:colors123.surface,borderRadius:radius.lg,borderWidth:1,borderColor:colors123.borderLight,padding:20,gap:spacing.md},
-  fieldGroup:{gap:6},
-  label:{...typography.label,color:colors123.textSecondary},
-  passwordField:{minHeight:50,borderWidth:1,borderColor:colors123.borderStrong,borderRadius:radius.sm,backgroundColor:colors123.surface,paddingHorizontal:14,flexDirection:'row',alignItems:'center',gap:10},
-  inputGrow:{flex:1},
-  innerField:{gap:0},
-  innerInput:{paddingVertical:0,minHeight:46},
-  hint:{...typography.caption,color:colors123.textMuted},
   error:{...typography.small,color:colors123.danger},
   legal:{...typography.caption,color:colors123.textMuted,textAlign:'center'},
   alt:{minHeight:52,alignItems:'center',justifyContent:'center',flexDirection:'row',marginTop:spacing.sm},
