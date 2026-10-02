@@ -33,12 +33,12 @@ export default function LoginScreen({navigation}){
   };
 
   return <KeyboardAvoidingView style={s.container} behavior={Platform.OS==='ios'?'padding':'height'}>
-    <StatusBar style="light"/>
+    <StatusBar style="dark"/>
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={s.scroll}>
       <View style={[s.hero,{paddingTop:insets.top+28}]}>
         <View style={s.brandRow}>
           <Text style={s.wordmark}>StitchBook</Text>
-          <View style={s.secure}><Ionicons name="shield-checkmark" size={14} color={colors123.surface}/><Text style={s.secureText}>Secure</Text></View>
+          <View style={s.secure}><Ionicons name="shield-checkmark" size={14} color={colors123.primary}/><Text style={s.secureText}>Secure</Text></View>
         </View>
         <Text style={s.heroTitle}>Welcome back</Text>
         <Text style={s.heroCopy}>Sign in with the email address or mobile number linked to your StitchBook account.</Text>
@@ -93,15 +93,15 @@ export default function LoginScreen({navigation}){
 const s=StyleSheet.create({
   container:{flex:1,backgroundColor:colors123.background},
   scroll:{flexGrow:1,paddingBottom:spacing.xl},
-  hero:{backgroundColor:colors123.primary,paddingHorizontal:20,paddingBottom:54,borderBottomLeftRadius:28,borderBottomRightRadius:28},
+  hero:{backgroundColor:colors123.background,paddingHorizontal:20,paddingBottom:18},
   brandRow:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',gap:12},
-  wordmark:{fontFamily:fonts.bold,fontSize:30,lineHeight:38,color:colors123.surface,letterSpacing:-.6},
-  secure:{flexDirection:'row',alignItems:'center',gap:6,minHeight:34,paddingHorizontal:10,borderRadius:radius.pill,backgroundColor:'rgba(255,255,255,.12)',borderWidth:1,borderColor:'rgba(255,255,255,.18)'},
-  secureText:{fontFamily:fonts.semibold,fontSize:12,color:colors123.surface},
-  heroTitle:{...typography.h1,color:colors123.surface,marginTop:32},
-  heroCopy:{...typography.body,color:'rgba(255,255,255,.82)',marginTop:8,maxWidth:350},
-  card:{marginHorizontal:20,marginTop:-30,backgroundColor:colors123.surface,borderRadius:radius.lg,borderWidth:1,borderColor:colors123.borderLight,padding:20,gap:spacing.md},
-  title:{...typography.h1,color:colors123.text},
+  wordmark:{fontFamily:fonts.bold,fontSize:28,lineHeight:36,color:colors123.text,letterSpacing:-.5},
+  secure:{flexDirection:'row',alignItems:'center',gap:6,minHeight:34,paddingHorizontal:10,borderRadius:radius.pill,backgroundColor:colors123.primarySoft,borderWidth:1,borderColor:colors123.borderLight},
+  secureText:{fontFamily:fonts.semibold,fontSize:12,color:colors123.primary},
+  heroTitle:{...typography.h1,color:colors123.text,marginTop:24},
+  heroCopy:{...typography.small,color:colors123.textMuted,marginTop:6,maxWidth:350},
+  card:{marginHorizontal:20,marginTop:4,gap:spacing.md},
+  title:{...typography.h2,color:colors123.text},
   subtitle:{...typography.small,color:colors123.textMuted,marginTop:-8},
   forgot:{minHeight:36,alignSelf:'flex-end',justifyContent:'center',marginTop:-6},
   forgotText:{...typography.small,color:colors123.primary,fontFamily:fonts.semibold},
