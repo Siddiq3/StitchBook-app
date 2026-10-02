@@ -35,7 +35,11 @@ jobs:
           distribution: temurin
           java-version: 17
       - name: Install Android SDK components
-        run: yes | sdkmanager 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.1.12297006'
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          if [ -z "$SDKMANAGER" ]; then echo "::error::sdkmanager was not found under ANDROID_HOME"; exit 1; fi
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" 'platforms;android-36' 'build-tools;36.0.0' 'ndk;27.1.12297006'
       - run: npm ci
       - run: cd android && ./gradlew :app:bundleRelease --no-daemon
       - uses: actions/upload-artifact@v4
