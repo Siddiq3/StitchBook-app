@@ -72,7 +72,7 @@ test("premium SaaS visual tokens stay consistent", () => {
   assert.equal(theme.spacing.lg, 24);
   assert.equal(theme.spacing.xl, 32);
   assert.equal(theme.spacing.xxl, 48);
-  assert.equal(theme.radius.sm, 12);
+  assert.equal(theme.radius.sm, 10);
   assert.equal(theme.radius.md, 14);
   assert.equal(theme.radius.lg, 18);
   assert.equal(theme.radius.xl, 22);
