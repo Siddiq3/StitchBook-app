@@ -175,8 +175,9 @@ export default function NotificationScreen({ navigation }) {const { t } = useLan
 const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
-    paddingBottom: 100,
-    gap: spacing.md,
+    paddingBottom: spacing.xxl,
+    gap: spacing.sm,
+    backgroundColor: colors123.background,
   },
   markAllButton: {
     marginBottom: spacing.md,
@@ -189,12 +190,12 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
-    borderLeftWidth: 4,
-    borderLeftColor: colors123.transparent,
+    borderWidth: 1,
+    borderColor: colors123.borderLight,
   },
   notificationUnread: {
     backgroundColor: colors123.primarySoft,
-    borderLeftColor: colors123.primary,
+    borderColor: colors123.borderLight,
   },
   notificationIcon: {
     width: 40,
