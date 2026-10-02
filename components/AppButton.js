@@ -1,36 +1,23 @@
 import React from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { colors123, fonts, radius, spacing } from "../utils/theme";
 
 export default function AppButton({
-  label,
-  title,
-  onPress,
-  icon,
-  variant = "primary",
-  size = "md",
-  style,
-  textStyle,
-  loading = false,
-  disabled = false,
-  accessibilityLabel,
-  ...props
+  label, title, onPress, icon, variant = "primary", size = "md", style, textStyle,
+  loading = false, disabled = false, accessibilityLabel, ...props
 }) {
-  const filled = ["primary", "accent", "danger"].includes(variant);
-  const foreground = filled
-    ? colors123.surface
-    : variant === "ghost"
-    ? colors123.textSecondary
-    : colors123.primary;
   const unavailable = disabled || loading;
   const buttonLabel = label ?? title ?? "";
+  const palette = {
+    primary: { bg: colors123.primary, border: colors123.primary, text: colors123.surface },
+    accent: { bg: colors123.primary, border: colors123.primary, text: colors123.surface },
+    secondary: { bg: colors123.surface, border: colors123.borderStrong, text: colors123.textSecondary },
+    ghost: { bg: colors123.primarySoft, border: colors123.primarySoft, text: colors123.primary },
+    tertiary: { bg: "transparent", border: "transparent", text: colors123.primary },
+    danger: { bg: colors123.dangerSoft, border: colors123.dangerSoft, text: colors123.danger },
+  }[variant] || { bg: colors123.primary, border: colors123.primary, text: colors123.surface };
+
   return (
     <Pressable
       {...props}
@@ -42,61 +29,38 @@ export default function AppButton({
       style={({ pressed }) => [
         styles.base,
         size === "sm" && styles.small,
-        {
-          backgroundColor: filled
-            ? variant === "danger"
-              ? colors123.danger
-              : colors123.primary
-            : variant === "ghost"
-            ? "transparent"
-            : colors123.surface,
-          borderColor: filled
-            ? variant === "danger"
-              ? colors123.danger
-              : colors123.primary
-            : variant === "ghost"
-            ? "transparent"
-            : colors123.border,
-        },
+        size === "lg" && styles.large,
+        { backgroundColor: palette.bg, borderColor: palette.border },
+        pressed && !unavailable && styles.pressed,
+        pressed && !unavailable && variant === "primary" && { backgroundColor: colors123.primaryPressed },
+        unavailable && styles.unavailable,
         style,
-        pressed && { opacity: 0.8 },
-        unavailable && { opacity: 0.5 },
       ]}
     >
       <View style={styles.content}>
-        {loading ? (
-          <ActivityIndicator color={foreground} size="small" />
-        ) : icon ? (
-          <MaterialCommunityIcons color={foreground} name={icon} size={20} />
-        ) : null}
-        <Text style={[styles.label, { color: foreground }, textStyle]}>
+        {loading ? <ActivityIndicator color={palette.text} size="small" /> :
+          icon ? <MaterialCommunityIcons color={palette.text} name={icon} size={size === "sm" ? 18 : 20} /> : null}
+        <Text style={[styles.label, { color: unavailable ? colors123.textDisabled : palette.text }, textStyle]}>
           {buttonLabel}
         </Text>
       </View>
     </Pressable>
   );
 }
+
 const styles = StyleSheet.create({
   base: {
-    minHeight: 48,
+    minHeight: 50,
     borderRadius: radius.md,
     justifyContent: "center",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1,
   },
-  small: { minHeight: 44, paddingVertical: spacing.xs },
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.xs,
-  },
-  label: {
-    flexShrink: 1,
-    textAlign: "center",
-    fontFamily: fonts.semibold,
-    fontSize: 15,
-    lineHeight: 22,
-  },
+  small: { minHeight: 44, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs },
+  large: { minHeight: 54, paddingHorizontal: spacing.lg },
+  content: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.xs },
+  label: { flexShrink: 1, textAlign: "center", fontFamily: fonts.semibold, fontSize: 14, lineHeight: 21 },
+  pressed: { opacity: 0.84 },
+  unavailable: { opacity: 0.55, backgroundColor: colors123.surfaceMuted, borderColor: colors123.borderLight },
 });
