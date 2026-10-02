@@ -186,9 +186,6 @@ export default function CustomersScreen({ navigation }) {
             <Text style={styles.insightTitle}>
               {customers?.length || 0} {t("totalClientsInBook")}
             </Text>
-            <Text style={styles.insightSubtitle}>
-              {t("customerInsightSubtitle")}
-            </Text>
           </View>
         </AppCard>
 
@@ -255,20 +252,10 @@ export default function CustomersScreen({ navigation }) {
                       </View>
                     </View>
                     <Text style={styles.customerMeta}>{customer.phone}</Text>
-                    {customer.address &&
-                <Text style={styles.customerMeta} numberOfLines={1}>
-                        {customer.address}
-                      </Text>
-                }
                     <View style={styles.customerFooter}>
                       <Text style={styles.footerText}>
                         {customer.orderCount || 0} {t("orders")}
                       </Text>
-                      {customer.createdAt &&
-                  <Text style={styles.footerText}>
-                          {t("joined")} {format(parseISO(customer.createdAt), "dd MMM yyyy")}
-                        </Text>
-                  }
                     </View>
                   </View>
                   <MaterialCommunityIcons
@@ -297,7 +284,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.xl,
-    gap: spacing.md,
+    gap: spacing.sm,
     backgroundColor: colors123.background,
   },
   addButton: {
@@ -306,17 +293,17 @@ const styles = StyleSheet.create({
   },
   insightCard: {
     flexDirection: "row",
-    gap: spacing.md,
+    gap: spacing.sm,
     alignItems: "center",
-    borderRadius: radius.md,
-    backgroundColor: colors123.primarySoft,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderRadius: 0,
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    padding: 0,
   },
   insightIcon: {
-    width: 46,
-    height: 46,
-    borderRadius: 14,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors123.primarySoft,
@@ -341,11 +328,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    paddingVertical: 14,
+    paddingVertical: 12,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   pressedCard: {
     opacity: 0.88,
@@ -394,7 +381,7 @@ const styles = StyleSheet.create({
     color: colors123.textSecondary,
   },
   customerFooter: {
-    marginTop: spacing.sm,
+    marginTop: 6,
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.sm,
