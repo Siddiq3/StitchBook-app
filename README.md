@@ -14,3 +14,7 @@ Android uses React Native autolinking for `RNGoogleSignin` and MSG91's `Biometri
 
 - `npm run test:ui` — UI foundations and translation coverage.
 - `npm run test:services` — native-module availability, auth persistence and service import cycles.
+
+## Cashfree payments
+
+Plan purchases are handled on the StitchBook website using Cashfree. The mobile subscription screen reads server entitlements and refreshes when the app resumes. It does not include a native gateway SDK or payment credentials. `paymentApi.createCashfreeCheckout` creates a customer order checkout through `/payment/cashfree/create-order`; returned relative checkout URLs belong to the configured website. Manual cash/UPI payment recording remains available. See the backend `SETUP_STEP_7_CASHFREE.md` for setup and migration.

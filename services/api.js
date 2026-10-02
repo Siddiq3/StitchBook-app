@@ -231,6 +231,8 @@ export const measurementApi = {
 
 // ── PAYMENT (NEW) ─────────────────────
 export const paymentApi = {
+  // The server creates Cashfree checkout; credentials stay on the backend.
+  createCashfreeCheckout: (data) => api.post("/payment/cashfree/create-order", data),
   record: (data) => api.post("/payment", data),
   getByOrder: (orderId) => api.get(`/payment/order/${orderId}`),
   delete: (id) => api.delete(`/payment/${id}`)
