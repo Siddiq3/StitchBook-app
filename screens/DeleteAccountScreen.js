@@ -6,7 +6,7 @@ import InlineAlert from '../components/InlineAlert';
 import { getNativeGoogleModule } from '../services/nativeAuthModules';
 import api from '../services/api';
 import { useStitchPro } from '../context/StitchProContext';
-import { colors123, fonts, spacing } from '../utils/theme';
+import { colors123, fonts, radius, spacing } from '../utils/theme';
 
 export default function DeleteAccountScreen() {
   const { logout,user } = useStitchPro();
