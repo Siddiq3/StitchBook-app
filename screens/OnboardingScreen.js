@@ -88,7 +88,7 @@ const OnboardingScreen = () => {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.header}>
-          <BrandLogo light subtitle={t("tailorShopManager")} />
+          <BrandLogo subtitle={t("tailorShopManager")} />
           <Text style={styles.subtitle}>{t("setupYourShop")}</Text>
         </View>
 
