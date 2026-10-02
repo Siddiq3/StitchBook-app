@@ -1367,10 +1367,9 @@ const styles = StyleSheet.create({
   previewOrderCard: {
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    borderRadius: 16,
+    borderRadius: radius.md,
     backgroundColor: colors123.surface,
     padding: spacing.md,
-    ...shadows.card,
   },
   previewOrderTop: {
     flexDirection: "row",
@@ -1443,10 +1442,10 @@ const styles = StyleSheet.create({
   closeButton: {
     width: 44,
     height: 44,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors123.bgInput,
+    backgroundColor: colors123.surfaceMuted,
   },
   formGroup: {
     marginBottom: spacing.md,
@@ -1460,11 +1459,11 @@ const styles = StyleSheet.create({
   input: {
     flexDirection: "row",
     alignItems: "center",
-    minHeight: 44,
+    minHeight: 50,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     backgroundColor: colors123.surface,
-    borderRadius: 12,
+    borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors123.borderLight,
   },
@@ -1491,10 +1490,9 @@ const styles = StyleSheet.create({
   accessRoleCard: {
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    borderRadius: 16,
+    borderRadius: radius.md,
     backgroundColor: colors123.surface,
     padding: spacing.md,
-    ...shadows.soft,
   },
   accessRoleCardActive: {
     borderColor: colors123.primary,
