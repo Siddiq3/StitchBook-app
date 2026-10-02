@@ -1,5 +1,6 @@
 import SessionsScreen from '../screens/SessionsScreen';
 import DeleteAccountScreen from '../screens/DeleteAccountScreen';
+import PasswordScreen from '../screens/PasswordScreen';
 import AccountRecoveryScreen from '../screens/AccountRecoveryScreen';
 import RecordMeasurementScreen from "../screens/RecordMeasurementScreen";
 import ViewMeasurementsScreen from "../screens/ViewMeasurementsScreen";
@@ -140,6 +141,7 @@ export default function MainTabNavigator() {
     <Stack.Navigator initialRouteName="StudioTabs" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Sessions" component={SessionsScreen} options={{headerShown:true,title:"Devices and sessions"}} />
       <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{headerShown:true,title:"Delete account"}} />
+      <Stack.Screen name="Password" component={PasswordScreen} options={{headerShown:true,title:"Password & security",headerTintColor:colors123.primary,headerTitleStyle:{fontFamily:fonts.semibold}}} />
       <Stack.Screen name="StudioTabs" component={StudioTabs} />
       <Stack.Screen name="RecordMeasurement" component={RecordMeasurementScreen} options={{ headerShown: true, title: 'Record measurement', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />
       <Stack.Screen name="ViewMeasurements" component={ViewMeasurementsScreen} options={{ headerShown: true, title: 'Measurement history', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />

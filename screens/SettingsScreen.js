@@ -1,4 +1,3 @@
-import { getNativeGoogleModule, getMsg91Module } from "../services/nativeAuthModules";
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -16,7 +15,6 @@ import {
   Platform } from
 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import Constants from 'expo-constants';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors123, spacing, fonts, radius } from '../utils/theme';
 import ScreenHeader from '../components/ScreenHeader';
@@ -25,25 +23,6 @@ import { useLanguage } from '../context/LanguageContext';
 import { useStitchPro } from '../context/StitchProContext';
 import { useToast } from '../context/ToastContext';
 import { languages } from '../localization/translations';
-import { authService } from '../services/authService';
-
-const googleWebClientId = Constants.expoConfig?.extra?.googleWebClientId || '';
-const msg91WidgetId = Constants.expoConfig?.extra?.msg91WidgetId || '';
-const msg91WidgetTokenAuth = Constants.expoConfig?.extra?.msg91WidgetTokenAuth || '';
-const extractMsg91AccessToken = (response) =>
-  response?.accessToken ||
-  response?.access_token ||
-  response?.message ||
-  response?.data?.accessToken ||
-  response?.data?.message ||
-  '';
-
-const toMsg91Identifier = (phone) => {
-  const digits = phone.replace(/\D/g, '');
-  if (digits.length === 10) return `91${digits}`;
-  if (digits.length === 12 && digits.startsWith('91')) return digits;
-  return digits;
-};
 
 const settingsMenuItems = [
 {
@@ -92,24 +71,16 @@ function SettingsMenuItem({ item, onPress, t }) {
 export default function SettingsScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { t, language, selectLanguage } = useLanguage();
-  const { user, shop, logout, updateShop, updateAuthenticatedUser } = useStitchPro();
+  const { user, shop, logout, updateShop } = useStitchPro();
   const { showToast } = useToast();
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [shopEditModalVisible, setShopEditModalVisible] = useState(false);
-  const [mobileLinkModalVisible, setMobileLinkModalVisible] = useState(false);
   const [shopForm, setShopForm] = useState({
     name: shop?.name || '',
     phone: shop?.phone || '',
     location: shop?.location || ''
   });
   const [isUpdatingShop, setIsUpdatingShop] = useState(false);
-  const [authMethods, setAuthMethods] = useState(null);
-  const [authMethodsLoading, setAuthMethodsLoading] = useState(false);
-  const [linkingGoogle, setLinkingGoogle] = useState(false);
-  const [linkingMobile, setLinkingMobile] = useState(false);
-  const [linkPhone, setLinkPhone] = useState('');
-  const [linkOtp, setLinkOtp] = useState('');
-  const [linkReqId, setLinkReqId] = useState('');
 
   useEffect(() => {
     setShopForm({
@@ -118,23 +89,6 @@ export default function SettingsScreen({ navigation }) {
       location: shop?.location || ''
     });
   }, [shop]);
-
-  useEffect(() => {
-    loadAuthMethods();
-
-    if (Platform.OS === 'android' && googleWebClientId) {
-      const googleModule = getNativeGoogleModule();
-      googleModule?.GoogleSignin?.configure({
-        webClientId: googleWebClientId,
-        scopes: ['profile', 'email']
-      });
-    }
-
-    if (msg91WidgetId && msg91WidgetTokenAuth) {
-      const msg91 = getMsg91Module();
-      msg91?.OTPWidget?.initializeWidget(msg91WidgetId, msg91WidgetTokenAuth);
-    }
-  }, []);
 
   const currentLanguageName = languages.find(
     (lang) => lang.code === language
@@ -164,155 +118,6 @@ export default function SettingsScreen({ navigation }) {
       showToast(err.message || t('shopUpdateFailed'), 'error');
     } finally {
       setIsUpdatingShop(false);
-    }
-  };
-
-  const loadAuthMethods = async () => {
-    setAuthMethodsLoading(true);
-    try {
-      const methods = await authService.getAuthMethods();
-      setAuthMethods(methods);
-    } catch (err) {
-      setAuthMethods(null);
-    } finally {
-      setAuthMethodsLoading(false);
-    }
-  };
-
-  const handleLinkGoogle = async () => {
-    if (!googleWebClientId) {
-      showToast('Google login is not configured for this app build.', 'error');
-      return;
-    }
-
-    setLinkingGoogle(true);
-    try {
-      const googleModule = getNativeGoogleModule();
-      if (!googleModule?.GoogleSignin) {
-        throw new Error('Connecting Google is unavailable in this preview. Please use the latest installed StitchBook app.');
-      }
-
-      const { GoogleSignin } = googleModule;
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      await GoogleSignin.signOut().catch(() => null);
-      const response = await GoogleSignin.signIn();
-      if (response?.type === 'cancelled') return;
-
-      const googleUser = response?.data || response;
-      const idToken = googleUser?.idToken || (await GoogleSignin.getTokens())?.idToken;
-      if (!idToken) {
-        throw new Error('Google did not return an ID token.');
-      }
-
-      const data = await authService.linkGoogle(idToken);
-      if (data?.user) await updateAuthenticatedUser(data.user);
-      setAuthMethods(data?.methods || null);
-      showToast('Google login connected', 'success');
-    } catch (err) {
-      const googleModule = getNativeGoogleModule();
-      if (err.code === googleModule?.statusCodes?.SIGN_IN_CANCELLED) return;
-      const message =
-        err.response?.data?.message ||
-        err.response?.data?.error?.message ||
-        err.message ||
-        'Could not connect Google login';
-      showToast(message, 'error');
-    } finally {
-      setLinkingGoogle(false);
-    }
-  };
-
-  const resetMobileLink = () => {
-    setLinkPhone('');
-    setLinkOtp('');
-    setLinkReqId('');
-  };
-
-  const handleSendLinkOtp = async () => {
-    const identifier = toMsg91Identifier(linkPhone);
-    if (identifier.length < 12) {
-      showToast('Enter a valid mobile number', 'error');
-      return;
-    }
-
-    setLinkingMobile(true);
-    try {
-      const msg91 = getMsg91Module();
-      if (!msg91?.OTPWidget || !msg91WidgetId || !msg91WidgetTokenAuth) {
-        throw new Error('MSG91 mobile OTP is not configured in this app build.');
-      }
-
-      await msg91.OTPWidget.initializeWidget(msg91WidgetId, msg91WidgetTokenAuth);
-      const response = await msg91.OTPWidget.sendOTP({ identifier });
-      if (response?.type === 'error' || response?.hasError || response?.status === 'fail') {
-        throw new Error(response?.message || 'Could not send OTP');
-      }
-
-      const reqId = response?.reqId || response?.message || response?.data?.reqId;
-      if (!reqId) throw new Error('OTP request missing. Please try again.');
-      setLinkReqId(reqId);
-      showToast('OTP sent', 'success');
-    } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        err.response?.data?.error?.message ||
-        err.message ||
-        'Could not send OTP';
-      showToast(message, 'error');
-    } finally {
-      setLinkingMobile(false);
-    }
-  };
-
-  const handleVerifyLinkOtp = async () => {
-    if (!linkReqId) {
-      showToast('Send OTP first', 'error');
-      return;
-    }
-
-    const cleanOtp = linkOtp.replace(/\D/g, '');
-    if (cleanOtp.length < 4) {
-      showToast('Enter the OTP', 'error');
-      return;
-    }
-
-    setLinkingMobile(true);
-    try {
-      const msg91 = getMsg91Module();
-      if (!msg91?.OTPWidget || !msg91WidgetId || !msg91WidgetTokenAuth) {
-        throw new Error('MSG91 mobile OTP is not configured in this app build.');
-      }
-
-      await msg91.OTPWidget.initializeWidget(msg91WidgetId, msg91WidgetTokenAuth);
-      const response = await msg91.OTPWidget.verifyOTP({
-        reqId: linkReqId,
-        otp: cleanOtp
-      });
-
-      if (response?.type === 'error' || response?.hasError || response?.status === 'fail') {
-        throw new Error(response?.message || 'Could not verify OTP');
-      }
-
-      const accessToken = extractMsg91AccessToken(response);
-      if (!accessToken) {
-        throw new Error('MSG91 verified OTP, but did not return access token.');
-      }
-
-      const data = await authService.linkMobileWithAccessToken(accessToken);
-      if (data?.user) await updateAuthenticatedUser(data.user);
-      setAuthMethods(data?.methods || null);
-      setMobileLinkModalVisible(false);
-      resetMobileLink();
-      showToast('Mobile login connected', 'success');
-    } catch (err) {
-      const message =
-        err.response?.data?.message ||
-        err.response?.data?.error?.message ||
-        err.message ||
-        'Could not verify OTP';
-      showToast(message, 'error');
-    } finally {
-      setLinkingMobile(false);
     }
   };
 
@@ -526,6 +331,7 @@ export default function SettingsScreen({ navigation }) {
         </View>
         */}
 
+        <AppButton label="Password & security" variant="secondary" onPress={() => navigation.navigate("Password")} />
         <AppButton label="Devices and sessions" variant="secondary" onPress={() => navigation.navigate("Sessions")} />
         <AppButton label="Delete account" variant="danger" onPress={() => navigation.navigate('DeleteAccount')} />
         {/* Settings Menu */}
@@ -709,79 +515,6 @@ export default function SettingsScreen({ navigation }) {
         </Pressable>
       </Modal>
 
-      {/* Mobile Link Modal */}
-      <Modal
-        visible={mobileLinkModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => {
-          setMobileLinkModalVisible(false);
-          resetMobileLink();
-        }}>
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={{ flex: 1 }}>
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <View>
-                  <Text style={styles.modalTitle}>Connect mobile login</Text>
-                  <Text style={styles.modalSubtitle}>Verify OTP to link this number safely.</Text>
-                </View>
-                <TouchableOpacity accessibilityRole="button"
-                  onPress={() => {
-                    setMobileLinkModalVisible(false);
-                    resetMobileLink();
-                  }}>
-                  <MaterialCommunityIcons name="close" size={24} color={colors123.text} />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.modalBody}>
-                <View style={styles.formGroup}>
-                  <Text style={styles.label}>Mobile number</Text>
-                  <TextInput accessibilityLabel="Enter 10 digit number"
-                    style={styles.input}
-                    placeholder="Enter 10 digit number"
-                    value={linkPhone}
-                    onChangeText={setLinkPhone}
-                    keyboardType="phone-pad"
-                    maxLength={14} />
-                </View>
-
-                {linkReqId ? (
-                  <View style={styles.formGroup}>
-                    <Text style={styles.label}>OTP</Text>
-                    <TextInput accessibilityLabel="Enter OTP"
-                      style={styles.input}
-                      placeholder="Enter OTP"
-                      value={linkOtp}
-                      onChangeText={setLinkOtp}
-                      keyboardType="number-pad"
-                      maxLength={8} />
-                  </View>
-                ) : null}
-              </View>
-
-              <View style={styles.modalActions}>
-                <TouchableOpacity accessibilityRole="button"
-                  style={styles.cancelButton}
-                  onPress={() => {
-                    setMobileLinkModalVisible(false);
-                    resetMobileLink();
-                  }}>
-                  <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
-                </TouchableOpacity>
-                <AppButton
-                  title={linkReqId ? 'Verify and connect' : 'Send OTP'}
-                  onPress={linkReqId ? handleVerifyLinkOtp : handleSendLinkOtp}
-                  disabled={linkingMobile}
-                  style={{ flex: 1, marginLeft: spacing.md }} />
-              </View>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
     </SafeAreaView>);
 
 }

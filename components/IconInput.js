@@ -4,7 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { colors123, fonts, radius, spacing } from "../utils/theme";
 
 export default function IconInput({
-  label, icon, error, hint, multiline = false, style, inputStyle, onFocus, onBlur, editable = true, ...props
+  label, icon, error, hint, right, multiline = false, style, inputStyle, onFocus, onBlur, editable = true, ...props
 }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -28,6 +28,7 @@ export default function IconInput({
           onFocus={(event) => { setFocused(true); onFocus?.(event); }}
           onBlur={(event) => { setFocused(false); onBlur?.(event); }}
         />
+        {right ? <View style={styles.right}>{right}</View> : null}
       </View>
       {error || hint ? (
         <Text accessibilityLiveRegion={error ? "polite" : "none"} style={[styles.hint, error && styles.errorText]}>
@@ -58,5 +59,6 @@ const styles = StyleSheet.create({
   input: { flex: 1, minWidth: 0, minHeight: 48, color: colors123.text, fontSize: 16, lineHeight: 22, fontFamily: fonts.regular, paddingVertical: 12 },
   multiline: { minHeight: 104, paddingTop: 14 },
   hint: { color: colors123.textMuted, fontSize: 12, lineHeight: 18, fontFamily: fonts.regular },
+  right: { alignItems: 'center', justifyContent: 'center' },
   errorText: { color: colors123.danger },
 });
