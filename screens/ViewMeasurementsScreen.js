@@ -20,7 +20,7 @@ import ScreenHeader from "../components/ScreenHeader";
 import { useToast } from "../context/ToastContext";
 import { getOutfitById } from "../services/outfitTypes";
 import storage from "../services/storage";
-import { colors123, spacing, fonts } from "../utils/theme";
+import { colors123, spacing, fonts, radius } from "../utils/theme";
 import { useLanguage } from "../context/LanguageContext";
 
 export default function ViewMeasurementsScreen({
