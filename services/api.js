@@ -83,7 +83,9 @@ api.interceptors.response.use(
     const requestUrl = originalRequest?.url || "";
     const isAuthRequest = [
     "/auth/google",
+    "/auth/register",
     "/auth/login",
+    "/auth/firebase",
     "/auth/msg91-widget",
     "/auth/refresh-token"].
     some((path) => requestUrl.includes(path));
@@ -147,7 +149,10 @@ export const authApi = {
   logoutAll: () => api.post("/auth/logout-all"),
   sessions: () => api.get("/auth/sessions"),
   revokeSession: (id) => api.delete(`/auth/session/${id}`),
-  login: (firebaseToken) => api.post("/auth/login", { firebaseToken }),
+  register: (data) => api.post("/auth/register", { ...data, platform: Platform.OS, device: Platform.OS }),
+  login: (identifier, password) => api.post("/auth/login", { identifier, password, platform: Platform.OS, device: Platform.OS }),
+  setPassword: (currentPassword, newPassword) => api.post("/auth/password", { currentPassword, newPassword }),
+  firebase: (firebaseToken) => api.post("/auth/firebase", { firebaseToken }),
   google: (idToken) =>
   api.post("/auth/google", {
     idToken,
