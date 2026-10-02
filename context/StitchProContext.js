@@ -239,6 +239,20 @@ export const StitchProProvider = ({ children }) => {
     }
   };
 
+  const registerWithPassword = async (data) => {
+    return completeLogin(authService.registerWithPassword(data), "password signup");
+  };
+
+  const loginWithPassword = async (identifier, password) => {
+    return completeLogin(authService.loginWithPassword(identifier, password), "password");
+  };
+
+  const setPassword = async (currentPassword, newPassword) => {
+    const result = await authService.setPassword(currentPassword, newPassword);
+    if (result?.user) set({ user: result.user });
+    return result;
+  };
+
   const loginWithGoogle = async (idToken) => {
     return completeLogin(authService.loginWithGoogle(idToken), "Google");
   };
@@ -1103,6 +1117,9 @@ export const StitchProProvider = ({ children }) => {
         retryShop: fetchShopSilently,
         retryBoot: bootApp,
         logout,
+        registerWithPassword,
+        loginWithPassword,
+        setPassword,
         loginWithGoogle,
         loginWithMsg91Widget,
         sendMsg91MobileOtp,
