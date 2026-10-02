@@ -20,17 +20,18 @@ export default function StatCard({ label, value, icon, color, subtitle }) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    minHeight: 112,
+    minHeight: 92,
     borderRadius: radius.md,
-    padding: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 13,
     backgroundColor: colors123.surface,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     justifyContent: 'center',
   },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.sm },
-  iconWrap: { width: 34, height: 34, borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+  header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xs },
+  iconWrap: { width: 32, height: 32, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
   label: { ...typography.label, color: colors123.textMuted, marginLeft: spacing.xs, flex: 1 },
-  value: { fontFamily: typography.h2.fontFamily, fontSize: 26, lineHeight: 32, color: colors123.text, fontVariant: ['tabular-nums'] },
+  value: { fontFamily: typography.h2.fontFamily, fontSize: 24, lineHeight: 29, color: colors123.text, fontVariant: ['tabular-nums'] },
   subtitle: { ...typography.caption, color: colors123.textMuted, marginTop: 4 },
 });
