@@ -1494,7 +1494,7 @@ const styles = StyleSheet.create({
   headerActionButton: {
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
-    borderRadius: radius.pill,
+    borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     backgroundColor: colors123.surface,
@@ -1544,7 +1544,7 @@ const styles = StyleSheet.create({
   invoiceActions: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
     gap: spacing.sm,
   },
   invoiceActionButton: {
@@ -1556,13 +1556,13 @@ const styles = StyleSheet.create({
   contentScroll: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: spacing.xxl,
+    paddingBottom: spacing.xl,
   },
   card: {
     padding: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     backgroundColor: colors123.surface,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
   },
@@ -1570,7 +1570,7 @@ const styles = StyleSheet.create({
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.bold,
     color: colors123.text,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   cardSubtitle: {
     fontSize: fonts.sm.fontSize,
@@ -1582,7 +1582,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "flex-start",
     gap: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   reminderGrid: {
     flexDirection: "row",
@@ -1597,7 +1597,7 @@ const styles = StyleSheet.create({
     gap: spacing.xs,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    borderRadius: radius.lg,
+    borderRadius: radius.sm,
     backgroundColor: colors123.surface,
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.sm,
@@ -1628,13 +1628,13 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: colors123.border,
-    marginVertical: spacing.md,
+    marginVertical: spacing.sm,
   },
   statusPipeline: {
     flexDirection: "row",
-    marginVertical: spacing.lg,
+    marginVertical: spacing.md,
     alignItems: "flex-start",
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   statusCircle: {
     width: 32,
