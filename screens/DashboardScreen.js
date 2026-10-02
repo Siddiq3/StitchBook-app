@@ -503,7 +503,6 @@ export default function DashboardScreen({ navigation }) {
 
         style={[styles.heroCard, { backgroundColor: colors123.primary }]}>
 
-        <View style={styles.heroGlow} />
         <View style={styles.heroTopRow}>
           <View>
             <Text style={styles.heroEyebrow}>{t("revenueThisMonth")}</Text>
@@ -529,11 +528,6 @@ export default function DashboardScreen({ navigation }) {
             <Text style={styles.heroBadgeText}>{t("thisMonth")}</Text>
           </View>
         </View>
-
-        <Text style={styles.heroTitle}>{t("serveEveryOrder")}</Text>
-        <Text style={styles.heroSubtitle}>
-          {t("dashboardHeroSubtitle")}
-        </Text>
 
         <View style={styles.heroActionRow}>
           <Pressable accessibilityRole="button"
@@ -564,34 +558,6 @@ export default function DashboardScreen({ navigation }) {
 
             <Text style={styles.heroActionGhostText}>{t("customersTitle")}</Text>
           </Pressable>
-        </View>
-      </View>
-
-      {/* Split Summary Row */}
-      <View style={styles.splitSummaryRow}>
-        <View style={styles.splitSummaryCard}>
-          <View style={styles.splitSummaryHeader}>
-            <MaterialCommunityIcons name="needle" size={18} color={colors123.primary} />
-          <Text style={styles.splitSummaryTitle}>{t("stitching")}</Text>
-          </View>
-          <Text style={styles.splitSummaryCount}>
-            {dashboardStats?.stitchingStats?.count || 0} {t("orders")}
-          </Text>
-          <Text style={styles.splitSummaryRevenue}>
-            {formatCurrency(dashboardStats?.stitchingStats?.revenue || 0)}
-          </Text>
-        </View>
-        <View style={styles.splitSummaryCard}>
-          <View style={styles.splitSummaryHeader}>
-            <MaterialCommunityIcons name="scissors-cutting" size={18} color={colors123.primary} />
-          <Text style={styles.splitSummaryTitle}>{t("alteration")}</Text>
-          </View>
-          <Text style={styles.splitSummaryCount}>
-            {dashboardStats?.alterationStats?.count || 0} {t("orders")}
-          </Text>
-          <Text style={styles.splitSummaryRevenue}>
-            {formatCurrency(dashboardStats?.alterationStats?.revenue || 0)}
-          </Text>
         </View>
       </View>
 
@@ -666,94 +632,6 @@ export default function DashboardScreen({ navigation }) {
         title={t("revenueTrend")} />
 
 
-      {/* Shop Profile Card */}
-      <View style={styles.shopProfileShadow}>
-        <View
-
-
-
-          style={[styles.shopProfileCard, { backgroundColor: colors123.primary }]}>
-
-          <View style={styles.shopProfileHeader}>
-            <View style={styles.shopProfileAvatar}>
-              <Image source={machineLogo} resizeMode="contain" style={styles.shopProfileLogo} />
-              <View style={styles.shopProfileAvatarBadge}>
-                <MaterialCommunityIcons
-                  name="check"
-                  size={12}
-                  color={colors123.surface} />
-
-              </View>
-            </View>
-            <View style={styles.shopProfileInfo}>
-              <View style={styles.shopProfileTitleRow}>
-                <Text style={styles.shopProfileEyebrow}>{t("shopWorkspace")}</Text>
-                <View style={styles.shopProfileStatusPill}>
-                  <Text style={styles.shopProfileStatusText}>{t("active")}</Text>
-                </View>
-              </View>
-              <Text style={styles.shopProfileName} numberOfLines={1}>{shopName}</Text>
-              <Text style={styles.shopProfileRole} numberOfLines={1}>{ownerName} · {t("owner")}</Text>
-            </View>
-          </View>
-
-          <Text style={styles.shopProfileDescription}>
-            {t("welcomeDashboard")}
-          </Text>
-
-          <View style={styles.shopProfileMetaGrid}>
-            <View style={styles.shopProfileMetaItem}>
-              <MaterialCommunityIcons
-                name="phone-outline"
-                size={16}
-                color={colors123.surface} />
-
-              <Text style={styles.shopProfileMetaText} numberOfLines={1}>{shopPhone}</Text>
-            </View>
-            <View style={styles.shopProfileMetaItem}>
-              <MaterialCommunityIcons
-                name="map-marker-outline"
-                size={16}
-                color={colors123.surface} />
-
-              <Text style={styles.shopProfileMetaText} numberOfLines={1}>{shopLocation}</Text>
-            </View>
-          </View>
-
-          <View style={styles.shopProfileActions}>
-            <Pressable accessibilityRole="button"
-              onPress={() => navigation.navigate("Settings")}
-              style={({ pressed }) => [
-              styles.actionButton,
-              styles.actionButtonPrimary,
-              pressed && styles.actionButtonPressed]
-              }>
-
-              <MaterialCommunityIcons
-                name="store-edit-outline"
-                size={18}
-                color={colors123.primary} />
-
-              <Text style={styles.actionButtonPrimaryText}>{t("editShopDetailsShort")}</Text>
-            </Pressable>
-            <Pressable accessibilityRole="button"
-              onPress={() => navigation.navigate("Customers")}
-              style={({ pressed }) => [
-              styles.actionButton,
-              pressed && styles.actionButtonPressed]
-              }>
-
-              <MaterialCommunityIcons
-                name="account-plus-outline"
-                size={18}
-                color={colors123.surface} />
-
-              <Text style={styles.actionButtonText}>{t("addCustomer")}</Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-
       <MotiView
         key={activeAnnouncement.title}
         animate={{ opacity: 1, translateY: 0 }}
@@ -773,7 +651,6 @@ export default function DashboardScreen({ navigation }) {
 
             style={[styles.announcementCard, { backgroundColor: colors123.primary }]}>
 
-            <View style={styles.announcementGlow} />
             <View style={styles.announcementTopRow}>
               <View style={[styles.announcementIcon, { backgroundColor: activeAnnouncement.iconBg }]}>
                 <MaterialCommunityIcons
@@ -890,7 +767,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.xl,
-    gap: spacing.md,
+    gap: spacing.sm,
     backgroundColor: colors123.background,
   },
   announcementPressable: {
@@ -946,7 +823,6 @@ const styles = StyleSheet.create({
   announcementEyebrow: {
     fontFamily: fonts.semibold,
     fontSize: 12,
-    textTransform: "uppercase",
     letterSpacing: 0,
   },
   announcementTitle: {
@@ -958,7 +834,7 @@ const styles = StyleSheet.create({
   announcementAction: {
     maxWidth: 118,
     minHeight: 44,
-    borderRadius: radius.pill,
+    borderRadius: radius.sm,
     paddingHorizontal: spacing.sm,
     flexDirection: "row",
     alignItems: "center",
@@ -990,8 +866,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.primary,
   },
   heroCard: {
-    borderRadius: radius.lg,
-    padding: spacing.lg,
+    borderRadius: radius.md,
+    padding: spacing.md,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.18)",
     overflow: "hidden",
@@ -1074,14 +950,14 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.78)",
   },
   heroActionRow: {
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
     flexDirection: "row",
     gap: spacing.sm,
   },
   heroAction: {
     flex: 1,
-    minHeight: 48,
-    borderRadius: radius.md,
+    minHeight: 44,
+    borderRadius: radius.sm,
     backgroundColor: colors123.surface,
     alignItems: "center",
     justifyContent: "center",
@@ -1090,8 +966,8 @@ const styles = StyleSheet.create({
   },
   heroActionGhost: {
     flex: 1,
-    minHeight: 48,
-    borderRadius: radius.lg,
+    minHeight: 44,
+    borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.22)",
     alignItems: "center",
@@ -1131,10 +1007,10 @@ const styles = StyleSheet.create({
   },
   productionTile: {
     width: "100%",
-    minHeight: 92,
+    minHeight: 82,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    borderRadius: radius.lg,
+    borderRadius: radius.md,
     backgroundColor: colors123.surfaceMuted,
     padding: spacing.sm,
   },
@@ -1151,7 +1027,7 @@ const styles = StyleSheet.create({
   },
   productionValue: {
     fontFamily: fonts.extrabold,
-    fontSize: 18,
+    fontSize: 17,
     color: colors123.text,
   },
   productionLabel: {
@@ -1164,7 +1040,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     gap: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   sectionTitle: {
     fontFamily: fonts.bold,
