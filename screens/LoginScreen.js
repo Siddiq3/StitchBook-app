@@ -77,6 +77,9 @@ export default function LoginScreen({navigation}){
             </TouchableOpacity>
           }
         />
+        <TouchableOpacity accessibilityRole="button" style={s.forgot} onPress={()=>navigation.navigate('ForgotPassword')}>
+          <Text style={s.forgotText}>Forgot password?</Text>
+        </TouchableOpacity>
         {error?<Text accessibilityLiveRegion="polite" style={s.error}>{error}</Text>:null}
         <AppButton label="Sign in" loading={loading} onPress={submit} style={s.primary}/>
         <TouchableOpacity accessibilityRole="button" style={s.alt} onPress={()=>navigation.navigate('Register')}>
@@ -100,6 +103,8 @@ const s=StyleSheet.create({
   card:{marginHorizontal:20,marginTop:-30,backgroundColor:colors123.surface,borderRadius:radius.lg,borderWidth:1,borderColor:colors123.borderLight,padding:20,gap:spacing.md},
   title:{...typography.h1,color:colors123.text},
   subtitle:{...typography.small,color:colors123.textMuted,marginTop:-8},
+  forgot:{minHeight:36,alignSelf:'flex-end',justifyContent:'center',marginTop:-6},
+  forgotText:{...typography.small,color:colors123.primary,fontFamily:fonts.semibold},
   error:{...typography.small,color:colors123.danger},
   primary:{marginTop:2},
   alt:{minHeight:44,alignItems:'center',justifyContent:'center',flexDirection:'row'},

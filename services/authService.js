@@ -16,6 +16,16 @@ export const authService = {
     return { token, refreshToken, user };
   },
 
+  requestPasswordReset: async (email) => {
+    const res = await authApi.requestPasswordReset(email);
+    return res.data;
+  },
+
+  resetPassword: async (email, otp, newPassword) => {
+    const res = await authApi.resetPassword(email, otp, newPassword);
+    return res.data;
+  },
+
   setPassword: async (currentPassword, newPassword) => {
     const res = await authApi.setPassword(currentPassword, newPassword);
     const user = res.data.data?.user;
