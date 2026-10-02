@@ -357,14 +357,14 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: spacing.xxl,
+    paddingBottom: spacing.xl,
   },
   headerButton: {
     padding: spacing.md,
   },
   header: {
-    marginBottom: spacing.lg,
-    paddingBottom: spacing.md,
+    marginBottom: spacing.md,
+    paddingBottom: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors123.borderLight,
   },
@@ -398,7 +398,7 @@ const styles = StyleSheet.create({
   modeContainer: {
     flexDirection: "row",
     gap: spacing.sm,
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   modeBadge: {
     flexDirection: "row",
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     minHeight: 44,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     backgroundColor: colors123.surface,
@@ -425,13 +425,13 @@ const styles = StyleSheet.create({
     color: colors123.surface,
   },
   fieldsSection: {
-    marginVertical: spacing.lg,
+    marginVertical: spacing.md,
   },
   fieldsTitle: {
     fontSize: 14,
     fontFamily: fonts.semibold,
     color: colors123.text,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   fieldsList: {
     gap: spacing.xs,
@@ -439,7 +439,7 @@ const styles = StyleSheet.create({
   summary: {
     marginVertical: spacing.lg,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     backgroundColor: colors123.infoLight,
     borderRadius: radius.md,
     borderWidth: 1,
@@ -462,8 +462,8 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: "row",
-    gap: spacing.md,
-    marginTop: spacing.lg,
+    gap: spacing.sm,
+    marginTop: spacing.md,
   },
   actionButton: {
     flex: 1,
