@@ -20,15 +20,15 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: spacing.xl,
+    paddingTop: spacing.lg,
     paddingBottom: spacing.lg,
   },
   header: {
-    marginBottom: spacing.lg,
+    marginBottom: spacing.md,
   },
   title: {
-    fontSize: 28,
-    lineHeight: 35,
+    fontSize: 24,
+    lineHeight: 30,
 
     color: colors123.text,
     marginBottom: spacing.sm,
@@ -41,14 +41,14 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
     fontFamily: fonts.regular,
   },
   languageList: {
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   languageOption: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    minHeight: 64,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    minHeight: 56,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
@@ -99,13 +99,13 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
   continueButton: {
     flexDirection: "row",
     backgroundColor: colors123.primary,
-    minHeight: 50,
+    minHeight: 48,
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     justifyContent: "center",
     alignItems: "center",
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   continueButtonText: {
     fontSize: 14,
