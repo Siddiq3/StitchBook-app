@@ -59,30 +59,24 @@ export default function LoginScreen({navigation}){
           autoComplete="username"
           returnKeyType="next"
         />
-        <View style={s.passwordWrap}>
-          <Text style={s.label}>Password</Text>
-          <View style={[s.passwordField,error&&s.passwordFieldError]}>
-            <Ionicons name="lock-closed-outline" size={19} color={colors123.textMuted}/>
-            <View style={s.passwordInputWrap}>
-              <IconInput
-                style={s.innerField}
-                inputStyle={s.innerInput}
-                value={password}
-                onChangeText={(v)=>{setPassword(v);setError('');}}
-                placeholder="Enter your password"
-                secureTextEntry={!showPassword}
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="current-password"
-                returnKeyType="go"
-                onSubmitEditing={submit}
-              />
-            </View>
+        <IconInput
+          label="Password"
+          icon="lock-closed-outline"
+          value={password}
+          onChangeText={(v)=>{setPassword(v);setError('');}}
+          placeholder="Enter your password"
+          secureTextEntry={!showPassword}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="current-password"
+          returnKeyType="go"
+          onSubmitEditing={submit}
+          right={
             <TouchableOpacity accessibilityRole="button" accessibilityLabel={showPassword?'Hide password':'Show password'} onPress={()=>setShowPassword(v=>!v)} hitSlop={10}>
               <Ionicons name={showPassword?'eye-off-outline':'eye-outline'} size={20} color={colors123.textMuted}/>
             </TouchableOpacity>
-          </View>
-        </View>
+          }
+        />
         {error?<Text accessibilityLiveRegion="polite" style={s.error}>{error}</Text>:null}
         <AppButton label="Sign in" loading={loading} onPress={submit} style={s.primary}/>
         <TouchableOpacity accessibilityRole="button" style={s.alt} onPress={()=>navigation.navigate('Register')}>
@@ -106,13 +100,6 @@ const s=StyleSheet.create({
   card:{marginHorizontal:20,marginTop:-30,backgroundColor:colors123.surface,borderRadius:radius.lg,borderWidth:1,borderColor:colors123.borderLight,padding:20,gap:spacing.md},
   title:{...typography.h1,color:colors123.text},
   subtitle:{...typography.small,color:colors123.textMuted,marginTop:-8},
-  passwordWrap:{gap:6},
-  label:{...typography.label,color:colors123.textSecondary},
-  passwordField:{minHeight:50,borderWidth:1,borderColor:colors123.borderStrong,borderRadius:radius.sm,backgroundColor:colors123.surface,paddingHorizontal:14,flexDirection:'row',alignItems:'center',gap:10},
-  passwordFieldError:{borderColor:colors123.danger},
-  passwordInputWrap:{flex:1},
-  innerField:{gap:0},
-  innerInput:{paddingVertical:0,minHeight:46},
   error:{...typography.small,color:colors123.danger},
   primary:{marginTop:2},
   alt:{minHeight:44,alignItems:'center',justifyContent:'center',flexDirection:'row'},
