@@ -97,6 +97,12 @@ api.interceptors.response.use(
     }
 
     if (error.response.status === 401 && !originalRequest._retry) {
+      const currentToken = await storage.getToken();
+      if (currentToken && originalRequest.headers?.Authorization !== `Bearer ${currentToken}`) {
+        originalRequest._retry = true;
+        originalRequest.headers.Authorization = `Bearer ${currentToken}`;
+        return api(originalRequest);
+      }
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -123,6 +129,8 @@ api.interceptors.response.use(
 
         const newToken = response.data.data.token;
         const newRefreshToken = response.data.data.refreshToken;
+
+        if (!newToken || !newRefreshToken) throw new Error('Unable to renew your session. Please retry.');
 
         await storage.setToken(newToken);
         await storage.setRefreshToken(newRefreshToken);
