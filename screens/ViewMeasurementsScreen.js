@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: spacing.xxl,
+    paddingBottom: spacing.xl,
   },
   center: {
     flex: 1,
@@ -429,11 +429,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   actionButton: {
-    marginTop: spacing.lg,
+    marginTop: spacing.md,
   },
   outfitGroup: {
-    marginBottom: spacing.lg,
-    borderRadius: radius.lg,
+    marginBottom: spacing.md,
+    borderRadius: radius.md,
     overflow: "hidden",
     borderWidth: 1,
     borderColor: colors123.borderLight,
@@ -443,7 +443,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     backgroundColor: colors123.surface,
   },
   outfitHeaderLeft: {
@@ -467,13 +467,13 @@ const styles = StyleSheet.create({
   outfitContent: {
     backgroundColor: colors123.surfaceMuted,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
-    gap: spacing.lg,
+    paddingVertical: spacing.md,
+    gap: spacing.md,
   },
   latestPreview: {
     backgroundColor: colors123.surface,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
@@ -482,9 +482,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.semibold,
     color: colors123.textMuted,
-    marginBottom: spacing.md,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    marginBottom: spacing.sm,
+    letterSpacing: 0.15,
   },
   previewGrid: {
     flexDirection: "row",
@@ -527,13 +526,13 @@ const styles = StyleSheet.create({
   },
   versionCard: {
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
   },
   versionCardHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors123.border,
   },

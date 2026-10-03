@@ -50,17 +50,17 @@ export default function AppButton({
 
 const styles = StyleSheet.create({
   base: {
-    minHeight: 50,
-    borderRadius: radius.md,
+    minHeight: 48,
+    borderRadius: radius.sm,
     justifyContent: "center",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderWidth: 1,
   },
   small: { minHeight: 44, paddingHorizontal: spacing.sm, paddingVertical: spacing.xs },
-  large: { minHeight: 54, paddingHorizontal: spacing.lg },
+  large: { minHeight: 52, paddingHorizontal: spacing.lg },
   content: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.xs },
   label: { flexShrink: 1, textAlign: "center", fontFamily: fonts.semibold, fontSize: 14, lineHeight: 21 },
-  pressed: { opacity: 0.84 },
+  pressed: { opacity: 0.88 },
   unavailable: { opacity: 0.55, backgroundColor: colors123.surfaceMuted, borderColor: colors123.borderLight },
 });

@@ -19,7 +19,7 @@ export default function AccountRecoveryScreen({ message, onRetry }) {
   </ScrollView>;
 }
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, justifyContent: 'center', padding: 20, gap: spacing.md, backgroundColor: colors123.background },
-  title: { fontFamily: fonts.bold, fontSize: 24, lineHeight: 30, color: colors123.text },
+  container: { flexGrow: 1, justifyContent: 'center', padding: spacing.md, gap: spacing.sm, backgroundColor: colors123.background },
+  title: { fontFamily: fonts.bold, fontSize: 22, lineHeight: 28, color: colors123.text },
   body: { fontFamily: fonts.regular, fontSize: 14, lineHeight: 21, color: colors123.textSecondary },
 });

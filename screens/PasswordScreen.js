@@ -44,8 +44,8 @@ export default function PasswordScreen(){
   </View>;
 }
 const s=StyleSheet.create({
-  page:{flex:1,backgroundColor:colors123.background,padding:20,gap:spacing.md},
-  info:{padding:spacing.md,borderRadius:radius.md,backgroundColor:colors123.primarySoft,borderWidth:1,borderColor:colors123.borderLight},
+  page:{flex:1,backgroundColor:colors123.background,padding:spacing.md,gap:spacing.md},
+  info:{padding:spacing.md,borderRadius:radius.sm,backgroundColor:colors123.primarySoft},
   infoTitle:{...typography.h3,color:colors123.text},
   infoText:{...typography.small,color:colors123.textSecondary,marginTop:6},
   error:{...typography.small,color:colors123.danger},

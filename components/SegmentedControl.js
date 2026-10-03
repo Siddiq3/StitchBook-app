@@ -49,16 +49,16 @@ export default function SegmentedControl({
 }
 const styles = StyleSheet.create({
   container: {
-    borderRadius: radius.md,
+    borderRadius: radius.sm,
     backgroundColor: colors123.surfaceMuted,
     padding: spacing.xxs,
   },
   options: { gap: spacing.xxs },
   option: {
-    minHeight: 44,
+    minHeight: 40,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.sm,
+    paddingVertical: 9,
+    borderRadius: 8,
     justifyContent: "center",
   },
   selected: { backgroundColor: colors123.surface },

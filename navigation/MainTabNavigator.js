@@ -74,22 +74,22 @@ function StudioTabs() {
         tabBarLabelStyle: {
           fontSize: normalize(SIZES.xs),
           fontFamily: fonts.medium,
-          marginBottom: 5
+          marginBottom: 2
         },
         tabBarIcon: ({ color, focused }) =>
           <View style={[styles.tabIconWrap, focused && styles.tabIconWrapActive]}>
             <MaterialCommunityIcons
               color={color}
               name={focused ? iconMap[route.name] : iconOutlineMap[route.name]}
-              size={21}
+              size={22}
             />
           </View>,
 
         tabBarStyle: {
-          height: 70 + insets.bottom,
-          paddingTop: 8,
-          paddingBottom: Math.max(insets.bottom, 8),
-          paddingHorizontal: 12,
+          height: 64 + insets.bottom,
+          paddingTop: 6,
+          paddingBottom: Math.max(insets.bottom, 6),
+          paddingHorizontal: 8,
           borderTopWidth: 1,
           borderColor: colors123.borderLight,
           backgroundColor: colors123.surface,
@@ -100,7 +100,7 @@ function StudioTabs() {
           shadowRadius: 12
         },
         tabBarItemStyle: {
-          borderRadius: 18
+          borderRadius: 12
         }
       })}>
 
@@ -207,10 +207,10 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.background,
   },
   tabIconWrap: {
-    minWidth: 42,
-    height: 32,
-    paddingHorizontal: 10,
-    borderRadius: 16,
+    minWidth: 40,
+    height: 30,
+    paddingHorizontal: 9,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },

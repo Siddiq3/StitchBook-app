@@ -39,11 +39,11 @@ export default function ListRow({
 }
 const styles = StyleSheet.create({
   row: {
-    minHeight: 64,
+    minHeight: 58,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors123.borderLight,
   },
@@ -58,6 +58,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 20,
     color: colors123.textMuted,
-    marginTop: spacing.xxs,
+    marginTop: 2,
   },
 });

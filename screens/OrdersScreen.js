@@ -342,15 +342,6 @@ export default function OrdersScreen({ navigation, route }) {
                       <Text style={styles.deliveryText}>Delivery: {deliveryText}</Text>
                     </View>
 
-                    <View style={styles.cardFooter}>
-                        <View style={styles.openDetailsRow}>
-                          <Text style={styles.openDetailsText}>Open order details</Text>
-                          <MaterialCommunityIcons
-                            name="chevron-right"
-                            size={20}
-                            color={colors123.primary} />
-                        </View>
-                    </View>
                   </AppCard>
                   </Pressable>
                 </MotiView>);
@@ -368,7 +359,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
     paddingBottom: spacing.xl,
-    gap: spacing.md,
+    gap: spacing.sm,
     backgroundColor: colors123.background,
   },
   addButton: {
@@ -381,7 +372,7 @@ const styles = StyleSheet.create({
   },
   miniStatCard: {
     flex: 1,
-    minHeight: 76,
+    minHeight: 68,
     justifyContent: "center",
     borderWidth: 1,
     borderColor: colors123.borderLight,
@@ -394,16 +385,16 @@ const styles = StyleSheet.create({
     color: colors123.textMuted,
   },
   miniStatValue: {
-    marginTop: spacing.xs,
+    marginTop: 3,
     fontFamily: fonts.extrabold,
-    fontSize: 22,
+    fontSize: 20,
     color: colors123.text,
   },
   list: {
     gap: 10,
   },
   orderCard: {
-    gap: 10,
+    gap: spacing.sm,
     borderWidth: 1,
     borderColor: colors123.borderLight,
     borderRadius: radius.md,
@@ -470,11 +461,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderRadius: radius.md,
-    backgroundColor: colors123.surfaceMuted,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
+    backgroundColor: colors123.surface,
+    borderWidth: 0,
+    paddingVertical: 2,
+    paddingHorizontal: 0,
   },
   amountInfo: {
     flex: 1,
@@ -497,7 +487,7 @@ const styles = StyleSheet.create({
     width: 1,
     height: 28,
     backgroundColor: colors123.borderLight,
-    marginHorizontal: spacing.md,
+    marginHorizontal: spacing.sm,
   },
   deliveryRow: {
     flexDirection: "row",
@@ -510,7 +500,6 @@ const styles = StyleSheet.create({
     color: colors123.textMuted,
   },
   orderTypeBadge: {
-    marginTop: spacing.xs,
     alignSelf: "flex-start",
     paddingHorizontal: spacing.sm,
     paddingVertical: 6,

@@ -20,7 +20,7 @@ export default function AppHeader({
       style={[
         styles.header,
         {
-          paddingTop: insets.top + 12,
+          paddingTop: insets.top + 8,
           backgroundColor,
         },
       ]}
@@ -59,8 +59,8 @@ const styles = StyleSheet.create({
     minHeight: SIZES.headerH,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: SIZES.lg2,
-    paddingBottom: 14,
+    paddingHorizontal: 16,
+    paddingBottom: 10,
   },
   content: {
     flex: 1,
@@ -69,9 +69,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   iconButton: {
-    width: 42,
-    height: 42,
-    borderRadius: 14,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
-    fontSize: normalize(21),
+    fontSize: normalize(20),
     fontFamily: fonts.semibold,
     color: colors123.text,
   },

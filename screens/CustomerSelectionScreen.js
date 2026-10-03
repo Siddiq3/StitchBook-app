@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    minHeight: 60,
+    minHeight: 56,
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     backgroundColor: colors123.surface,
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors123.borderLight,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontFamily: fonts.semibold,
     color: colors123.text,
   },
@@ -174,24 +174,24 @@ const styles = StyleSheet.create({
   contentScroll: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: spacing.xxl,
+    paddingBottom: spacing.xl,
   },
   emptyContainer: {
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 220,
-    paddingVertical: spacing.xl,
+    minHeight: 160,
+    paddingVertical: spacing.lg,
   },
   emptyText: {
     fontSize: 18,
     fontFamily: fonts.semibold,
     color: colors123.text,
-    marginTop: spacing.md,
+    marginTop: spacing.sm,
   },
   emptySubtext: {
     fontSize: 14,
     color: colors123.textMuted,
-    marginTop: spacing.sm,
+    marginTop: spacing.xs,
     fontFamily: fonts.regular,
   },
 });

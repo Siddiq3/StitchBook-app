@@ -175,19 +175,19 @@ export default function NotificationScreen({ navigation }) {const { t } = useLan
 const styles = StyleSheet.create({
   content: {
     padding: spacing.md,
-    paddingBottom: spacing.xxl,
+    paddingBottom: spacing.xl,
     gap: spacing.sm,
     backgroundColor: colors123.background,
   },
   markAllButton: {
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   notification: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: spacing.md,
+    gap: spacing.sm,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     borderWidth: 1,
@@ -198,9 +198,9 @@ const styles = StyleSheet.create({
     borderColor: colors123.borderLight,
   },
   notificationIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
+    width: 36,
+    height: 36,
+    borderRadius: radius.sm,
     alignItems: "center",
     justifyContent: "center",
     marginTop: 2,
@@ -215,8 +215,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: fonts.regular,
     color: colors123.textMuted,
-    marginBottom: spacing.xs,
-    lineHeight: 16,
+    marginBottom: 4,
+    lineHeight: 17,
   },
   notificationTime: {
     fontSize: 12,
