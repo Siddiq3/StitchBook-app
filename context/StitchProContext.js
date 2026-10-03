@@ -173,12 +173,15 @@ export const StitchProProvider = ({ children }) => {
       await storage.saveShop(shop);
       set({ shop });
     } catch (err) {
-      const code = err.response?.data?.error?.code;
+      const response = err.response;
+      const code = response?.data?.error?.code;
+      // Older servers return this 404 without a machine-readable code.
+      const isMissingShop = code === "SHOP_NOT_FOUND" ||
+        (response?.status === 404 && response?.data?.message === "Shop not found");
 
-
-      if (code === "SHOP_NOT_FOUND") {
-
-        set({ shop: null });
+      if (isMissingShop) {
+        await storage.saveShop(null);
+        set({ shop: null, shopError: null });
       } else {
         set({ shopError: "Could not load your shop. Check your connection and try again." });
       }

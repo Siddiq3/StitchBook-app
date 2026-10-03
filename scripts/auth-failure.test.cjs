@@ -18,7 +18,7 @@ function load(file, imports) {
   return exports;
 }
 function provider({shopError, subscriptionError} = {}) {
-  let state, cleared = 0;
+  let state, cleared = 0, savedShop;
   const effects = [];
   const session = {token:'test-token',user:{id:1},shop:{id:7}};
   const react = {
@@ -36,14 +36,43 @@ function provider({shopError, subscriptionError} = {}) {
   };
   const module = load('context/StitchProContext.js', {
     react,
-    '../services/authService':{authService:{restoreSession:async () => session,loginWithGoogle:async () => session}},
-    '../services/storage':{storage:{saveShop:async()=>{},clearAll:async()=>{cleared++;}}},
+    '../services/authService':{authService:{restoreSession:async () => session,loginWithGoogle:async () => session,registerWithPassword:async () => session}},
+    '../services/storage':{storage:{saveShop:async shop=>{savedShop=shop;},clearAll:async()=>{cleared++;}}},
     '../services/api':api,
   });
   const value = module.StitchProProvider({children:null}).value;
-  return {value, effects, state:()=>state, cleared:()=>cleared};
+  return {value, effects, state:()=>state, cleared:()=>cleared, savedShop:()=>savedShop};
 }
 const networkError = () => new Error('Network unavailable');
+const shopResponseError = (status, message, code) => ({response:{status,data:{message,error:code ? {code} : null}}});
+for (const code of [undefined, 'SHOP_NOT_FOUND']) {
+  test(`first-time password signup opens shop setup with ${code || 'legacy'} missing-shop response`, async()=>{
+    const p=provider({shopError:shopResponseError(404,'Shop not found',code)});
+    await p.value.registerWithPassword({name:'New owner',email:'new@example.com',password:'stitch123'});
+    assert.equal(p.state().isAuthenticated,true);
+    assert.equal(p.state().shop,null);
+    assert.equal(p.state().shopError,null);
+    assert.equal(p.savedShop(),null);
+  });
+}
+test('missing shop on restart clears stale shop cache and opens setup', async()=>{
+  const p=provider({shopError:shopResponseError(404,'Shop not found','SHOP_NOT_FOUND')});
+  p.effects[0]();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(p.state().isAuthenticated,true);
+  assert.equal(p.state().shop,null);
+  assert.equal(p.state().shopError,null);
+  assert.equal(p.savedShop(),null);
+});
+for (const error of [networkError(),shopResponseError(500,'Shop not found'),shopResponseError(404,'Route not found'),shopResponseError(403,'Permission denied')]) {
+  test(`signup preserves recovery screen for real shop failure: ${error.response?.status || 'network'}`, async()=>{
+    const p=provider({shopError:error});
+    await p.value.registerWithPassword({});
+    assert.equal(p.state().isAuthenticated,true);
+    assert.ok(p.state().shopError);
+    assert.equal(p.savedShop(),undefined);
+  });
+}
 test('successful login retains authenticated session and shop', async()=>{
   const p=provider(); await p.value.loginWithGoogle('test-id-token');
   assert.equal(p.state().isAuthenticated,true); assert.equal(p.state().shop.id,7);
