@@ -60,8 +60,8 @@ test("status labels and tones support API and legacy spelling", () => {
   assert.equal(theme.getStatusTone("future_stage").labelKey, undefined);
 });
 test("premium SaaS visual tokens stay consistent", () => {
-  assert.equal(theme.COLORS.primary, "#C24924");
-  assert.equal(theme.COLORS.primaryLight, "#FFF1EB");
+  assert.equal(theme.COLORS.primary, "#007FFF");
+  assert.equal(theme.COLORS.primaryLight, "#EAF4FF");
   assert.equal(theme.COLORS.background, "#F7F5F2");
   assert.equal(theme.COLORS.surface, "#FFFFFF");
   assert.equal(theme.COLORS.text, "#1F1A17");

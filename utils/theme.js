@@ -4,15 +4,15 @@ const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get("window");
 
 /**
  * StitchBook visual system
- * Warm tailoring identity + restrained neutral operational surfaces.
+ * Azure blue identity + restrained neutral operational surfaces.
  * Business logic should consume semantic roles instead of one-off colors.
  */
 export const COLORS = {
-  primary: "#C24924",
-  primaryPressed: "#9F3517",
-  primaryLight: "#FFF1EB",
-  primaryDark: "#9F3517",
-  accent: "#C24924",
+  primary: "#007FFF",
+  primaryPressed: "#0066CC",
+  primaryLight: "#EAF4FF",
+  primaryDark: "#0066CC",
+  accent: "#007FFF",
 
   success: "#147A48",
   successLight: "#EDF8F1",
@@ -47,8 +47,8 @@ export const COLORS = {
   urgentText: "#B4233B",
 
   avatarColors: [
-    "#C24924",
-    "#9F3517",
+    "#007FFF",
+    "#0066CC",
     "#0F766E",
     "#9A5A08",
     "#245EA8",
@@ -57,7 +57,7 @@ export const COLORS = {
     "#475569",
   ],
 
-  statPrimary: "#C24924",
+  statPrimary: "#007FFF",
   statSuccess: "#147A48",
   statWarning: "#9A5A08",
   statPurple: "#7C3AED",

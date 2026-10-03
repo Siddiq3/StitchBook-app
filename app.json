@@ -23,7 +23,7 @@
       "package": "com.stitchbook.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#C24924"
+        "backgroundColor": "#007FFF"
       }
     },
     "web": {
