@@ -375,9 +375,9 @@ export default function CreateItemDetail({
           <Text style={styles.label}>{t("pricePerItem")}</Text>
           <View style={styles.priceInputContainer}>
             <Text style={styles.currencySymbol}>₹</Text>
-            <TextInput accessibilityLabel="0"
+            <TextInput accessibilityLabel={t("enterPrice")}
               style={styles.priceInput}
-              placeholder="0"
+              placeholder={t("enterPrice")}
               placeholderTextColor={colors123.textSoft}
               keyboardType="decimal-pad"
               value={price}

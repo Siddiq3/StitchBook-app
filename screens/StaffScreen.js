@@ -611,7 +611,7 @@ export default function StaffScreen() {const { t } = useLanguage();
           style={styles.textInput}
           value={formData.name}
           onChangeText={(text) => setFormData({ ...formData, name: text })}
-          placeholder={t("auto_enter_name")}
+          placeholder={t("auto_enter_staff_name")}
           placeholderTextColor={colors123.textMuted}
           returnKeyType="next" />
 
@@ -626,11 +626,11 @@ export default function StaffScreen() {const { t } = useLanguage();
           size={18}
           color={colors123.primary} />
 
-          <TextInput accessibilityLabel="staff@gmail.com"
+          <TextInput accessibilityLabel={t("enterStaffEmail")}
           style={styles.textInput}
           value={formData.email}
           onChangeText={(text) => setFormData({ ...formData, email: text })}
-          placeholder="staff@gmail.com"
+          placeholder={t("enterStaffEmail")}
           placeholderTextColor={colors123.textMuted}
           keyboardType="email-address"
           autoCapitalize="none"
@@ -654,7 +654,7 @@ export default function StaffScreen() {const { t } = useLanguage();
           style={styles.textInput}
           value={formData.phone}
           onChangeText={(text) => setFormData({ ...formData, phone: text })}
-          placeholder={t("auto_enter_phone")}
+          placeholder={t("enterPhoneNumber")}
           placeholderTextColor={colors123.textMuted}
           keyboardType="phone-pad"
           returnKeyType="done" />
@@ -753,8 +753,8 @@ export default function StaffScreen() {const { t } = useLanguage();
 
           <TextInput accessibilityLabel={
           formData.payment_type === "commission" ?
-          "Example: 10" :
-          "Example: 500"
+          t("enterCommissionRate") :
+          t("enterPayRate")
           }
           style={styles.textInput}
           value={formData.pay_rate}
@@ -763,8 +763,8 @@ export default function StaffScreen() {const { t } = useLanguage();
           }
           placeholder={
           formData.payment_type === "commission" ?
-          "Example: 10" :
-          "Example: 500"
+          t("enterCommissionRate") :
+          t("enterPayRate")
           }
           placeholderTextColor={colors123.textMuted}
           keyboardType="numeric" />

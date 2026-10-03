@@ -69,7 +69,7 @@ export default function MeasurementRow({
           hasError && styles.inputError,
           value ? styles.inputFilled : {}]
           }
-          placeholder="0.0"
+          placeholder={t("enterValue")}
           placeholderTextColor={colors123.textSoft}
           keyboardType="decimal-pad"
           value={value || ""}

@@ -89,7 +89,7 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
         icon="account-outline"
         label={t("fullName")}
         onChangeText={(value) => handleChange("name", value)}
-        placeholder="Priya Sharma"
+        placeholder={t("enterCustomerName")}
         value={form.name}
       />
       <IconInput
@@ -101,7 +101,7 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
         onChangeText={(value) =>
           handleChange("phone", value.replace(/[^\d]/g, ""))
         }
-        placeholder="9876543210"
+        placeholder={t("enterCustomerPhone")}
         value={form.phone}
       />
       <IconInput
@@ -111,7 +111,7 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
         keyboardType="email-address"
         label={t("email")}
         onChangeText={(value) => handleChange("email", value)}
-        placeholder="priya@gmail.com"
+        placeholder={t("enterCustomerEmail")}
         value={form.email}
       />
       <IconInput
@@ -120,7 +120,7 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
         label={t("address")}
         multiline
         onChangeText={(value) => handleChange("address", value)}
-        placeholder="Banjara Hills, Hyderabad"
+        placeholder={t("enterCustomerAddress")}
         value={form.address}
       />
 

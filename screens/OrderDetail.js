@@ -1329,9 +1329,9 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                 <Text style={styles.label}>{t("auto_amount")}</Text>
                 <View style={styles.amountInputContainer}>
                   <Text style={styles.currencySymbol}>₹</Text>
-                  <TextInput accessibilityLabel={String(balanceDue)}
+                  <TextInput accessibilityLabel={t("enterPaymentAmount")}
                     style={styles.amountInput}
-                    placeholder={String(balanceDue)}
+                    placeholder={t("enterPaymentAmount")}
                     keyboardType="decimal-pad"
                     value={paymentForm.amount}
                     onChangeText={(text) =>

@@ -52,7 +52,7 @@ export default function LoginScreen({navigation}){
           icon="account-outline"
           value={identifier}
           onChangeText={(v)=>{setIdentifier(v);setError('');}}
-          placeholder="Email or mobile number"
+          placeholder="Enter your email or mobile number"
           autoCapitalize="none"
           autoCorrect={false}
           keyboardType="email-address"

@@ -84,7 +84,7 @@ export default function ForgotPasswordScreen({navigation}){
             icon="email-outline"
             value={email}
             onChangeText={(v)=>{setEmail(v);setError('');}}
-            placeholder="you@example.com"
+            placeholder="Enter your email"
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
@@ -103,7 +103,7 @@ export default function ForgotPasswordScreen({navigation}){
             icon="numeric"
             value={otp}
             onChangeText={(v)=>{setOtp(v.replace(/\D/g,'').slice(0,6));setError('');}}
-            placeholder="123456"
+            placeholder="Enter the 6-digit verification code"
             keyboardType="number-pad"
             maxLength={6}
             autoComplete="one-time-code"
@@ -124,7 +124,7 @@ export default function ForgotPasswordScreen({navigation}){
             icon="lock-closed-outline"
             value={password}
             onChangeText={(v)=>{setPassword(v);setError('');}}
-            placeholder="At least 8 characters"
+            placeholder="Enter your new password"
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             autoCorrect={false}
@@ -138,7 +138,7 @@ export default function ForgotPasswordScreen({navigation}){
             icon="lock-check-outline"
             value={confirm}
             onChangeText={(v)=>{setConfirm(v);setError('');}}
-            placeholder="Repeat your password"
+            placeholder="Re-enter your new password"
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             autoCorrect={false}

@@ -334,7 +334,7 @@ export default function MeasurementSheet({
                     onChangeText={(value) => handleChange(fieldLabel, value)}
                     onFocus={() => focusMeasurementField(fieldLabel)}
                     onSubmitEditing={() => focusNextField(index)}
-                    placeholder="0.0"
+                    placeholder={t("enterValue")}
                     placeholderTextColor={colors123.textSoft}
                     returnKeyType={isLastField ? "done" : "next"}
                     style={[styles.fieldInputRow, isFocused && styles.fieldInputRowFocused]}

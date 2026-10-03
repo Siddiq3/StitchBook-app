@@ -49,9 +49,9 @@ export default function RegisterScreen({navigation}){
       <Text style={s.subtitle}>Use one account for StitchBook on mobile and web.</Text>
 
       <View style={s.card}>
-        <IconInput label="Your name" icon="account-outline" value={form.name} onChangeText={set('name')} placeholder="Full name" autoCapitalize="words" autoComplete="name"/>
-        <IconInput label="Email address" icon="email-outline" value={form.email} onChangeText={set('email')} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email"/>
-        <IconInput label="Mobile number" icon="phone-outline" value={form.phone} onChangeText={set('phone')} placeholder="98765 43210" keyboardType="phone-pad" autoComplete="tel"/>
+        <IconInput label="Your name" icon="account-outline" value={form.name} onChangeText={set('name')} placeholder="Enter your name" autoCapitalize="words" autoComplete="name"/>
+        <IconInput label="Email address" icon="email-outline" value={form.email} onChangeText={set('email')} placeholder="Enter your email" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email"/>
+        <IconInput label="Mobile number" icon="phone-outline" value={form.phone} onChangeText={set('phone')} placeholder="Enter your mobile number" keyboardType="phone-pad" autoComplete="tel"/>
         <IconInput
           label="Password"
           icon="lock-closed-outline"
