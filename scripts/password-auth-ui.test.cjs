@@ -24,7 +24,7 @@ test('registration requires name email mobile password and confirmation',()=>{
 test('legacy authenticated accounts can reach password setup from settings',()=>{
   const settings=read('screens/SettingsScreen.js');
   const navigation=read('navigation/MainTabNavigator.js');
-  assert.match(settings,/Password & security/);
+  assert.match(settings,/t\("passwordSecurity"\)/);
   assert.match(settings,/navigation\.navigate\("Password"\)/);
   assert.match(navigation,/name="Password"/);
 });

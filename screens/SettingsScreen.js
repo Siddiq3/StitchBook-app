@@ -22,56 +22,14 @@ import AppButton from '../components/AppButton';
 import { useLanguage } from '../context/LanguageContext';
 import { useStitchPro } from '../context/StitchProContext';
 import { useToast } from '../context/ToastContext';
+import { getAccountStatusText } from '../utils/accountStatus';
+import { formatPhone } from '../utils/formHelpers';
 import { languages } from '../localization/translations';
-
-const settingsMenuItems = [
-{
-  id: 'notifications',
-  icon: 'bell-outline',
-  label: 'notifications',
-  iconBgColor: colors123.primaryLight
-},
-{
-  id: 'staff-management',
-  icon: 'account-multiple',
-  label: 'staffManagement',
-  iconBgColor: colors123.primaryLight
-},
-{
-  id: 'subscription',
-  icon: 'credit-card',
-  label: 'subscription',
-  iconBgColor: colors123.primaryLight
-}];
-
-function SettingsMenuItem({ item, onPress, t }) {
-  return (
-    <TouchableOpacity accessibilityRole="button"
-      style={styles.menuItem}
-      onPress={onPress}
-      activeOpacity={0.7}>
-
-      <View style={styles.iconContainer}>
-        <MaterialCommunityIcons
-          name={item.icon}
-          size={20}
-          color={colors123.primary} />
-
-      </View>
-      <Text style={styles.menuLabel}>{t(item.label)}</Text>
-      <MaterialCommunityIcons
-        name="chevron-right"
-        size={24}
-        color={colors123.textSoft} />
-
-    </TouchableOpacity>);
-
-}
 
 export default function SettingsScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { t, language, selectLanguage } = useLanguage();
-  const { user, shop, logout, updateShop } = useStitchPro();
+  const { user, shop, logout, updateShop, subscription } = useStitchPro();
   const { showToast } = useToast();
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [shopEditModalVisible, setShopEditModalVisible] = useState(false);
@@ -121,24 +79,6 @@ export default function SettingsScreen({ navigation }) {
     }
   };
 
-  const handleMenuItemPress = (itemId) => {
-
-    // Navigate to respective screens
-    switch (itemId) {
-      case 'staff-management':
-        navigation.navigate('Staff');
-        break;
-      case 'notifications':
-        navigation.navigate('Notifications');
-        break;
-      case 'subscription':
-        navigation.navigate('Subscription');
-        break;
-      default:
-
-    }
-  };
-
   const handleLogout = () => {
     Alert.alert(
       t('logoutConfirmTitle'),
@@ -185,7 +125,7 @@ export default function SettingsScreen({ navigation }) {
               <Text style={styles.profileName}>{user?.name || t('user')}</Text>
               <Text style={styles.profileRole}>{shop?.name || t('shopOwner')}</Text>
             </View>
-            <TouchableOpacity accessibilityRole="button"
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel={t('editShopDetails')}
               style={styles.editButton}
               onPress={() => setShopEditModalVisible(true)}>
 
@@ -210,7 +150,7 @@ export default function SettingsScreen({ navigation }) {
               <View style={styles.shopInfoRow}>
                     <MaterialCommunityIcons name="phone" size={18} color={colors123.primary} />
                     <Text style={styles.shopInfoLabel}>{t('phone')}:</Text>
-                    <Text style={styles.shopInfoValue}>{shop.phone}</Text>
+                    <Text style={styles.shopInfoValue}>{formatPhone(shop.phone)}</Text>
                   </View>
               }
                 {shop.location &&
@@ -221,13 +161,6 @@ export default function SettingsScreen({ navigation }) {
                   </View>
               }
               </View>
-              <TouchableOpacity accessibilityRole="button"
-              style={styles.editShopButton}
-              onPress={() => setShopEditModalVisible(true)}>
-
-                <MaterialCommunityIcons name="pencil" size={16} color={colors123.primary} />
-                <Text style={styles.editShopButtonText}>{t('editShopDetails')}</Text>
-              </TouchableOpacity>
             </>
           }
         </View>
@@ -331,36 +264,33 @@ export default function SettingsScreen({ navigation }) {
         </View>
         */}
 
-        <View style={styles.securityMenu}>
-          <Text style={styles.sectionTitle}>Account</Text>
+        {/* Everyday shop tools first, account housekeeping last */}
+        <View style={styles.groupCard}>
+          <Text style={styles.groupTitle}>{t("shop")}</Text>
           {[
-            { title: "Password & security", icon: "lock-outline", route: "Password", onPress: () => navigation.navigate("Password") },
-            { title: "Devices and sessions", icon: "devices", route: "Sessions", onPress: () => navigation.navigate("Sessions") },
-            { title: "Delete account", icon: "delete-outline", route: "DeleteAccount", onPress: () => navigation.navigate("DeleteAccount") },
-          ].map(item => <ListRow key={item.route} title={item.title}
+            { key: "staff", title: t("staffManagement"), icon: "account-multiple-outline", onPress: () => navigation.navigate("Staff") },
+            { key: "measurements", title: t("measurements"), icon: "ruler", onPress: () => navigation.navigate("Measurements") },
+            { key: "notifications", title: t("notifications"), icon: "bell-outline", onPress: () => navigation.navigate("Notifications") },
+          ].map(item => <ListRow key={item.key} title={item.title}
             leading={<MaterialCommunityIcons name={item.icon} size={20} color={colors123.textSecondary} />}
             trailing={<MaterialCommunityIcons name="chevron-right" size={20} color={colors123.textMuted} />}
             onPress={item.onPress} />)}
         </View>
-        {/* Settings Menu */}
-        <View style={styles.settingsMenu}>
-          <Text style={styles.sectionTitle}>{t("shopDetails")}</Text>
-          <SettingsMenuItem item={{ id: 'measurements', icon: 'ruler', label: 'measurements' }} t={t} onPress={() => navigation.navigate('Measurements')} />
-          <Text style={styles.sectionTitle}>{t("team")}</Text>
-          {settingsMenuItems.filter(item => item.id !== "subscription").map((item) =>
-          <SettingsMenuItem
-            key={item.id}
-            item={item}
-            t={t}
-            onPress={() => handleMenuItemPress(item.id)} />
 
-          )}
+        <View style={styles.groupCard}>
+          <Text style={styles.groupTitle}>{t("account")}</Text>
+          <ListRow title={t("accountStatus")} meta={getAccountStatusText(subscription, t) || "—"}
+            leading={<MaterialCommunityIcons name="shield-check-outline" size={20} color={colors123.textSecondary} />} />
+          {[
+            { key: "password", title: t("passwordSecurity"), icon: "lock-outline", onPress: () => navigation.navigate("Password") },
+            { key: "sessions", title: t("devicesSessions"), icon: "devices", onPress: () => navigation.navigate("Sessions") },
+            { key: "delete", title: t("deleteAccount"), icon: "delete-outline", onPress: () => navigation.navigate("DeleteAccount") },
+          ].map(item => <ListRow key={item.key} title={item.title}
+            leading={<MaterialCommunityIcons name={item.icon} size={20} color={colors123.textSecondary} />}
+            trailing={<MaterialCommunityIcons name="chevron-right" size={20} color={colors123.textMuted} />}
+            onPress={item.onPress} />)}
         </View>
 
-        <View style={styles.settingsMenu}>
-          <Text style={styles.sectionTitle}>{t("account")}</Text>
-          {settingsMenuItems.filter(item => item.id === "subscription").map(item => <SettingsMenuItem key={item.id} item={item} t={t} onPress={() => handleMenuItemPress(item.id)} />)}
-        </View>
         {/* Logout Button */}
         <TouchableOpacity accessibilityRole="button"
           style={styles.logoutButton}
@@ -540,7 +470,8 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     backgroundColor: colors123.background,
   },
-  securityMenu: { marginHorizontal: spacing.md, paddingHorizontal: spacing.md, backgroundColor: colors123.surface, borderRadius: radius.md },
+  groupCard: { marginTop: spacing.md, marginHorizontal: spacing.md, paddingHorizontal: spacing.md, paddingTop: spacing.sm, backgroundColor: colors123.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors123.borderLight },
+  groupTitle: { fontSize: 14, color: colors123.textMuted, fontFamily: fonts.semibold, paddingTop: spacing.xs },
   profileSection: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,

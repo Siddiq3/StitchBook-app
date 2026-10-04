@@ -16,17 +16,19 @@ import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { colors123, SIZES, normalize, SHADOWS, spacing } from "../utils/theme";
 import BrandLogo from "../components/BrandLogo";
+import StepProgress from "../components/StepProgress";
+import { formatPhone, normalizePhone } from "../utils/formHelpers";
 
 const OnboardingScreen = () => {
   const { t } = useLanguage();
-  const { createShop } = useStitchPro();
+  const { createShop, user } = useStitchPro();
   const { showToast } = useToast();
 
   const [step, setStep] = useState(1);   // 1, 2, or 3
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
     name: '',
-    phone: '',
+    phone: user?.phone ? formatPhone(user.phone) : '',
     location: '',
   });
   const [errors, setErrors] = useState({});
@@ -67,7 +69,7 @@ const OnboardingScreen = () => {
     try {
       await createShop({
         name:     form.name.trim(),
-        phone:    form.phone.trim(),
+        phone:    normalizePhone(form.phone) || form.phone.trim(),
         location: form.location.trim() || undefined,
       });
       showToast(t('shopCreatedSuccess'), 'success');
@@ -92,17 +94,7 @@ const OnboardingScreen = () => {
           <Text style={styles.subtitle}>{t("setupYourShop")}</Text>
         </View>
 
-        <View style={styles.progressContainer}>
-          {[1, 2, 3].map((dot) => (
-            <View
-              key={dot}
-              style={[
-                styles.progressDot,
-                dot <= step && styles.progressDotActive,
-              ]}
-            />
-          ))}
-        </View>
+        <StepProgress total={3} current={step} />
 
         <View style={styles.stepContainer}>
           {step === 1 && (
@@ -166,7 +158,7 @@ const OnboardingScreen = () => {
                 </View>
                 <View style={styles.reviewItem}>
                   <Text style={styles.reviewLabel}>{t("phone")}</Text>
-                  <Text style={styles.reviewValue}>{form.phone}</Text>
+                  <Text style={styles.reviewValue}>{formatPhone(form.phone)}</Text>
                 </View>
                 <View style={styles.reviewItem}>
                   <Text style={styles.reviewLabel}>{t("location")}</Text>
@@ -231,20 +223,6 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: "center",
   },
-  progressContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 16,
-    gap: 6,
-  },
-  progressDot: {
-    width: 36,
-    height: 4,
-    borderRadius: 999,
-    backgroundColor: colors123.border,
-  },
-  progressDotActive: { backgroundColor: colors123.primary },
   stepContainer: {
     flex: 1,
     justifyContent: "flex-start",

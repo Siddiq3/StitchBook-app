@@ -42,7 +42,7 @@ export function StatusBadge({ status, size = 'md', style }) {
     delivered: {
       bg: BRAND_COLORS.successLight,
       text: BRAND_COLORS.success,
-      icon: 'check-double',
+      icon: 'check-all',
       label: 'Delivered',
     },
     cancelled: {

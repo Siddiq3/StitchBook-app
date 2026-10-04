@@ -9,9 +9,12 @@ import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 import { getOutfitsByGender } from "../services/outfitTypes";
-import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
+import { colors123, fonts, formatCurrency, radius, shadows, spacing } from "../utils/theme";
 import AvatarCircle from "../components/AvatarCircle";
 import AppButton from "../components/AppButton";
+import StepProgress from "../components/StepProgress";
+import { showAccountInactiveAlert } from "../utils/accountStatus";
+import { formatPhone, toLocalDateKey } from "../utils/formHelpers";
 import MeasurementPickerModal from "../components/MeasurementPickerModal";
 import CreateItemDetail from "./CreateItemDetail";
 
@@ -19,7 +22,7 @@ export default function CreateOrder({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { customersError } = useStitchPro();
-  const { addOrder, customers, fetchCustomers } = useStitchPro();
+  const { addOrder, recordPayment, customers, fetchCustomers } = useStitchPro();
   const { showToast } = useToast();
 
   // Get customerId from route params (if coming from CustomerDetail or CustomerSelection)
@@ -48,7 +51,7 @@ export default function CreateOrder({ navigation, route }) {
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   ); // Default: 7 days from now
   const [showDatePicker, setShowDatePicker] = useState(false);
-  const [priority, setPriority] = useState("normal"); // normal or high
+  const [advance, setAdvance] = useState("");
   const [notes, setNotes] = useState("");
 
   // If customerId provided, find and select that customer immediately
@@ -110,26 +113,21 @@ export default function CreateOrder({ navigation, route }) {
     setCurrentStep(3); // → Step 3: Item Details Configuration
   };
 
+  // The item screen already asks for measurements (required for stitching,
+  // optional for alteration), so the item is complete here; no second prompt.
   const handleItemDetailSave = (item) => {
-    if (item?.measurementSnapshot) {
-      const completeItem = {
-        ...item,
-        measurementLabel: item.measurementLabel || item.measurementSnapshot.outfitLabel,
-        measurementData: item.measurementData || item.measurementSnapshot.measurementsData
-      };
-      setSelectedItems((current) => [...current, completeItem]);
-      setTempItem(null);
-      setCurrentOutfitType(null);
-      setCurrentItemMeasurement(null);
-      showToast(t("itemAddedWithProfile"), "success");
-      setCurrentStep(2);
-      return;
-    }
-
-    // Item details saved → move directly to step 4 (measurements)
-    // CRITICAL: tempItem must persist through step 4
-    setTempItem(item);
-    setCurrentStep(4); // → Step 4: Measurements Selection
+    const snapshot = item?.measurementSnapshot;
+    const completeItem = snapshot ? {
+      ...item,
+      measurementLabel: item.measurementLabel || snapshot.outfitLabel,
+      measurementData: item.measurementData || snapshot.measurementsData
+    } : item;
+    setSelectedItems((current) => [...current, completeItem]);
+    setTempItem(null);
+    setCurrentOutfitType(null);
+    setCurrentItemMeasurement(null);
+    showToast(t(snapshot ? "itemAddedWithProfile" : "itemAddedWithoutMeasurement"), "success");
+    setCurrentStep(2);
   };
 
   const handleItemDetailCancel = () => {
@@ -207,7 +205,7 @@ export default function CreateOrder({ navigation, route }) {
     setCurrentItemMeasurement(null);
     setSelectedItems([]);
     setDeliveryDate(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
-    setPriority("normal");
+    setAdvance("");
     setNotes("");
   };
 
@@ -235,13 +233,19 @@ export default function CreateOrder({ navigation, route }) {
       return;
     }
 
+    if (advanceAmount > totalAmount) {
+      showToast(t("advanceTooHigh"), "error");
+      return;
+    }
+
     setLoading(true);
     try {
-      await addOrder({
+      const createdOrder = await addOrder({
         customerId: selectedCustomer.id,
         items: selectedItems.map((item) => ({
           type: item.type || item.typeLabel,
-          fabric: item.fabric,
+          typeLabel: item.typeLabel || null,
+          fabric: item.fabric || "",
           quantity: Number(item.quantity),
           price: Number(item.price),
           measurement_id: item.measurement_id || null,
@@ -249,7 +253,7 @@ export default function CreateOrder({ navigation, route }) {
           measurementData: item.measurementData || null,
           measurementSnapshot: item.measurementSnapshot || null
         })),
-        deliveryDate: deliveryDate.toISOString().split("T")[0],
+        deliveryDate: toLocalDateKey(deliveryDate),
         description: notes || '',
         measurement_snapshot: {
           profiles: measurementSnapshots,
@@ -258,22 +262,22 @@ export default function CreateOrder({ navigation, route }) {
         }
       });
 
-      showToast(t("orderCreatedSuccess"), "success");
+      let advanceSaved = true;
+      if (advanceAmount > 0 && createdOrder?.id) {
+        try {
+          await recordPayment({ orderId: createdOrder.id, amount: advanceAmount, paymentMethod: "cash", notes: t("advance") });
+        } catch {
+          advanceSaved = false;
+        }
+      }
+
+      // The order exists either way; only the advance needs re-entering if it failed.
+      showToast(advanceSaved ? t("orderCreatedSuccess") : t("advanceNotSaved"), advanceSaved ? "success" : "error");
       resetForm();
       navigation.navigate("StudioTabs", { screen: "Orders" });
     } catch (err) {
       if (err.code === "SUBSCRIPTION_REQUIRED") {
-        Alert.alert(
-          t("trialExpired"),
-          t("trialExpiredMessage"),
-          [
-          { text: t("notNow"), style: "cancel" },
-          {
-            text: t("viewStatus"),
-            onPress: () => navigation.navigate("Subscription")
-          }]
-
-        );
+        showAccountInactiveAlert(t);
         return;
       }
 
@@ -287,6 +291,7 @@ export default function CreateOrder({ navigation, route }) {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
+  const advanceAmount = Number(advance) || 0;
 
   // ========== STEP 3: ITEM DETAIL CONFIGURATION ==========
   if (currentStep === 3 && currentOutfitType && selectedCustomer) {
@@ -315,18 +320,7 @@ export default function CreateOrder({ navigation, route }) {
           <View style={{ width: 28 }} />
         </View>
 
-        {/* Progress Dots */}
-        <View style={styles.progressContainer}>
-          {[1, 2, 3, 4, 5].map((dot) =>
-          <View
-            key={dot}
-            style={[
-            styles.progressDot,
-            dot <= currentStep && styles.progressDotActive]
-            } />
-
-          )}
-        </View>
+        <StepProgress total={4} current={Math.min(currentStep, 4)} />
 
         <ScrollView
           style={styles.content}
@@ -378,7 +372,7 @@ export default function CreateOrder({ navigation, route }) {
                   <AvatarCircle name={item.name} size={48} />
                   <View style={styles.customerInfo}>
                     <Text style={styles.customerName}>{item.name}</Text>
-                    <Text style={styles.customerPhone}>{item.phone}</Text>
+                    <Text style={styles.customerPhone}>{formatPhone(item.phone)}</Text>
                   </View>
                   <View style={styles.genderPill}>
                     <Text style={styles.genderPillText}>
@@ -418,17 +412,7 @@ export default function CreateOrder({ navigation, route }) {
           <View style={{ width: 28 }} />
         </View>
 
-        <View style={styles.progressContainer}>
-          {[1, 2, 3, 4, 5].map((dot) =>
-          <View
-            key={dot}
-            style={[
-            styles.progressDot,
-            dot <= currentStep && styles.progressDotActive]
-            } />
-
-          )}
-        </View>
+        <StepProgress total={4} current={Math.min(currentStep, 4)} />
 
         <ScrollView
           style={styles.content}
@@ -447,7 +431,7 @@ export default function CreateOrder({ navigation, route }) {
               <AvatarCircle name={selectedCustomer?.name} size={56} />
               <View style={styles.customerSummaryInfo}>
                 <Text style={styles.customerName}>{selectedCustomer?.name}</Text>
-                <Text style={styles.customerPhone}>{selectedCustomer?.phone}</Text>
+                <Text style={styles.customerPhone}>{formatPhone(selectedCustomer?.phone)}</Text>
               </View>
             </View>
           </View>
@@ -460,9 +444,9 @@ export default function CreateOrder({ navigation, route }) {
             <View key={index} style={styles.itemCard}>
                   <View style={styles.itemDetails}>
                     <Text style={styles.itemType}>{item.typeLabel}</Text>
-                    <Text style={styles.itemFabric}>{item.fabric}</Text>
+                    {item.fabric ? <Text style={styles.itemFabric}>{item.fabric}</Text> : null}
                     <Text style={styles.itemPrice}>
-                      {item.quantity}x ₹{item.price} = ₹{item.quantity * item.price}
+                      {item.quantity} × {formatCurrency(item.price)} = {formatCurrency(item.quantity * item.price)}
                     </Text>
                   </View>
                   <TouchableOpacity accessibilityRole="button"
@@ -551,17 +535,7 @@ export default function CreateOrder({ navigation, route }) {
           <View style={{ width: 28 }} />
         </View>
 
-        <View style={styles.progressContainer}>
-          {[1, 2, 3, 4, 5].map((dot) =>
-          <View
-            key={dot}
-            style={[
-            styles.progressDot,
-            dot <= currentStep && styles.progressDotActive]
-            } />
-
-          )}
-        </View>
+        <StepProgress total={4} current={Math.min(currentStep, 4)} />
 
         <ScrollView
           style={styles.content}
@@ -577,7 +551,7 @@ export default function CreateOrder({ navigation, route }) {
           <View style={styles.summaryCard}>
               <Text style={styles.cardTitle}>{t("itemDetails")}</Text>
               <Text style={styles.itemType}>{tempItem.typeLabel}</Text>
-              <Text style={styles.itemFabric}>{tempItem.fabric}</Text>
+              {tempItem.fabric ? <Text style={styles.itemFabric}>{tempItem.fabric}</Text> : null}
               <Text style={styles.itemPrice}>
                 {tempItem.quantity}x ₹{tempItem.price}
               </Text>
@@ -620,7 +594,7 @@ export default function CreateOrder({ navigation, route }) {
     return (
       <View style={styles.container}>
         <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
-          <TouchableOpacity accessibilityRole="button"
+          <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")}
             onPress={() => setCurrentStep(2)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
 
@@ -630,17 +604,7 @@ export default function CreateOrder({ navigation, route }) {
           <View style={{ width: 28 }} />
         </View>
 
-        <View style={styles.progressContainer}>
-          {[1, 2, 3, 4, 5].map((dot) =>
-          <View
-            key={dot}
-            style={[
-            styles.progressDot,
-            dot <= currentStep && styles.progressDotActive]
-            } />
-
-          )}
-        </View>
+        <StepProgress total={4} current={Math.min(currentStep, 4)} />
 
         <ScrollView style={styles.content} contentContainerStyle={styles.contentScroll}>
           {/* Customer Summary */}
@@ -651,7 +615,7 @@ export default function CreateOrder({ navigation, route }) {
               <View style={styles.customerSummaryInfo}>
                 <Text style={styles.customerName}>{selectedCustomer.name}</Text>
                 <Text style={styles.customerPhone}>
-                  {selectedCustomer.phone}
+                  {formatPhone(selectedCustomer.phone)}
                 </Text>
               </View>
             </View>
@@ -664,25 +628,24 @@ export default function CreateOrder({ navigation, route }) {
             <View key={index} style={styles.itemSummary}>
                 <View>
                   <Text style={styles.itemType}>{item.typeLabel}</Text>
-                  <Text style={styles.itemFabric}>{item.fabric}</Text>
+                  {item.fabric ? <Text style={styles.itemFabric}>{item.fabric}</Text> : null}
                   {item.measurementLabel &&
                 <Text style={styles.measurementMeta}>{item.measurementLabel}</Text>
                 }
                 </View>
                 <View style={{ alignItems: "flex-end" }}>
                   <Text style={styles.itemPrice}>
-                    {item.quantity}x ₹{item.price}
+                    {item.quantity} × {formatCurrency(item.price)}
                   </Text>
                   <Text style={styles.itemTotal}>
-                    ₹{item.quantity * item.price}
+                    {formatCurrency(item.quantity * item.price)}
                   </Text>
                 </View>
               </View>
             )}
-            <View style={styles.divider} />
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>{t("totalAmount")}</Text>
-              <Text style={styles.totalValue}>₹{totalAmount}</Text>
+              <Text style={styles.totalValue}>{formatCurrency(totalAmount)}</Text>
             </View>
           </View>
 
@@ -703,42 +666,18 @@ export default function CreateOrder({ navigation, route }) {
               </Text>
             </TouchableOpacity>
 
-            <View style={styles.priorityRow}>
-              <Text style={styles.label}>{t("priority")}</Text>
-              <View style={styles.priorityButtons}>
-                <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(priority === "normal") }}
-                  style={[
-                  styles.priorityButton,
-                  priority === "normal" && styles.priorityButtonActive]
-                  }
-                  onPress={() => setPriority("normal")}>
-
-                  <Text
-                    style={[
-                    styles.priorityButtonText,
-                    priority === "normal" && styles.priorityButtonTextActive]
-                    }>
-
-                    {t("normal")}
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(priority === "high") }}
-                  style={[
-                  styles.priorityButton,
-                  priority === "high" && styles.priorityButtonActive]
-                  }
-                  onPress={() => setPriority("high")}>
-
-                  <Text
-                    style={[
-                    styles.priorityButtonText,
-                    priority === "high" && styles.priorityButtonTextActive]
-                    }>
-
-                    {t("high")}
-                  </Text>
-                </TouchableOpacity>
-              </View>
+            <View style={styles.notesContainer}>
+              <Text style={styles.label}>{t("advanceReceived")}</Text>
+              <TextInput accessibilityLabel={t("advanceReceived")}
+                style={styles.notesInput}
+                placeholder="₹0"
+                placeholderTextColor={colors123.textSoft}
+                keyboardType="number-pad"
+                value={advance}
+                onChangeText={(value) => setAdvance(value.replace(/[^\d]/g, ""))} />
+              {advanceAmount > 0 &&
+              <Text style={styles.measurementMeta}>{t("balance")}: {formatCurrency(Math.max(0, totalAmount - advanceAmount))}</Text>
+              }
             </View>
 
             <View style={styles.notesContainer}>
@@ -766,14 +705,6 @@ export default function CreateOrder({ navigation, route }) {
 
           }
 
-          {/* Action Buttons */}
-          <AppButton
-            label={t("createOrder")}
-            onPress={handleSubmitOrder}
-            loading={loading}
-            disabled={loading} />
-
-
           <TouchableOpacity accessibilityRole="button"
             style={styles.secondaryButton}
             onPress={() => setCurrentStep(2)}
@@ -782,12 +713,41 @@ export default function CreateOrder({ navigation, route }) {
             <Text style={styles.secondaryButtonText}>{t("editItems")}</Text>
           </TouchableOpacity>
         </ScrollView>
+
+        {/* Primary action pinned within thumb reach */}
+        <View style={[styles.stickyFooter, { paddingBottom: insets.bottom + spacing.sm }]}>
+          <View>
+            <Text style={styles.footerLabel}>{t("totalAmount")}</Text>
+            <Text style={styles.footerTotal}>{formatCurrency(totalAmount)}</Text>
+          </View>
+          <AppButton
+            icon="check"
+            label={t("createOrder")}
+            onPress={handleSubmitOrder}
+            loading={loading}
+            disabled={loading}
+            size="lg"
+            style={styles.footerButton} />
+        </View>
       </View>);
 
   }
 }
 
 const styles = StyleSheet.create({
+  stickyFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.md,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: colors123.borderLight,
+    backgroundColor: colors123.surface,
+  },
+  footerLabel: { fontFamily: fonts.regular, fontSize: 12, color: colors123.textMuted },
+  footerTotal: { fontFamily: fonts.bold, fontSize: 20, color: colors123.text },
+  footerButton: { flex: 1 },
   container: {
     flex: 1,
     backgroundColor: colors123.background,
@@ -807,23 +767,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: fonts.extrabold,
     color: colors123.text,
-  },
-  progressContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: spacing.sm,
-    gap: 6,
-    backgroundColor: colors123.background,
-  },
-  progressDot: {
-    width: 30,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: colors123.borderLight,
-  },
-  progressDotActive: {
-    backgroundColor: colors123.primary,
   },
   content: {
     flex: 1,
@@ -1119,35 +1062,6 @@ const styles = StyleSheet.create({
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.semibold,
     color: colors123.text,
-  },
-  priorityRow: {
-    marginBottom: spacing.md,
-  },
-  priorityButtons: {
-    flexDirection: "row",
-    gap: spacing.md,
-  },
-  priorityButton: {
-    flex: 1,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    borderRadius: radius.pill,
-    backgroundColor: colors123.surface,
-    alignItems: "center",
-  },
-  priorityButtonActive: {
-    backgroundColor: colors123.primary,
-    borderColor: colors123.primary,
-  },
-  priorityButtonText: {
-    fontSize: fonts.sm.fontSize,
-    fontFamily: fonts.semibold,
-    color: colors123.text,
-  },
-  priorityButtonTextActive: {
-    color: colors123.surface,
   },
   notesContainer: {
     marginTop: spacing.md,

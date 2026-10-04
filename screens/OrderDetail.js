@@ -10,12 +10,13 @@ import { shareAsync } from "expo-sharing";
 import { parseISO, isValid, format } from "date-fns";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
-import { ORDER_STATUS_CONFIG, PAYMENT_METHODS } from "../services/outfitTypes";
+import { ORDER_STATUS_CONFIG, PAYMENT_METHODS, getOutfitLabel } from "../services/outfitTypes";
 import { getWhatsAppTemplate, generateWhatsAppShareUrl } from "../services/whatsappTemplates";
 import api, { orderApi } from "../services/api";
-import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
+import { colors123, fonts, formatCurrency, radius, shadows, spacing, getOrderAmounts, getStatusTone } from "../utils/theme";
 
 import StatusBadge from "../components/StatusBadge";
+import { getMeasurementEntries } from "../utils/formHelpers";
 import AppButton from "../components/AppButton";
 import MeasurementFieldThumb from "../components/MeasurementFieldThumb";
 import generateJobSheetHTML from "../utils/generateJobSheetHTML";import { useLanguage } from "../context/LanguageContext";
@@ -257,25 +258,10 @@ export default function OrderDetail({ route, navigation }) {
 
   };
 
-  const getOrderTotals = (targetOrder = order) => {
-    const total = Number(
-      targetOrder?.total_amount ||
-      targetOrder?.totalAmount ||
-      targetOrder?.amount ||
-      0
-    );
-    const paid = Number(
-      targetOrder?.advance_paid ||
-      targetOrder?.paidAmount ||
-      targetOrder?.paid_amount ||
-      0
-    );
-    return {
-      total,
-      paid,
-      balance: Math.max(0, total - paid)
-    };
-  };
+  const getOrderTotals = (targetOrder = order) => getOrderAmounts(targetOrder);
+  // One name per status everywhere (badge, steps, dialogs)
+  const statusName = (status) => t(getStatusTone(status).labelKey || status);
+
 
   const getCustomerPhone = () =>
     order?.customer_phone ||
@@ -426,19 +412,19 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
 
     Alert.alert(t("auto_advance_order_status"),
 
-    `Move from ${statusConfig.label} to ${ORDER_STATUS_CONFIG[statusConfig.nextStatus]?.label || statusConfig.nextStatus}?`,
+    `${statusName(order.status)} → ${statusName(statusConfig.nextStatus)}`,
     [
     {
-      text: "Cancel",
+      text: t("cancel"),
       onPress: () => {}
     },
     {
-      text: "Confirm",
+      text: t("confirm"),
       onPress: async () => {
         setLoadingStatus(true);
         try {
           await updateOrderStatus(orderId, statusConfig.nextStatus);
-          showToast(`Order moved to ${statusConfig.nextStatus}`, "success");
+          showToast(`${t("orderMovedTo")} ${statusName(statusConfig.nextStatus)}`, "success");
           loadActivity();
         } catch (err) {
           showToast(err.message || "Failed to update status", "error");
@@ -505,9 +491,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
     const shopName = shop?.name || "StitchBook";
     const orderNo = order.order_number || `#${order.id}`;
     const delivery = formatDisplayDate(order.deliveryDate || order.delivery_date, "to be confirmed");
-    const total = Number(order.total_amount || order.totalAmount || order.amount || 0);
-    const paid = Number(order.advance_paid || order.paidAmount || order.paid_amount || 0);
-    const balance = Math.max(0, total - paid);
+    const { total, paid, balance } = getOrderAmounts(order);
     const itemText = (order.items || []).
     map((item) => itemDisplayName(item)).
     filter(Boolean).
@@ -618,7 +602,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
   };
 
   const itemDisplayName = (item = {}) =>
-  item.typeLabel || item.type || item.item_name || item.name || "Item";
+  item.typeLabel || (item.type && getOutfitLabel(item.type)) || item.item_name || item.name || "Item";
 
   const buildOrderUpdatePayload = (items) => ({
     customer_id: order.customer_id || order.customerId || order.customer?.id,
@@ -781,7 +765,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
   }
 
   const statusConfig = ORDER_STATUS_CONFIG[order.status];
-  const balanceDue = order.total_amount - (order.advance_paid || 0);
+  const { total: orderTotal, paid: paidSoFar, balance: balanceDue, paymentStatus } = getOrderAmounts(order);
   const hasNextStatus = statusConfig?.nextStatus;
 
   return (
@@ -845,7 +829,9 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               <Text style={styles.label}>{t("auto_customer")}</Text>
               <Text style={styles.value}>{order?.customer_name || 'Unknown Customer'}</Text>
             </View>
-            <StatusBadge status={order?.status} />
+            <View style={{ alignItems: "flex-end", gap: spacing.xs }}>
+              <StatusBadge compact status={paymentStatus} />
+            </View>
           </View>
 
           <View style={styles.divider} />
@@ -895,7 +881,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               </View>
               <View style={styles.divider} />
               <ResponsiveGrid minItemWidth={140} style={styles.measurementList}>
-                {Object.entries(measurementData).map(([key, value]) =>
+                {getMeasurementEntries(measurementData).map(([key, value]) =>
               <View key={key} style={styles.measurementRow}>
                     <MeasurementFieldThumb
                   bodyType={getMeasurementBodyType(outfitType)}
@@ -975,10 +961,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                       currentStatus && styles.statusLabelActive]
                       }>
 
-                      {status === 'started' ? 'New\nOrder' :
-                      status === 'cutting' ? 'Cutting' :
-                      status === 'stitching' ? 'Stitching' :
-                      status === 'ready' ? 'Ready' : 'Delivered'}
+                      {t(status === 'started' ? 'pending' : status)}
                     </Text>
                   </View>);
 
@@ -988,7 +971,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
 
           {hasNextStatus &&
           <AppButton
-            title={`Mark as ${statusConfig.nextStatus}`}
+            title={`${t("markAs")} ${t(statusConfig.nextStatus)}`}
             onPress={handleAdvanceStatus}
             disabled={loadingStatus}
             style={{ marginTop: spacing.lg }} />
@@ -1044,7 +1027,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   </View>
                   <View style={styles.itemMetaStack}>
                     <Text style={styles.itemMetaText}>Qty {item.quantity}</Text>
-                    <Text style={styles.itemPriceText}>₹{item.price * item.quantity}</Text>
+                    <Text style={styles.itemPriceText}>{formatCurrency(item.price * item.quantity)}</Text>
                   </View>
                   </View>
 
@@ -1118,7 +1101,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               "Measurement profile"}
               </Text>
               <ResponsiveGrid style={styles.measurementGrid}>
-                {Object.entries(measurementData).map(([key, value]) =>
+                {getMeasurementEntries(measurementData).map(([key, value]) =>
               <View key={key} style={styles.measurementTile}>
                     <MeasurementFieldThumb
                   bodyType={getMeasurementBodyType(outfitType)}
@@ -1138,11 +1121,11 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
           <View style={styles.totalsContainer}>
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>{t("auto_subtotal")}</Text>
-              <Text style={styles.totalValue}>₹{order.total_amount}</Text>
+              <Text style={styles.totalValue}>{formatCurrency(orderTotal)}</Text>
             </View>
             <View style={[styles.totalRow, { marginTop: spacing.md }]}>
-              <Text style={styles.totalLabel}>{t("auto_advance_paid")}</Text>
-              <Text style={styles.totalValue}>₹{order.advance_paid || 0}</Text>
+              <Text style={styles.totalLabel}>{t("paid")}</Text>
+              <Text style={styles.totalValue}>{formatCurrency(paidSoFar)}</Text>
             </View>
             <View
               style={[
@@ -1162,13 +1145,24 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                 balanceDue > 0 && styles.balanceValueWarning]
                 }>
 
-                ₹{balanceDue}
+                {formatCurrency(balanceDue)}
               </Text>
             </View>
           </View>
 
+          {/* Collect sits right under the balance it settles; it is the one primary action here */}
+          {balanceDue > 0 &&
+          <AppButton
+            icon="cash-plus"
+            title={t("auto_record_payment")}
+            onPress={() => setShowPaymentModal(true)}
+            style={{ marginTop: spacing.md }} />
+          }
+
           <View style={styles.invoiceActions}>
             <AppButton
+              icon="whatsapp"
+              variant="secondary"
               label={t("auto_share_on_whatsapp")}
               onPress={handleShareOnWhatsApp}
               loading={whatsappLoading}
@@ -1183,19 +1177,6 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
 
           </View>
         </View>
-
-        {/* Payment Section */}
-        {balanceDue > 0 &&
-        <View style={styles.card}>
-            <Text style={styles.cardTitle}>{t("auto_record_payment")}</Text>
-            <Text style={styles.cardSubtitle}>{t("auto_balance_due_2")}{balanceDue}</Text>
-            <AppButton
-            title={t("auto_record_payment")}
-            onPress={() => setShowPaymentModal(true)}
-            style={{ marginTop: spacing.md }} />
-
-          </View>
-        }
 
         {/* Activity Timeline */}
         <View style={styles.card}>
@@ -1342,7 +1323,13 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                     } />
 
                 </View>
-                <Text style={styles.helperText}>{t("auto_balance_due_2")}{balanceDue}</Text>
+                <View style={styles.paymentHintRow}>
+                  <Text style={styles.helperText}>{t("auto_balance_due_2")}{Number(balanceDue).toLocaleString("en-IN")}</Text>
+                  {balanceDue > 0 &&
+                  <AppButton size="sm" variant="ghost" label={t("fullBalance")}
+                  onPress={() => setPaymentForm({ ...paymentForm, amount: String(balanceDue) })} />
+                  }
+                </View>
               </View>
 
               {/* Payment Method */}
@@ -1633,6 +1620,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.border,
     marginVertical: spacing.sm,
   },
+  paymentHintRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: spacing.sm,
+  },
   statusPipeline: {
     flexDirection: "row",
     marginVertical: spacing.md,
@@ -1640,6 +1633,7 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   statusCircle: {
+    zIndex: 1,
     width: 32,
     height: 32,
     borderRadius: 16,
@@ -1662,11 +1656,14 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     backgroundColor: colors123.border,
   },
+  // Joins this step's circle to the next one, drawn behind the circles
   statusLine: {
-    flex: 1,
+    position: "absolute",
+    top: 15,
+    left: "50%",
+    width: "100%",
     height: 2,
     backgroundColor: colors123.border,
-    marginHorizontal: spacing.xs,
   },
   statusLineCompleted: {
     backgroundColor: colors123.success,

@@ -14,8 +14,9 @@ export default function AccountRecoveryScreen({ message, onRetry }) {
     <Text accessibilityLiveRegion="polite" style={styles.body}>{message}</Text>
     <AppButton label="Try again" onPress={onRetry} />
     <AppButton label="Sign out" variant="secondary" onPress={logout} />
-    <AppButton label="Delete account" variant="danger" onPress={() => setDeleting(true)} />
     <AppButton label="Contact support" variant="ghost" onPress={() => Linking.openURL("mailto:stitchbook3@gmail.com")} />
+    {/* Kept reachable for Play's account-deletion rule, but not a primary choice on an error screen */}
+    <AppButton label="Delete account" variant="tertiary" size="sm" textStyle={{ color: colors123.danger }} onPress={() => setDeleting(true)} />
   </ScrollView>;
 }
 const styles = StyleSheet.create({

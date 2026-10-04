@@ -1,3 +1,5 @@
+import { getOutfitLabel } from "../services/outfitTypes";
+
 /**
  * Form utilities and validators
  * Common patterns for forms across the app
@@ -9,11 +11,16 @@ export const isValidEmail = (email) => {
   return emailRegex.test(email);
 };
 
-// Phone validation (Indian format)
-export const isValidPhone = (phone) => {
-  const phoneRegex = /^[0-9]{10}$/;
-  return phoneRegex.test(phone.replace(/[\s-]/g, ''));
+// Accept "+91 98765-43210", "098765 43210", "(987) 654 3210" → "9876543210"
+export const normalizePhone = (phone) => {
+  const digits = String(phone || '').replace(/\D/g, '');
+  if (digits.length === 12 && digits.startsWith('91')) return digits.slice(2);
+  if (digits.length === 11 && digits.startsWith('0')) return digits.slice(1);
+  return digits;
 };
+
+// Phone validation (Indian format)
+export const isValidPhone = (phone) => /^[0-9]{10}$/.test(normalizePhone(phone));
 
 // Password validation
 export const isValidPassword = (password) => {
@@ -27,18 +34,37 @@ export const isValidName = (name) => {
 };
 
 // Sanitize phone number
-export const sanitizePhone = (phone) => {
-  return phone.replace(/[\s-()]/g, '');
+export const sanitizePhone = normalizePhone;
+
+// Format phone number for display: "98765 43210"; leaves unknown formats untouched
+export const formatPhone = (phone) => {
+  const cleaned = normalizePhone(phone);
+  return cleaned.length === 10 ? `${cleaned.slice(0, 5)} ${cleaned.slice(5)}` : String(phone || '');
 };
 
-// Format phone number
-export const formatPhone = (phone) => {
-  const cleaned = sanitizePhone(phone);
-  if (cleaned.length === 10) {
-    return `${cleaned.slice(0, 3)}-${cleaned.slice(3, 6)}-${cleaned.slice(6)}`;
-  }
-  return cleaned;
+// Profile metadata stored alongside body measurements; never shown as a measurement row
+const MEASUREMENT_META_KEYS = new Set(['outfitType', 'outfit_type', 'outfitLabel', 'outfit_label', 'unit', 'notes']);
+
+export const getMeasurementEntries = (data) =>
+  Object.entries(data || {}).filter(
+    ([key, value]) => !MEASUREMENT_META_KEYS.has(key) && value !== '' && value !== null && value !== undefined && typeof value !== 'object'
+  );
+
+// Orders from the API carry snake_case ids and an items array; these read either shape.
+export const getOrderCustomerId = (order) => order?.customerId ?? order?.customer_id ?? null;
+
+export const getOrderItemsText = (order) => {
+  if (order?.item) return order.item;
+  const names = (Array.isArray(order?.items) ? order.items : [])
+    .map((item) => item.name || item.item_name || item.typeLabel || (item.type && getOutfitLabel(item.type)) || item.category)
+    .filter(Boolean);
+  if (names.length === 0) return 'Custom order';
+  return names.length > 1 ? `${names[0]} +${names.length - 1}` : names[0];
 };
+
+export const getOrderSearchText = (order) =>
+  [getOrderItemsText(order), order?.fabric, ...(Array.isArray(order?.items) ? order.items.map((item) => item.fabric) : [])]
+    .filter(Boolean).join(' ').toLowerCase();
 
 // Currency formatter
 export const formatCurrency = (amount, currency = '₹') => {
@@ -75,6 +101,22 @@ export const formatFileSize = (bytes) => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+};
+
+// Local calendar day as 'YYYY-MM-DD' (toISOString would give the UTC day,
+// which is yesterday in India before 5:30 AM).
+export const toLocalDateKey = (date = new Date()) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+// Delivery day of an order as 'YYYY-MM-DD', whatever shape the API sent.
+export const getDeliveryDateKey = (order) => {
+  const value = order?.deliveryDate || order?.delivery_date;
+  if (!value) return '';
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(value))) return String(value);
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? '' : toLocalDateKey(d);
 };
 
 // Date formatters
@@ -148,6 +190,7 @@ export const stringToColor = (str) => {
 export default {
   isValidEmail,
   isValidPhone,
+  normalizePhone,
   isValidPassword,
   isValidName,
   sanitizePhone,

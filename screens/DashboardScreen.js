@@ -1,21 +1,20 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ScreenHeader from "../components/ScreenHeader";
 import AppButton from "../components/AppButton";
-import SegmentedControl from "../components/SegmentedControl";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
-import React, { useEffect, useMemo, useCallback, useState } from "react";
+import React, { useEffect, useMemo, useCallback } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
 import AppCard from "../components/AppCard";
-import ChartCard from "../components/ChartCard";
 import StatusBadge from "../components/ui/StatusBadge";
-import StatCard from "../components/ui/StatCard";
 import { DashboardSkeleton } from "../components/SkeletonBlock";
 import { useLanguage } from "../context/LanguageContext";
 import { useStitchPro } from "../context/StitchProContext";
+import { getAccountStatusText, isAccountInactive } from "../utils/accountStatus";
+import { getDeliveryDateKey, getOrderCustomerId, getOrderItemsText, toLocalDateKey } from "../utils/formHelpers";
 import {
   colors123,
   SIZES,
@@ -23,17 +22,8 @@ import {
   radius,
   spacing,
   fonts,
-  formatCompactCurrency,
-  formatCurrency } from
+  } from
 "../utils/theme";
-
-const MS_PER_DAY = 1000 * 60 * 60 * 24;
-
-const toDate = (value) => {
-  if (!value) return null;
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? null : date;
-};
 
 const formatTrialDate = (value) => {
   if (!value) return "-";
@@ -44,27 +34,6 @@ const formatTrialDate = (value) => {
   }
 };
 
-const getTrialMeta = (subscription = {}) => {
-  const startDate = toDate(subscription.trialStartDate || subscription.startDate);
-  const endDate = toDate(subscription.trialEndDate || subscription.endDate);
-  const fallbackTotal = startDate && endDate ?
-  Math.max(1, Math.ceil((endDate.getTime() - startDate.getTime()) / MS_PER_DAY)) :
-  10;
-  const totalDays = Math.max(1, Number(subscription.trialDaysTotal || fallbackTotal));
-  const remainingDays = Math.max(0, Number(
-    subscription.trialDaysRemaining ?? subscription.daysRemaining ?? 0
-  ));
-  const usedDays = Math.min(totalDays, Math.max(0, totalDays - remainingDays));
-  const progressPercent = Math.min(100, Math.max(0, Math.round(usedDays / totalDays * 100)));
-
-  return {
-    totalDays,
-    remainingDays,
-    usedDays,
-    progressPercent
-  };
-};
-
 const cleanDisplayText = (value, fallback) => {
   const text = String(value || "").trim();
   if (!text || text === "?" || text.toLowerCase() === "undefined" || text.toLowerCase() === "null") {
@@ -73,46 +42,58 @@ const cleanDisplayText = (value, fallback) => {
   return text;
 };
 
-function SummaryTile({ icon, label, value, toneColor, delay = 0 }) {
+function SetupChecklist({ t, steps }) {
+  const doneCount = steps.filter((step) => step.done).length;
   return (
-    <MotiView
-      animate={{ opacity: 1, translateY: 0 }}
-      from={{ opacity: 0, translateY: 14 }}
-      transition={{ delay, duration: 320, type: "timing" }}
-      style={styles.gridTile}>
+    <AppCard style={styles.checklistCard}>
+      <Text style={styles.checklistTitle}>{t("setupChecklistTitle")}</Text>
+      <Text style={styles.checklistMeta}>{doneCount} / {steps.length}</Text>
+      {steps.map((step) =>
+      <Pressable
+        key={step.key}
+        accessibilityRole="button"
+        accessibilityState={{ checked: step.done, disabled: step.done }}
+        disabled={step.done}
+        onPress={step.onPress}
+        style={styles.checklistRow}>
 
-      <StatCard label={label} value={value} icon={icon} color={toneColor} />
-    </MotiView>);
+          <MaterialCommunityIcons
+          color={step.done ? colors123.success : colors123.textMuted}
+          name={step.done ? "check-circle" : "circle-outline"}
+          size={22} />
+
+          <Text style={[styles.checklistLabel, step.done && styles.checklistLabelDone]}>{step.label}</Text>
+          {!step.done && <MaterialCommunityIcons color={colors123.primary} name="chevron-right" size={22} />}
+        </Pressable>
+      )}
+    </AppCard>);
 
 }
 
 export default function DashboardScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
-  const { dashboardError } = useStitchPro();
   const {
     isBooting,
     orders,
     fetchOrders,
-    dashboardLoading,
-    dashboardStats,
-    fetchDashboardStats,
     subscription,
     fetchSubscription,
-    staff,
-    fetchStaff,
     user,
-    shop
+    shop,
+    customers,
+    fetchCustomers,
+    ordersLoading,
+    ordersError
   } = useStitchPro();
-  const [period, setPeriod] = useState("week"); // today, week, month, year
-  const [orderType, setOrderType] = useState(null); // null, 'stitching', 'alteration'
-
-  // Fetch orders and dashboard stats on mount
   useEffect(() => {
     fetchOrders();
-    fetchDashboardStats(period, orderType);
-    fetchStaff?.();
-  }, [fetchOrders, fetchDashboardStats, fetchStaff, period, orderType]);
+    fetchCustomers?.();
+  }, [fetchOrders, fetchCustomers]);
+
+  const customerName = (order) =>
+    order.customerName || order.customer_name ||
+    customers?.find((customer) => String(customer.id) === String(getOrderCustomerId(order)))?.name || "";
 
   useEffect(() => {
     if (!subscription) {
@@ -123,25 +104,13 @@ export default function DashboardScreen({ navigation }) {
   }, [fetchSubscription, subscription]);
 
   // Handle pull-to-refresh
-  const onRefresh = useCallback(async () => {
-    await fetchOrders();
-    await fetchDashboardStats(period, orderType);
-  }, [fetchOrders, fetchDashboardStats, period, orderType]);
-
-  // Compute today's deliveries and overdue orders from metrics
-  const todayDeliveries = useMemo(() => {
-    if (!orders || !Array.isArray(orders)) return [];
-    const today = new Date().toISOString().split("T")[0];
-    return orders.filter(
-      (order) => order.deliveryDate && order.deliveryDate === today && order.status !== "delivered"
-    );
-  }, [orders]);
+  const onRefresh = useCallback(() => fetchOrders(), [fetchOrders]);
 
   const overdueOrders = useMemo(() => {
     if (!orders || !Array.isArray(orders)) return [];
-    const today = new Date().toISOString().split("T")[0];
+    const today = toLocalDateKey();
     return orders.filter(
-      (order) => order.deliveryDate && order.deliveryDate < today && order.status !== "delivered"
+      (order) => getDeliveryDateKey(order) && getDeliveryDateKey(order) < today && order.status !== "delivered"
     );
   }, [orders]);
 
@@ -149,69 +118,29 @@ export default function DashboardScreen({ navigation }) {
     () => {
       if (!orders || !Array.isArray(orders)) return [];
       return [...orders].
-      filter((order) => order.deliveryDate && order.status !== "delivered").
+      filter((order) => getDeliveryDateKey(order) && order.status !== "delivered").
       sort((left, right) =>
-      left.deliveryDate.localeCompare(right.deliveryDate)
+      getDeliveryDateKey(left).localeCompare(getDeliveryDateKey(right))
       ).
       slice(0, 4);
     },
     [orders]
   );
 
-  const revenueTrendData = useMemo(() => {
-    const rows = dashboardStats?.weeklyRevenue;
-    if (!Array.isArray(rows)) return [];
-
-    return rows.
-    map((row) => {
-      const rawDate = row.date || row.label;
-      let label = rawDate ? String(rawDate).slice(0, 10) : "";
-
-      try {
-        if (rawDate) {
-          label = format(parseISO(String(rawDate)), "dd MMM");
-        }
-      } catch {
-        label = rawDate ? String(rawDate).slice(0, 10) : "";
-      }
-
-      return {
-        label,
-        value: Number(row.revenue ?? row.totalRevenue ?? row.value ?? 0)
-      };
-    }).
-    filter((point) => point.label);
-  }, [dashboardStats?.weeklyRevenue]);
-
-  const productionStats = useMemo(() => {
+  const workStats = useMemo(() => {
     const rows = Array.isArray(orders) ? orders : [];
-    const today = new Date().toISOString().split("T")[0];
-    const statusOf = (order) => {
-      const status = order.status || "started";
-      if (status === "pending") return "started";
-      if (status === "in_progress") return "cutting";
-      return status;
-    };
-    const dateOf = (order) => order.deliveryDate || order.delivery_date || "";
-
-    const staffEarnings = (Array.isArray(staff) ? staff : []).reduce(
-      (sum, member) => sum + Number(member.current_month_earnings || member.total_earnings || 0),
-      0
-    );
-
+    const count = (fn) => rows.filter(fn).length;
     return {
-      cuttingPending: rows.filter((order) => statusOf(order) === "cutting").length,
-      stitchingPending: rows.filter((order) => statusOf(order) === "stitching").length,
-      deliveryDue: rows.filter((order) => dateOf(order) === today && statusOf(order) !== "delivered").length,
-      lateOrders: rows.filter((order) => dateOf(order) && dateOf(order) < today && statusOf(order) !== "delivered").length,
-      staffEarnings
+      cutting: count((order) => order.status === "cutting" || order.status === "in_progress"),
+      stitching: count((order) => order.status === "stitching"),
+      ready: count((order) => order.status === "ready"),
+      pending: count((order) => !order.status || order.status === "pending" || order.status === "new")
     };
-  }, [orders, staff]);
+  }, [orders]);
   const isTrialActive = subscription?.status === "trial" && subscription?.isActive;
-  const isTrialExpired = subscription?.status === "trial_expired" || subscription?.requiresSubscription;
-  const trialMeta = useMemo(() => getTrialMeta(subscription), [subscription]);
+  const isTrialExpired = isAccountInactive(subscription);
   const shopName = cleanDisplayText(shop?.name, t("yourShop"));
-  if (isBooting || (dashboardLoading && !dashboardStats && !dashboardError)) {
+  if (isBooting || (ordersLoading && !orders?.length && !ordersError)) {
     return (
       <ScrollView
         contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm }]}
@@ -222,7 +151,7 @@ export default function DashboardScreen({ navigation }) {
 
   }
 
-  if (dashboardError && !dashboardStats) {
+  if (ordersError && !orders?.length) {
     return <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm }]}><ScreenHeader title={shopName} /><InlineAlert message={t("loadDashboardFailed")} onRetry={onRefresh} retryLabel={t("retry")} /></ScrollView>;
   }
 
@@ -232,7 +161,7 @@ export default function DashboardScreen({ navigation }) {
       showsVerticalScrollIndicator={false}
       refreshControl={
       <RefreshControl
-        refreshing={dashboardLoading}
+        refreshing={ordersLoading}
         onRefresh={onRefresh}
         tintColor={colors123.primary}
         colors={[colors123.primary]} />
@@ -240,10 +169,31 @@ export default function DashboardScreen({ navigation }) {
       }>
 
       <ScreenHeader title={shopName} action={<AppButton icon="plus" label={t("newOrder")} size="sm" onPress={() => navigation.navigate("CustomerSelection")} />} />
-      <InlineAlert message={dashboardError ? t("loadDashboardFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
-      <SegmentedControl options={["today", "week", "month", "year"].map(value => ({ value, label: t(value) }))} value={period} onChange={setPeriod} />
-      <SegmentedControl options={[{ value: null, label: t("all") }, { value: "stitching", label: t("stitching") }, { value: "alteration", label: t("alteration") }]} value={orderType} onChange={setOrderType} disabled={dashboardLoading} />
-
+      {(isTrialActive || isTrialExpired) && (
+        <AppCard variant="muted">
+          <View style={styles.announcementTopRow}>
+            <MaterialCommunityIcons
+              name={isTrialExpired ? "alert-circle-outline" : "clock-outline"}
+              size={22}
+              color={isTrialExpired ? colors123.danger : colors123.primary} />
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={styles.deliveryTitle}>{getAccountStatusText(subscription, t)}</Text>
+              <Text style={styles.deliveryMeta}>
+                {isTrialExpired ? t("accountInactiveMessage") : `${t("trialEndsOn")} ${formatTrialDate(subscription?.trialEndDate || subscription?.endDate)}`}
+              </Text>
+            </View>
+          </View>
+        </AppCard>
+      )}
+      {!ordersLoading && !ordersError && !(orders?.length > 0) &&
+      <SetupChecklist
+        t={t}
+        steps={[
+        { key: "shop", label: t("setupShopCreated"), done: true },
+        { key: "customer", label: t("setupAddCustomer"), done: customers?.length > 0, onPress: () => navigation.navigate("Customers") },
+        { key: "order", label: t("setupCreateOrder"), done: false, onPress: () => navigation.navigate("CustomerSelection") }]
+        } />
+      }
       {/* Overdue Orders Alert */}
       {overdueOrders.length > 0 &&
       <MotiView
@@ -267,7 +217,7 @@ export default function DashboardScreen({ navigation }) {
                 {overdueOrders.length} {overdueOrders.length > 1 ? t("overdueOrders") : t("overdueOrder")}
               </Text>
               <Text style={styles.alertSubtitle}>
-                {overdueOrders[0]?.customerName}
+                {overdueOrders[0] ? customerName(overdueOrders[0]) : ""}
                 {overdueOrders.length > 1 ? ` +${overdueOrders.length - 1} more` : ""}
               </Text>
             </View>
@@ -280,75 +230,22 @@ export default function DashboardScreen({ navigation }) {
         </MotiView>
       }
 
-      {/* Today's Deliveries */}
-      {todayDeliveries.length > 0 &&
-      <AppCard>
-          <View style={styles.sectionRow}>
-            <View>
-              <Text style={styles.sectionTitle}>{t("todaysDeliveries")}</Text>
-              <Text style={styles.sectionSubtitle}>
-                {todayDeliveries.length} {t("orders")} {t("readyForPickup")}
-              </Text>
-            </View>
-            <MaterialCommunityIcons
-            color={colors123.success}
-            name="calendar-today"
-            size={22} />
-
-          </View>
-
-          <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.todayScroll}>
-
-            {todayDeliveries.map((order, index) =>
-          <MotiView
-            key={order.id}
-            animate={{ opacity: 1, scale: 1 }}
-            from={{ opacity: 0, scale: 0.9 }}
-            transition={{ delay: index * 50, duration: 260 }}
-            style={styles.todayCard}>
-
-                <View style={styles.todayIcon}>
-                  <MaterialCommunityIcons
-                color={colors123.success}
-                name="check-circle"
-                size={20} />
-
-                </View>
-                <Text style={styles.todayName} numberOfLines={1}>
-                  {order.customerName}
-                </Text>
-                <Text style={styles.todayItem} numberOfLines={1}>
-                  {order.item}
-                </Text>
-                <StatusBadge compact status={order.status} />
-              </MotiView>
-          )}
-          </ScrollView>
-        </AppCard>
-      }
-
       <AppCard style={styles.productionCard}>
         <View style={styles.sectionRow}>
-          <View>
-            <Text style={styles.sectionTitle}>Production</Text>
-
-          </View>
+          <Text style={styles.sectionTitle}>{t("workInProgress")}</Text>
           <MaterialCommunityIcons name="clipboard-list-outline" size={22} color={colors123.primary} />
         </View>
         <ResponsiveGrid minItemWidth={140} style={styles.productionGrid}>
           {[
-          { label: "Cutting pending", value: productionStats.cuttingPending, icon: "content-cut", color: colors123.warning },
-          { label: "Stitching pending", value: productionStats.stitchingPending, icon: "needle", color: colors123.primary },
-          { label: "Delivery due", value: productionStats.deliveryDue, icon: "truck-delivery-outline", color: colors123.success },
-          { label: "Late orders", value: productionStats.lateOrders, icon: "alert-circle-outline", color: colors123.danger },
-          { label: "Staff earnings", value: formatCurrency(productionStats.staffEarnings), icon: "cash-multiple", color: colors123.accent }].
+          { key: "new", label: t("pending"), value: workStats.pending, icon: "clipboard-text-outline", color: colors123.info, status: "pending" },
+          { key: "cutting", label: t("cutting"), value: workStats.cutting, icon: "content-cut", color: colors123.warning, status: "cutting" },
+          { key: "stitching", label: t("stitching"), value: workStats.stitching, icon: "needle", color: colors123.primary, status: "stitching" },
+          { key: "ready", label: t("readyForPickupTile"), value: workStats.ready, icon: "cube-send", color: colors123.success, status: "ready" }].
           map((item) =>
           <Pressable accessibilityRole="button"
-            key={item.label}
-            onPress={() => navigation.navigate(item.label === "Staff earnings" ? "Staff" : "Orders")}
+            accessibilityLabel={`${item.label}: ${item.value}`}
+            key={item.key}
+            onPress={() => navigation.navigate("Orders", { status: item.status })}
             style={({ pressed }) => [
             styles.productionTile,
             pressed && styles.productionTilePressed]
@@ -366,58 +263,17 @@ export default function DashboardScreen({ navigation }) {
         </ResponsiveGrid>
       </AppCard>
 
-      <ResponsiveGrid minItemWidth={140} style={styles.grid}>
-        <SummaryTile
-          delay={40}
-          icon="cash-multiple"
-          label={t("revenue")}
-          toneColor={colors123.warning}
-          value={formatCurrency(dashboardStats?.totalRevenue || 0)} />
+      <Pressable accessibilityRole="button"
+        onPress={() => navigation.navigate("Reports")}
+        style={({ pressed }) => [styles.reportsRow, pressed && styles.productionTilePressed]}>
 
-        <SummaryTile
-          delay={80}
-          icon="needle"
-          label={t("active")}
-          toneColor={colors123.info}
-          value={String(dashboardStats?.orderCounts?.in_progress || 0)} />
-
-        <SummaryTile
-          delay={120}
-          icon="cube-send"
-          label={t("ready")}
-          toneColor={colors123.success}
-          value={String(dashboardStats?.orderCounts?.ready || 0)} />
-
-        <SummaryTile
-          delay={160}
-          icon="star-four-points-outline"
-          label={t("pending")}
-          toneColor={colors123.danger}
-          value={String(dashboardStats?.orderCounts?.pending || 0)} />
-
-      </ResponsiveGrid>
-
-      <ChartCard
-        data={revenueTrendData}
-        subtitle={t("revenueTrendSubtitle")}
-        title={t("revenueTrend")} />
-
-
-      {(isTrialActive || isTrialExpired) && (
-        <AppCard variant="muted">
-          <View style={styles.announcementTopRow}>
-            <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={styles.deliveryTitle}>
-                {isTrialExpired ? t("subscriptionExpired") : `${t("freeTrial")} · ${t("auto_days_remaining")}: ${trialMeta.remainingDays}`}
-              </Text>
-              {isTrialActive && <Text style={styles.deliveryMeta}>
-                {t("trialEndsOn")} {formatTrialDate(subscription?.trialEndDate || subscription?.endDate)}
-              </Text>}
-            </View>
-            <AppButton label={t("viewPlan")} size="sm" variant="secondary" onPress={() => navigation.navigate("Subscription")} />
-          </View>
-        </AppCard>
-      )}
+        <MaterialCommunityIcons name="chart-box-outline" size={22} color={colors123.primary} />
+        <View style={{ flex: 1 }}>
+          <Text style={styles.sectionTitle}>{t("viewReports")}</Text>
+          <Text style={styles.sectionSubtitle}>{t("viewReportsSubtitle")}</Text>
+        </View>
+        <MaterialCommunityIcons name="chevron-right" size={22} color={colors123.textMuted} />
+      </Pressable>
 
       <AppCard>
         <View style={styles.sectionRow}>
@@ -434,12 +290,11 @@ export default function DashboardScreen({ navigation }) {
         <View style={{ gap: spacing.md }}>
           {upcomingOrders.length > 0 ?
           upcomingOrders.map((order, index) =>
-          <MotiView
+          <Pressable
             key={order.id}
-            animate={{ opacity: 1, translateY: 0 }}
-            from={{ opacity: 0, translateY: 12 }}
-            transition={{ delay: index * 50, duration: 260, type: "timing" }}
-            style={styles.deliveryRow}>
+            accessibilityRole="button"
+            onPress={() => navigation.navigate("OrderDetail", { orderId: order.id })}
+            style={({ pressed }) => [styles.deliveryRow, pressed && styles.productionTilePressed]}>
 
                 <View style={styles.deliveryIcon}>
                   <MaterialCommunityIcons
@@ -449,18 +304,16 @@ export default function DashboardScreen({ navigation }) {
 
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={styles.deliveryTitle}>{order.customerName}</Text>
-                  <Text style={styles.deliveryMeta}>
-                    {order.item} • {order.fabric || t("customFabric")}
-                  </Text>
+                  <Text style={styles.deliveryTitle}>{customerName(order)}</Text>
+                  <Text style={styles.deliveryMeta}>{getOrderItemsText(order)}</Text>
                 </View>
                 <View style={styles.deliveryRight}>
                   <Text style={styles.deliveryDate}>
-                    {order.deliveryDate ? format(parseISO(order.deliveryDate), "dd MMM") : t("noDate")}
+                    {getDeliveryDateKey(order) ? format(parseISO(getDeliveryDateKey(order)), "dd MMM") : t("noDate")}
                   </Text>
                   <StatusBadge compact status={order.status} />
                 </View>
-              </MotiView>
+              </Pressable>
           ) :
 
           <View style={styles.emptyState}>
@@ -497,9 +350,6 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: spacing.md,
     justifyContent: "space-between",
-  },
-  gridTile: {
-    width: "100%",
   },
   productionCard: {
     gap: spacing.sm,
@@ -594,6 +444,23 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors123.text,
   },
+  reportsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    minHeight: 64,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors123.borderLight,
+    backgroundColor: colors123.surface,
+  },
+  checklistCard: { gap: spacing.xs },
+  checklistTitle: { fontFamily: fonts.semibold, fontSize: 16, color: colors123.text },
+  checklistMeta: { fontFamily: fonts.regular, fontSize: 12, color: colors123.textMuted },
+  checklistRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, minHeight: 44 },
+  checklistLabel: { flex: 1, fontFamily: fonts.medium, fontSize: 14, color: colors123.text },
+  checklistLabelDone: { color: colors123.textMuted, textDecorationLine: "line-through" },
   alertCard: {
     flexDirection: "row",
     alignItems: "center",
@@ -622,40 +489,6 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 12,
     color: "rgba(255,255,255,0.8)",
-  },
-  todayScroll: {
-    gap: spacing.sm,
-    paddingVertical: spacing.xs,
-  },
-  todayCard: {
-    width: 116,
-    backgroundColor: colors123.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    padding: spacing.sm,
-    alignItems: "center",
-    gap: spacing.xs,
-  },
-  todayIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: colors123.successSoft,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  todayName: {
-    fontFamily: fonts.semibold,
-    fontSize: 13,
-    color: colors123.text,
-    textAlign: "center",
-  },
-  todayItem: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors123.textMuted,
-    textAlign: "center",
   },
   emptyState: {
     alignItems: "center",

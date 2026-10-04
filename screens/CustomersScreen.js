@@ -16,6 +16,8 @@ import ScreenHeader from "../components/ScreenHeader";
 import { ListSkeleton } from "../components/SkeletonBlock";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
+import { showAccountInactiveAlert } from "../utils/accountStatus";
+import { formatPhone } from "../utils/formHelpers";
 import { useLanguage } from "../context/LanguageContext";
 import { colors123, radius, shadows, spacing, fonts } from "../utils/theme";
 
@@ -91,19 +93,6 @@ export default function CustomersScreen({ navigation }) {
     );
   }, [customers, debouncedQuery, orders]);
 
-  const showSubscriptionRequiredAlert = useCallback(() => {
-    Alert.alert(
-      t("trialExpired"),
-      t("trialExpiredMessage"),
-      [
-      { text: t("notNow"), style: "cancel" },
-      {
-        text: t("viewStatus"),
-        onPress: () => navigation.navigate("Subscription")
-      }]
-
-    );
-  }, [navigation, t]);
 
   const handleCreateCustomer = async (form) => {
     try {
@@ -114,7 +103,7 @@ export default function CustomersScreen({ navigation }) {
     } catch (err) {
       if (err.code === 'SUBSCRIPTION_REQUIRED') {
         setShowCreateSheet(false);
-        showSubscriptionRequiredAlert();
+        showAccountInactiveAlert(t);
         return false;
       }
 
@@ -174,21 +163,6 @@ export default function CustomersScreen({ navigation }) {
           } />
 
 
-        <AppCard style={styles.insightCard}>
-          <View style={styles.insightIcon}>
-            <MaterialCommunityIcons
-              color={colors123.primary}
-              name="account-star-outline"
-              size={20} />
-
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.insightTitle}>
-              {customers?.length || 0} {t("totalClientsInBook")}
-            </Text>
-          </View>
-        </AppCard>
-
         <IconInput
           icon="magnify"
           onChangeText={setSearchQuery}
@@ -204,7 +178,8 @@ export default function CustomersScreen({ navigation }) {
         <EmptyState
           description={searchQuery ? t("noCustomerMatchesDescription") : t("noCustomersYetDescription")}
           icon={searchQuery ? "account-search-outline" : "account-plus-outline"}
-          title={searchQuery ? t("noCustomerMatches") : t("noCustomersYet")} /> :
+          title={searchQuery ? t("noCustomerMatches") : t("noCustomersYet")}
+          action={searchQuery ? null : <AppButton icon="account-plus" label={t("addCustomerTitle")} onPress={() => setShowCreateSheet(true)} />} /> :
 
         <View style={styles.list}>
             {filteredCustomers.map((customer, index) =>
@@ -251,7 +226,7 @@ export default function CustomersScreen({ navigation }) {
                     }
                       </View>
                     </View>
-                    <Text style={styles.customerMeta}>{customer.phone}</Text>
+                    <Text style={styles.customerMeta}>{formatPhone(customer.phone)}</Text>
                     <View style={styles.customerFooter}>
                       <Text style={styles.footerText}>
                         {customer.orderCount || 0} {t("orders")}

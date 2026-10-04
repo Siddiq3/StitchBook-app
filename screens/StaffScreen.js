@@ -2,6 +2,7 @@ import { ListSkeleton } from "../components/SkeletonBlock";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { getMeasurementEntries, toLocalDateKey } from "../utils/formHelpers";
 import {
   ScrollView,
   StyleSheet,
@@ -18,7 +19,6 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MotiView } from "../components/AccessibleMotionView";
 import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";
-import ScreenHeader from "../components/ScreenHeader";
 import EmptyState from "../components/EmptyState";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
@@ -27,7 +27,7 @@ import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";impo
 
 const PAYMENT_TYPES = [
 { id: "monthly", labelKey: "staffMonthly", icon: "calendar-month-outline" },
-{ id: "daily", labelKey: "staffDaily", icon: "calendar-today-outline" },
+{ id: "daily", labelKey: "staffDaily", icon: "calendar-today" },
 { id: "per_piece", labelKey: "staffPerPiece", icon: "needle" },
 { id: "commission", labelKey: "staffCommission", icon: "percent-outline" }];
 
@@ -51,7 +51,7 @@ const PRIMARY_STAFF_ROLES = [
   },
 ];
 
-const today = () => new Date().toISOString().split("T")[0];
+const today = () => toLocalDateKey();
 
 const money = (value) => `₹${Number(value || 0).toFixed(0)}`;
 
@@ -645,7 +645,7 @@ export default function StaffScreen() {const { t } = useLanguage();
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.label}>{t("auto_phone")} optional</Text>
+        <Text style={styles.label}>{t("auto_phone")} {t("optional")}</Text>
         <View style={styles.input}>
           <MaterialCommunityIcons
           name="phone"
@@ -662,9 +662,6 @@ export default function StaffScreen() {const { t } = useLanguage();
           returnKeyType="done" />
 
         </View>
-        <Text style={styles.helpText}>
-          Save mobile number now for future OTP login after DLT approval.
-        </Text>
       </View>
 
       <View style={styles.formGroup}>
@@ -1163,7 +1160,7 @@ export default function StaffScreen() {const { t } = useLanguage();
               item.measurement_data ||
               item.measurementSnapshot?.measurementsData ||
               {};
-            const measurementEntries = Object.entries(measurement).slice(0, isCutter ? 4 : 2);
+            const measurementEntries = getMeasurementEntries(measurement).slice(0, isCutter ? 4 : 2);
             return (
               <View key={key} style={styles.previewOrderCard}>
                 <View style={styles.previewOrderTop}>
@@ -1224,8 +1221,6 @@ export default function StaffScreen() {const { t } = useLanguage();
 
       }>
 
-      <ScreenHeader
-        title="Staff" />
 
 <InlineAlert message={staffError ? t("loadStaffFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
       <AppButton label={showWorkflowGuide ? "Hide staff guide" : "How staff access works"} variant="ghost" icon={showWorkflowGuide ? "chevron-up" : "chevron-down"} onPress={() => setShowWorkflowGuide(value => !value)} />

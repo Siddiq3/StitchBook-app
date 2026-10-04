@@ -6,6 +6,7 @@ import IconInput from "./IconInput";
 import AppButton from "./AppButton";
 import { spacing, colors123, fonts } from "../utils/theme";
 import { useLanguage } from "../context/LanguageContext";
+import { normalizePhone } from "../utils/formHelpers";
 
 const emptyForm = {
   name: "",
@@ -23,7 +24,7 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
   const [submitError, setSubmitError] = useState(false);
 
   const canSubmit = useMemo(
-    () => form.name.trim().length > 0 && form.phone.trim().length >= 10,
+    () => form.name.trim().length > 0 && normalizePhone(form.phone).length >= 10,
     [form.name, form.phone]
   );
 
@@ -39,7 +40,8 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
     if (!form.name.trim()) {
       nextErrors.name = t("customerNameRequired");
     }
-    if (!/^\d{10}$/.test(form.phone.trim())) {
+    const phone = normalizePhone(form.phone);
+    if (!/^\d{10}$/.test(phone)) {
       nextErrors.phone = t("validMobileRequired");
     }
     if (form.email.trim() && !/\S+@\S+\.\S+/.test(form.email.trim())) {
@@ -54,7 +56,7 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
     setSubmitting(true);
     setSubmitError(false);
     try {
-      const result = await onSubmit(form);
+      const result = await onSubmit({ ...form, phone });
       if (result === false) {
         setSubmitError(true);
         return;
@@ -70,9 +72,9 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
 
   const handleClose = () => {
     if (submitting) return;
+    // Keep the draft: an accidental back-press or swipe must not wipe what was typed.
     setSubmitError(false);
     setErrors({});
-    setForm(emptyForm);
     onClose();
   };
 
@@ -97,10 +99,8 @@ export default function CustomerFormSheet({ visible, onClose, onSubmit }) {
         icon="phone-outline"
         keyboardType="phone-pad"
         label={t("phoneNumber")}
-        maxLength={10}
-        onChangeText={(value) =>
-          handleChange("phone", value.replace(/[^\d]/g, ""))
-        }
+        maxLength={16}
+        onChangeText={(value) => handleChange("phone", value)}
         placeholder={t("enterCustomerPhone")}
         value={form.phone}
       />

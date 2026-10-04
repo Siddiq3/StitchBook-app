@@ -15,6 +15,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, isValid, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
 import AppButton from "../components/AppButton";
+import { getOrderCustomerId, getOrderItemsText, getOrderSearchText } from "../utils/formHelpers";
 import AppCard from "../components/AppCard";
 import EmptyState from "../components/EmptyState";
 import IconInput from "../components/IconInput";
@@ -31,7 +32,8 @@ import {
   shadows,
   spacing,
   fonts,
-  formatCurrency } from
+  formatCurrency,
+  getOrderAmounts } from
 "../utils/theme";
 
 // API status values (lowercase)
@@ -50,21 +52,6 @@ const safeParseDate = (value) => {
 
 const allFilters = ["All", ...statusOptions];
 
-const getOrderItemsText = (order) => {
-  if (order.item) return order.item;
-  if (Array.isArray(order.items) && order.items.length > 0) {
-    const names = order.items.
-    map((item) => item.name || item.item_name || item.typeLabel || item.type || item.category).
-    filter(Boolean);
-
-    if (names.length > 0) {
-      const first = names[0];
-      return names.length > 1 ? `${first} +${names.length - 1} more` : first;
-    }
-  }
-  return "Custom order";
-};
-
 const getOrderQuantity = (order) => {
   if (Array.isArray(order.items) && order.items.length > 0) {
     return order.items.reduce((sum, item) => sum + Number(item.quantity || item.qty || 1), 0);
@@ -72,33 +59,27 @@ const getOrderQuantity = (order) => {
   return Number(order.quantity || order.qty || 1);
 };
 
-const getOrderAmountDetails = (order) => {
-  const total = Number(order.amount || order.total_amount || order.totalAmount || 0);
-  const paid = Number(order.advance_paid || order.paid_amount || order.paidAmount || 0);
-  const balanceValue = order.balance_due ?? order.balanceDue;
-  const balance = balanceValue !== undefined && balanceValue !== null ?
-  Number(balanceValue) :
-  Math.max(0, total - paid);
-
-  return { total, paid, balance };
-};
-
 export default function OrdersScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { ordersError, ordersLoading } = useStitchPro();
-  const { customerId } = route?.params || {};
-  const { orders, customers, isBooting, dashboardStats, addOrder, fetchOrders, fetchCustomers, dashboardLoading } =
+  const { customerId, status: routeStatus } = route?.params || {};
+  const { orders, customers, isBooting, addOrder, fetchOrders, fetchCustomers } =
   useStitchPro();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("All");
+  const [activeFilter, setActiveFilter] = useState(routeStatus || "All");
+
+  // Home screen tiles open Orders already filtered
+  useEffect(() => {
+    if (routeStatus) setActiveFilter(routeStatus);
+  }, [routeStatus]);
   const [refreshing, setRefreshing] = useState(false);
   const statusLabels = useMemo(() => ({
-    pending: t("newOrder") || "New Order",
-    cutting: "Cutting",
+    pending: t("pending"),
+    cutting: t("cutting"),
     stitching: t("stitching") || "Stitching",
-    in_progress: "Cutting",
+    in_progress: t("cutting"),
     ready: t("ready"),
     delivered: t("delivered")
   }), [t]);
@@ -131,7 +112,7 @@ export default function OrdersScreen({ navigation, route }) {
 
     return orders.filter((order) => {
       // Filter by customer if customerId is provided
-      if (customerId && order.customerId !== customerId) {
+      if (customerId && String(getOrderCustomerId(order)) !== String(customerId)) {
         return false;
       }
 
@@ -142,13 +123,12 @@ export default function OrdersScreen({ navigation, route }) {
       const matchesQuery =
       !query ||
       (order.customerName || "").toLowerCase().includes(query) ||
-      (customersMap[order.customerId] || "").toLowerCase().includes(query) ||
-      (order.item || "").toLowerCase().includes(query) ||
-      (order.fabric || "").toLowerCase().includes(query);
+      (customersMap[getOrderCustomerId(order)] || "").toLowerCase().includes(query) ||
+      getOrderSearchText(order).includes(query);
 
       return matchesFilter && matchesQuery;
     }).map((order) => {
-      const resolvedName = order.customerName || customersMap[order.customerId] || customersMap[order.customer_id] || 'Unknown Customer';
+      const resolvedName = order.customerName || order.customer_name || customersMap[getOrderCustomerId(order)] || 'Unknown Customer';
       return {
         ...order,
         customerName: resolvedName
@@ -156,19 +136,6 @@ export default function OrdersScreen({ navigation, route }) {
     });
   }, [activeFilter, customerId, orders, searchQuery, customers]);
 
-  const showSubscriptionRequiredAlert = useCallback(() => {
-    Alert.alert(
-      t("trialExpired"),
-      t("trialExpiredMessage"),
-      [
-      { text: t("notNow"), style: "cancel" },
-      {
-        text: t("viewStatus"),
-        onPress: () => navigation.navigate("Subscription")
-      }]
-
-    );
-  }, [navigation, t]);
 
   const handleAddOrderPress = () => {
     if (!customers || customers.length === 0) {
@@ -220,15 +187,15 @@ export default function OrdersScreen({ navigation, route }) {
         <View style={styles.miniStats}>
           <AppCard style={styles.miniStatCard} variant="muted">
             <Text style={styles.miniStatLabel}>{t("inQueue")}</Text>
-            <Text style={styles.miniStatValue}>{dashboardStats?.inProgressCount ?? "—"}</Text>
+            <Text style={styles.miniStatValue}>{(orders || []).filter((o) => !["ready", "delivered", "cancelled"].includes(o.status)).length}</Text>
           </AppCard>
           <AppCard style={styles.miniStatCard} variant="muted">
             <Text style={styles.miniStatLabel}>{t("pickupReady")}</Text>
-            <Text style={styles.miniStatValue}>{dashboardStats?.readyCount ?? "—"}</Text>
+            <Text style={styles.miniStatValue}>{(orders || []).filter((o) => o.status === "ready").length}</Text>
           </AppCard>
           <AppCard style={styles.miniStatCard} variant="muted">
-            <Text style={styles.miniStatLabel}>{t("thisMonth")}</Text>
-            <Text style={styles.miniStatValue}>{dashboardStats?.deliveredCount ?? "—"}</Text>
+            <Text style={styles.miniStatLabel}>{t("delivered")}</Text>
+            <Text style={styles.miniStatValue}>{(orders || []).filter((o) => o.status === "delivered").length}</Text>
           </AppCard>
         </View>
 
@@ -257,7 +224,7 @@ export default function OrdersScreen({ navigation, route }) {
             const deliveryDateObj = safeParseDate(deliveryDateValue);
             const itemText = getOrderItemsText(order);
             const quantity = getOrderQuantity(order);
-            const { total, paid, balance } = getOrderAmountDetails(order);
+            const { total, paid, balance, paymentStatus } = getOrderAmounts(order);
             const deliveryText = deliveryDateObj ?
             format(deliveryDateObj, "dd MMM yyyy") :
             deliveryDateValue ?
@@ -313,6 +280,7 @@ export default function OrdersScreen({ navigation, route }) {
                       </View>
                       <View style={{ alignItems: "flex-end", gap: spacing.xs }}>
                         <StatusBadge status={order.status} />
+                        <StatusBadge compact status={paymentStatus} />
                         <Text style={styles.orderAmount}>
                           {formatCurrency(total)}
                         </Text>
@@ -321,12 +289,12 @@ export default function OrdersScreen({ navigation, route }) {
 
                     <View style={styles.amountPanel}>
                       <View style={styles.amountInfo}>
-                        <Text style={styles.amountLabel}>Paid</Text>
+                        <Text style={styles.amountLabel}>{t("paid")}</Text>
                         <Text style={styles.amountValue}>{formatCurrency(paid)}</Text>
                       </View>
                       <View style={styles.amountDivider} />
                       <View style={styles.amountInfo}>
-                        <Text style={styles.amountLabel}>Balance</Text>
+                        <Text style={styles.amountLabel}>{t("balance")}</Text>
                         <Text style={[styles.amountValue, balance > 0 && styles.balanceDueText]}>
                           {formatCurrency(balance)}
                         </Text>

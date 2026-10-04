@@ -2,7 +2,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
@@ -16,7 +16,10 @@ import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
 
 import { measurementApi } from "../services/api";
-import { colors123, fonts, formatCurrency, radius, shadows, spacing } from "../utils/theme";import { useLanguage } from "../context/LanguageContext";
+import { colors123, fonts, formatCurrency, getOrderAmounts, radius, shadows, spacing } from "../utils/theme";
+import { useLanguage } from "../context/LanguageContext";
+import { formatPhone, getDeliveryDateKey, getMeasurementEntries, getOrderCustomerId, getOrderItemsText, normalizePhone } from "../utils/formHelpers";
+import { generateWhatsAppShareUrl } from "../services/whatsappTemplates";
 
 export default function CustomerDetailScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
@@ -107,7 +110,7 @@ export default function CustomerDetailScreen({ navigation, route }) {
   const customerOrders = useMemo(
     () => {
       if (!orders || !Array.isArray(orders)) return [];
-      return orders.filter((entry) => entry.customerId === customerId);
+      return orders.filter((entry) => String(getOrderCustomerId(entry)) === String(customerId));
     },
     [customerId, orders]
   );
@@ -260,9 +263,8 @@ export default function CustomerDetailScreen({ navigation, route }) {
               </Pressable>
               <View style={styles.headerContent}>
                 <Text style={styles.headerTitle}>{customer?.name || 'Unknown'}</Text>
-                <Text style={styles.headerSubtitle}>{customer?.phone || 'No phone'}</Text>
               </View>
-              <Pressable accessibilityRole="button" onPress={handleCreateOrderPress} style={styles.createOrderButton}>
+              <Pressable accessibilityRole="button" accessibilityLabel={t("newOrder")} onPress={handleCreateOrderPress} style={styles.createOrderButton}>
                 <MaterialCommunityIcons color={colors123.surface} name="plus" size={22} />
               </Pressable>
             </View>
@@ -277,10 +279,19 @@ export default function CustomerDetailScreen({ navigation, route }) {
 
                 <View style={styles.customerInfo}>
                   <Text style={styles.customerName}>{customer?.name || 'Unknown'}</Text>
-                  <Text style={styles.customerPhone}>{customer?.phone || 'No phone'}</Text>
+                  <Text style={styles.customerPhone}>{customer?.phone ? formatPhone(customer.phone) : t("noPhone")}</Text>
                   {customer?.email && <Text style={styles.customerEmail}>{customer?.email}</Text>}
                 </View>
               </View>
+
+              {customer?.phone ?
+            <View style={styles.contactActions}>
+                  <AppButton icon="phone" label={t("call")} size="sm" variant="secondary" style={styles.contactAction}
+                onPress={() => Linking.openURL(`tel:${normalizePhone(customer.phone)}`).catch(() => {})} />
+                  <AppButton icon="whatsapp" label="WhatsApp" size="sm" variant="secondary" style={styles.contactAction}
+                onPress={() => Linking.openURL(generateWhatsAppShareUrl(customer.phone, "", "web")).catch(() => {})} />
+                </View> :
+            null}
 
               {/* Stats Row */}
               <View style={styles.statsRow}>
@@ -295,48 +306,21 @@ export default function CustomerDetailScreen({ navigation, route }) {
                 </View>
                 <View style={styles.divider} />
                 <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{formatCurrency(customerOrders.reduce((sum, o) => sum + (o.totalAmount || o.amount || 0), 0))}</Text>
+                  <Text style={styles.statValue}>{formatCurrency(customerOrders.reduce((sum, o) => sum + getOrderAmounts(o).total, 0))}</Text>
                   <Text style={styles.statLabel}>{t("auto_revenue")}</Text>
                 </View>
               </View>
             </View>
 
-            {/* Action Cards */}
-            <View style={styles.actionCardsRow}>
-              <Pressable accessibilityRole="button"
-              onPress={() => navigation.navigate('ViewMeasurements', { customerId: customer.id, customerName: customer.name, customerGender: customer.gender || 'male' })}
-              style={styles.actionCard}>
-
-                <View style={styles.actionCardIcon}>
-                  <MaterialCommunityIcons color={colors123.primary} name="ruler" size={20} />
-                </View>
-                <View style={styles.actionCardContent}>
-                  <Text style={styles.actionCardTitle}>{t("auto_measurements_2")}</Text>
-                </View>
-                <MaterialCommunityIcons color={colors123.textMuted} name="chevron-right" size={20} />
-              </Pressable>
-
-              <Pressable accessibilityRole="button"
-              onPress={() => navigation.navigate('Orders', { customerId: customer.id })}
-              style={styles.actionCard}>
-
-                <View style={styles.actionCardIcon}>
-                  <MaterialCommunityIcons color={colors123.primary} name="clipboard-list-outline" size={20} />
-                </View>
-                <View style={styles.actionCardContent}>
-                  <Text style={styles.actionCardTitle}>{t("auto_orders")}</Text>
-                </View>
-                <MaterialCommunityIcons color={colors123.textMuted} name="chevron-right" size={20} />
-              </Pressable>
-            </View>
-
             {/* Measurements Section */}
             <View style={styles.section}>
               <View style={styles.sectionHeader}>
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text style={styles.sectionTitle}>{t("auto_measurements_2")}</Text>
                   <Text style={styles.sectionSubtitle}>{t("auto_keep_a_history_of_fit_profiles")}</Text>
                 </View>
+                <AppButton label={t("history")} size="sm" variant="tertiary"
+                onPress={() => navigation.navigate('ViewMeasurements', { customerId: customer.id, customerName: customer.name, customerGender: customer.gender || 'male' })} />
               </View>
 
               <InlineAlert message={measurementListError ? t("loadMeasurementsFailed") : null} onRetry={() => loadMeasurementList(customerId)} retryLabel={t("retry")} />
@@ -361,7 +345,7 @@ export default function CustomerDetailScreen({ navigation, route }) {
             <View style={styles.measurementsList}>
                   {sortedMeasurements.map((measurement) => {
                 const data = measurement.measurementsData || measurement.measurements_data || {};
-                const entries = Object.entries(data);
+                const entries = getMeasurementEntries(data);
                 const createdAt = measurement.createdAt || measurement.created_at || measurement.updatedAt || measurement.updated_at;
                 const isExpanded = expandedMeasurements.includes(measurement.id);
                 const visibleEntries = isExpanded ? entries : entries.slice(0, 4);
@@ -403,7 +387,7 @@ export default function CustomerDetailScreen({ navigation, route }) {
                             </View>
                       )}
                         </ResponsiveGrid>
-                        {entries.length > 0 &&
+                        {entries.length > 4 &&
                     <Pressable accessibilityRole="button" onPress={() => toggleMeasurementExpand(measurement.id)} style={styles.viewMoreButton}>
                             <Text style={styles.viewMoreLink}>
                               {isExpanded ? "Show less" : `Show all ${entries.length}`}
@@ -462,21 +446,20 @@ export default function CustomerDetailScreen({ navigation, route }) {
 
                         <View style={styles.orderCardHeader}>
                           <View style={styles.orderCardInfo}>
-                            <Text style={styles.orderCardTitle}>{order.item}</Text>
-                            <Text style={styles.orderCardMeta}>
-                              {order.fabric} • {order.color}
-                            </Text>
+                            <Text style={styles.orderCardTitle}>{getOrderItemsText(order)}</Text>
                           </View>
                           <View style={styles.orderCardActions}>
                             <StatusBadge compact status={order.status} />
                             <Text style={styles.orderCardAmount}>
-                              {formatCurrency(order.totalAmount || order.amount || 0)}
+                              {formatCurrency(getOrderAmounts(order).total)}
                             </Text>
                           </View>
                         </View>
-                        <Text style={styles.orderCardDue}>{t("auto_due")}
-                    {format(parseISO(order.deliveryDate || order.delivery_date), "dd MMM yyyy")}
-                        </Text>
+                        {getDeliveryDateKey(order) ?
+                        <Text style={styles.orderCardDue}>
+                          {t("auto_due")} {format(parseISO(getDeliveryDateKey(order)), "dd MMM yyyy")}
+                        </Text> :
+                        null}
                         {order.notes ?
                   <Text style={styles.orderCardNotes}>{order.notes}</Text> :
                   null}
@@ -565,6 +548,14 @@ const styles = StyleSheet.create({
   customerInfo: {
     flex: 1,
   },
+  contactActions: {
+    flexDirection: "row",
+    gap: spacing.sm,
+    marginTop: spacing.md,
+  },
+  contactAction: {
+    flex: 1,
+  },
   customerName: {
     fontFamily: fonts.bold,
     fontSize: 18,
@@ -648,6 +639,9 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
     marginBottom: spacing.sm,
   },
   sectionTitle: {

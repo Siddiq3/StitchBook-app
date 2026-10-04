@@ -247,6 +247,8 @@ export default function MeasurementSheet({
       </View>
 
       <View style={styles.outfitSelection}>
+        {/* Outfit is already known when opened from an order item */}
+        {!outfitType && <>
         <Text style={styles.sectionTitle}>{t("selectOutfitTypeLower")}</Text>
         <ScrollView
           horizontal
@@ -275,6 +277,7 @@ export default function MeasurementSheet({
             );
           })}
         </ScrollView>
+        </>}
       </View>
 
       {activeConfig ? (
@@ -334,7 +337,7 @@ export default function MeasurementSheet({
                     onChangeText={(value) => handleChange(fieldLabel, value)}
                     onFocus={() => focusMeasurementField(fieldLabel)}
                     onSubmitEditing={() => focusNextField(index)}
-                    placeholder={t("enterValue")}
+                    placeholder="0"
                     placeholderTextColor={colors123.textSoft}
                     returnKeyType={isLastField ? "done" : "next"}
                     style={[styles.fieldInputRow, isFocused && styles.fieldInputRowFocused]}

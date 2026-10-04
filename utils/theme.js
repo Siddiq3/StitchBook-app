@@ -265,7 +265,22 @@ export const statusToneMap = {
   urgent: { bg: colors123.urgentBg, color: colors123.urgentText, border: colors123.borderLight, labelKey: "urgent" },
   overdue: { bg: colors123.urgentBg, color: colors123.urgentText, border: colors123.borderLight, labelKey: "overdue" },
   cancelled: { bg: colors123.urgentBg, color: colors123.urgentText, border: colors123.borderLight, labelKey: "cancelled" },
+  paid: { bg: colors123.readyBg, color: colors123.readyText, border: colors123.borderLight, labelKey: "paid" },
+  partially_paid: { bg: colors123.pendingBg, color: colors123.pendingText, border: colors123.borderLight, labelKey: "partiallyPaid" },
+  unpaid: { bg: colors123.urgentBg, color: colors123.urgentText, border: colors123.borderLight, labelKey: "unpaid" },
 };
+
+// Single source for order money maths, so every screen shows the same balance.
+export function getOrderAmounts(order = {}) {
+  const total = Number(order?.total_amount || order?.totalAmount || order?.amount || 0) || 0;
+  const paid = Number(order?.advance_paid || order?.paid_amount || order?.paidAmount || 0) || 0;
+  const serverBalance = order?.balance_due ?? order?.balanceDue;
+  const balance = serverBalance !== undefined && serverBalance !== null && serverBalance !== ""
+    ? Math.max(0, Number(serverBalance) || 0)
+    : Math.max(0, total - paid);
+  const paymentStatus = balance <= 0 && total > 0 ? "paid" : paid > 0 ? "partially_paid" : "unpaid";
+  return { total, paid, balance, paymentStatus };
+}
 
 export function getStatusTone(status) {
   return statusToneMap[normalizeStatus(status)] || {
@@ -279,13 +294,12 @@ export function formatCurrency(amount) {
   return `₹${Number(amount || 0).toLocaleString("en-IN")}`;
 }
 
+// Short amounts for chart labels. Hermes lacks Intl's compact notation, so do it by hand.
 export function formatCompactCurrency(amount) {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    notation: "compact",
-    maximumFractionDigits: 1,
-  }).format(Number(amount || 0));
+  const value = Math.round(Number(amount || 0));
+  if (Math.abs(value) >= 10000000) return `₹${(value / 10000000).toFixed(1).replace(/\.0$/, "")}Cr`;
+  if (Math.abs(value) >= 100000) return `₹${(value / 100000).toFixed(1).replace(/\.0$/, "")}L`;
+  return `₹${value.toLocaleString("en-IN")}`;
 }
 
 export function getInitials(name = "") {

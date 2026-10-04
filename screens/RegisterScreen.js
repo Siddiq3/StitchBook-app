@@ -54,7 +54,7 @@ export default function RegisterScreen({navigation}){
         <IconInput label="Mobile number" icon="phone-outline" value={form.phone} onChangeText={set('phone')} placeholder="Enter your mobile number" keyboardType="phone-pad" autoComplete="tel"/>
         <IconInput
           label="Password"
-          icon="lock-closed-outline"
+          icon="lock-outline"
           value={form.password}
           onChangeText={set('password')}
           placeholder="Create a password"

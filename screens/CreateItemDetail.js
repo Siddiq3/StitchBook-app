@@ -7,10 +7,12 @@ import { MotiView } from "../components/AccessibleMotionView";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
 
-import { colors123, fonts, radius, spacing } from "../utils/theme";
+import { colors123, fonts, formatCurrency, radius, spacing } from "../utils/theme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppButton from "../components/AppButton";
 import MeasurementFieldThumb from "../components/MeasurementFieldThumb";
 import MeasurementPickerModal from "../components/MeasurementPickerModal";
+import { getMeasurementEntries } from "../utils/formHelpers";
 import StitchOptionsSheet from "../components/StitchOptionsSheet";
 
 export default function CreateItemDetail({
@@ -22,6 +24,7 @@ export default function CreateItemDetail({
 }) {
   const { t } = useLanguage();
   const { showToast } = useToast();
+  const insets = useSafeAreaInsets();
 
   // Item state
   const [itemType, setItemType] = useState("stitching"); // stitching or alteration
@@ -53,10 +56,6 @@ export default function CreateItemDetail({
 
   // Validate measurements for stitching type
   const canSave = () => {
-    if (!fabric.trim()) {
-      showToast(t("enterFabric"), "error");
-      return false;
-    }
     if (!price || Number(price) <= 0) {
       showToast(t("enterValidPrice"), "error");
       return false;
@@ -119,7 +118,7 @@ export default function CreateItemDetail({
     selectedMeasurement?.measurementsData ||
     selectedMeasurement?.measurements_data ||
     {};
-  const selectedMeasurementEntries = Object.entries(selectedMeasurementData);
+  const selectedMeasurementEntries = getMeasurementEntries(selectedMeasurementData);
   const visibleMeasurementEntries = measurementExpanded
     ? selectedMeasurementEntries
     : selectedMeasurementEntries.slice(0, 4);
@@ -140,8 +139,8 @@ export default function CreateItemDetail({
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity accessibilityRole="button"
+      <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")}
           onPress={onCancel}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
@@ -284,7 +283,7 @@ export default function CreateItemDetail({
                 ))}
               </ResponsiveGrid>
 
-              {selectedMeasurementEntries.length > 0 ? (
+              {selectedMeasurementEntries.length > 4 ? (
                 <TouchableOpacity accessibilityRole="button"
                   style={styles.measurementDropdown}
                   onPress={() => setMeasurementExpanded((current) => !current)}
@@ -340,7 +339,7 @@ export default function CreateItemDetail({
 
         {/* Fabric */}
         <View style={styles.section}>
-          <Text style={styles.label}>{t("fabric")}</Text>
+          <Text style={styles.label}>{t("fabricOptional")}</Text>
           <TextInput accessibilityLabel={t("fabricPlaceholder")}
             style={styles.input}
             placeholder={t("fabricPlaceholder")}
@@ -354,14 +353,14 @@ export default function CreateItemDetail({
         <View style={styles.section}>
           <Text style={styles.label}>{t("quantity")}</Text>
           <View style={styles.quantityContainer}>
-            <TouchableOpacity accessibilityRole="button"
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel={`${t("quantity")} −`}
               style={styles.quantityButton}
               onPress={() => setQuantity(Math.max(1, quantity - 1))}
             >
               <Text style={styles.quantityButtonText}>−</Text>
             </TouchableOpacity>
             <Text style={styles.quantityValue}>{quantity}</Text>
-            <TouchableOpacity accessibilityRole="button"
+            <TouchableOpacity accessibilityRole="button" accessibilityLabel={`${t("quantity")} +`}
               style={styles.quantityButton}
               onPress={() => setQuantity(quantity + 1)}
             >
@@ -386,7 +385,7 @@ export default function CreateItemDetail({
           </View>
           {price && quantity && (
             <Text style={styles.totalPrice}>
-              {t("total")}: ₹{Number(price) * Number(quantity)}
+              {t("total")}: {formatCurrency(Number(price) * Number(quantity))}
             </Text>
           )}
         </View>
@@ -406,27 +405,15 @@ export default function CreateItemDetail({
           />
         </View>
 
-        {/* Audio & Media Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t("additionalInfo")}</Text>
-          <View style={styles.mediaButtonsContainer}>
-            <TouchableOpacity accessibilityRole="button" style={styles.mediaButton}>
-              <Ionicons name="mic-outline" size={24} color={colors123.primary} />
-              <Text style={styles.mediaButtonText}>{t("recordAudio")}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity accessibilityRole="button" style={styles.mediaButton}>
-              <Ionicons name="image-outline" size={24} color={colors123.primary} />
-              <Text style={styles.mediaButtonText}>{t("uploadImages")}</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* Spacing for buttons */}
         <View style={{ height: spacing.xl }} />
       </ScrollView>
 
       {/* Bottom Actions */}
-      <View style={styles.bottomActions}>
+      {saveButtonDisabled &&
+      <Text style={styles.saveHint}>{t("saveItemNeedsMeasurement")}</Text>
+      }
+      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + spacing.md }]}>
         <TouchableOpacity accessibilityRole="button"
           style={styles.cancelButton}
           onPress={onCancel}
@@ -713,7 +700,7 @@ const styles = StyleSheet.create({
     color: colors123.text,
   },
   quantityValue: {
-    flex: 1,
+    minWidth: 48,
     textAlign: "center",
     fontSize: fonts.base.fontSize,
     fontFamily: fonts.semibold,
@@ -748,26 +735,13 @@ const styles = StyleSheet.create({
     color: colors123.textSoft,
     fontStyle: "italic",
   },
-  mediaButtonsContainer: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  mediaButton: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: spacing.md,
-    borderWidth: 1,
-    borderColor: colors123.border,
-    borderRadius: radius.sm,
-    backgroundColor: colors123.card,
-  },
-  mediaButtonText: {
-    marginLeft: spacing.sm,
-    fontSize: fonts.sm.fontSize,
-    fontFamily: fonts.semibold,
-    color: colors123.text,
+  saveHint: {
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.sm,
+    fontFamily: fonts.regular,
+    fontSize: 13,
+    color: colors123.textMuted,
+    backgroundColor: colors123.background,
   },
   bottomActions: {
     flexDirection: "row",

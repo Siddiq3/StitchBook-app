@@ -162,3 +162,33 @@ test("UI theme references have an import or local binding", () => {
   for (const dir of ["screens", "components", "navigation"]) scan(path.join(root, dir));
   assert.deepEqual(unbound, [], "Unbound theme tokens can crash the app while loading modules");
 });
+test("order amounts never go negative and pick a payment status", () => {
+  const amounts = (order) => ({ ...theme.getOrderAmounts(order) });
+  assert.deepEqual(amounts({ total_amount: 1000, advance_paid: 400 }), { total: 1000, paid: 400, balance: 600, paymentStatus: "partially_paid" });
+  assert.equal(amounts({ total_amount: 500, advance_paid: 700 }).balance, 0);
+  assert.equal(amounts({ amount: "800", balance_due: 0 }).paymentStatus, "paid");
+  assert.equal(amounts({ totalAmount: 300 }).paymentStatus, "unpaid");
+  assert.equal(amounts({}).balance, 0);
+  assert.equal(theme.getStatusTone("partially_paid").labelKey, "partiallyPaid");
+});
+test("phone input is lenient and display is consistent", () => {
+  const phone = loadModule("utils/formHelpers.js", { "../services/outfitTypes": { getOutfitLabel: (id) => id } });
+  for (const raw of ["+91 98765-43210", "098765 43210", "(98765) 43210", "9876543210"]) {
+    assert.equal(phone.normalizePhone(raw), "9876543210");
+    assert.equal(phone.formatPhone(raw), "98765 43210");
+  }
+  assert.equal(phone.isValidPhone("12345"), false);
+});
+test("dates use the local calendar day and accept API shapes", () => {
+  const h = loadModule("utils/formHelpers.js", { "../services/outfitTypes": { getOutfitLabel: (id) => (id === "blouse" ? "Blouse" : id) } });
+  assert.equal(h.toLocalDateKey(new Date(2026, 9, 11, 0, 30)), "2026-10-11");
+  assert.equal(h.getDeliveryDateKey({ delivery_date: "2026-10-11" }), "2026-10-11");
+  assert.equal(h.getDeliveryDateKey({ deliveryDate: null }), "");
+  assert.equal(h.getOrderItemsText({ items: [{ type: "blouse" }, { typeLabel: "Kurti" }] }), "Blouse +1");
+  assert.equal(JSON.stringify(h.getMeasurementEntries({ outfitType: "blouse", outfitLabel: "Blouse", Chest: "34", Waist: "" })), JSON.stringify([["Chest", "34"]]));
+});
+test("compact amounts read naturally in Indian units", () => {
+  assert.equal(theme.formatCompactCurrency(2000), "₹2,000");
+  assert.equal(theme.formatCompactCurrency(150000), "₹1.5L");
+  assert.equal(theme.formatCompactCurrency(20000000), "₹2Cr");
+});

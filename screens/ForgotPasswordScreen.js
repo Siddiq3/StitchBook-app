@@ -121,7 +121,7 @@ export default function ForgotPasswordScreen({navigation}){
         {step==='password'?<>
           <IconInput
             label="New password"
-            icon="lock-closed-outline"
+            icon="lock-outline"
             value={password}
             onChangeText={(v)=>{setPassword(v);setError('');}}
             placeholder="Enter your new password"

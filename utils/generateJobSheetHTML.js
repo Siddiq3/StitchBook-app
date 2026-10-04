@@ -1,3 +1,4 @@
+import { getMeasurementEntries } from "./formHelpers";
 const escapeHtml = (value) => {
   if (value === null || value === undefined) return "";
   return String(value)
@@ -34,7 +35,7 @@ const renderMeasurementGroup = (measurement) => {
   const outfitLabel =
     measurement.outfitLabel || measurement.outfit_label || measurement.outfitType || measurement.outfit_type || "Measurement profile";
   const data = measurement.measurementsData || measurement.measurements_data || {};
-  const entries = Object.entries(data || {});
+  const entries = getMeasurementEntries(data);
 
   if (entries.length === 0) {
     return `

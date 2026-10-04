@@ -14,7 +14,6 @@ import { useFocusEffect } from '@react-navigation/native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MotiView } from '../components/AccessibleMotionView';
 import AppButton from '../components/AppButton';
-import ScreenHeader from '../components/ScreenHeader';
 import EmptyState from '../components/EmptyState';
 import { useStitchPro } from '../context/StitchProContext';
 import { colors123, fonts, radius, spacing } from '../utils/theme';
@@ -133,9 +132,6 @@ export default function NotificationScreen({ navigation }) {const { t } = useLan
 
       }>
 
-      <ScreenHeader
-        title={t("auto_notifications")}
-        subtitle={notificationCount ? `${notificationCount} unread` : null} />
 
 
 <InlineAlert message={notificationsError ? t("loadNotificationsFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />

@@ -5,6 +5,7 @@ import AccountRecoveryScreen from '../screens/AccountRecoveryScreen';
 import RecordMeasurementScreen from "../screens/RecordMeasurementScreen";
 import ViewMeasurementsScreen from "../screens/ViewMeasurementsScreen";
 import MeasurementsScreen from "../screens/MeasurementsScreen";
+import ReportsScreen from "../screens/ReportsScreen";
 import { fonts } from "../utils/theme";
 import React, { Suspense, useEffect, useRef } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
@@ -24,7 +25,6 @@ const CreateOrder = React.lazy(() => import('../screens/CreateOrder'));
 import OrderDetail from '../screens/OrderDetail';
 import StaffScreen from '../screens/StaffScreen';
 import NotificationScreen from '../screens/NotificationScreen';
-import SubscriptionScreen from '../screens/SubscriptionScreen';
 import { useStitchPro } from '../context/StitchProContext';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -64,6 +64,7 @@ function StudioTabs() {
   };
 
   return (
+    <View style={{ flex: 1 }}>
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
@@ -108,7 +109,10 @@ function StudioTabs() {
       <Tab.Screen name="Orders" component={OrdersScreen} />
       <Tab.Screen name="Customers" component={CustomersScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
-    </Tab.Navigator>);
+    </Tab.Navigator>
+    {/* Edge-to-edge: keep scrolled content from showing through the status bar */}
+    <View pointerEvents="none" style={[styles.statusBarScrim, { height: insets.top }]} />
+    </View>);
 
 }
 
@@ -134,18 +138,19 @@ export default function MainTabNavigator() {
   }
 
   if (subscriptionState === "error") {
-    return <AccountRecoveryScreen message="Could not verify subscription. Your shop data is safe." onRetry={() => fetchSubscription().catch(() => {})} />;
+    return <AccountRecoveryScreen message="Could not check your account status. Your shop data is safe." onRetry={() => fetchSubscription().catch(() => {})} />;
   }
 
   return (
     <Stack.Navigator initialRouteName="StudioTabs" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Sessions" component={SessionsScreen} options={{headerShown:true,title:"Devices and sessions"}} />
       <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{headerShown:true,title:"Delete account"}} />
-      <Stack.Screen name="Password" component={PasswordScreen} options={{headerShown:true,title:"Password & security",headerTintColor:colors123.primary,headerTitleStyle:{fontFamily:fonts.semibold}}} />
+      <Stack.Screen name="Password" component={PasswordScreen} options={{headerShown:true,title:"Password & security",headerTintColor:colors123.primary,headerTitleStyle:{fontFamily:fonts.semibold,color:colors123.text}}} />
       <Stack.Screen name="StudioTabs" component={StudioTabs} />
-      <Stack.Screen name="RecordMeasurement" component={RecordMeasurementScreen} options={{ headerShown: true, title: 'Record measurement', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />
-      <Stack.Screen name="ViewMeasurements" component={ViewMeasurementsScreen} options={{ headerShown: true, title: 'Measurement history', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />
-      <Stack.Screen name="Measurements" component={MeasurementsScreen} options={{ headerShown: true, title: 'Measurements', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold } }} />
+      <Stack.Screen name="RecordMeasurement" component={RecordMeasurementScreen} options={{ headerShown: true, title: 'Record measurement', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
+      <Stack.Screen name="ViewMeasurements" component={ViewMeasurementsScreen} options={{ headerShown: true, title: 'Measurement history', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
+      <Stack.Screen name="Reports" component={ReportsScreen} options={{ headerShown: true, title: 'Reports', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
+      <Stack.Screen name="Measurements" component={MeasurementsScreen} options={{ headerShown: true, title: 'Measurements', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
       <Stack.Screen
         name="CustomerDetail"
         component={CustomerDetailScreen}
@@ -176,7 +181,7 @@ export default function MainTabNavigator() {
         component={StaffScreen}
         options={{
           animation: 'slide_from_right',
-          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold }
+          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text }
         }} />
 
       <Stack.Screen
@@ -184,22 +189,22 @@ export default function MainTabNavigator() {
         component={NotificationScreen}
         options={{
           animation: 'slide_from_right',
-          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold }
+          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text }
         }} />
 
-      <Stack.Screen
-        name="Subscription"
-        component={SubscriptionScreen}
-        options={{
-          animation: 'slide_from_right',
-          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold }
-        }} />
 
     </Stack.Navigator>);
 
 }
 
 const styles = StyleSheet.create({
+  statusBarScrim: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: colors123.background,
+  },
   loadingScreen: {
     flex: 1,
     alignItems: "center",

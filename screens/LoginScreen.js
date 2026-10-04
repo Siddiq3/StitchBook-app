@@ -58,7 +58,7 @@ export default function LoginScreen({navigation}){
         />
         <IconInput
           label="Password"
-          icon="lock-closed-outline"
+          icon="lock-outline"
           value={password}
           onChangeText={(v)=>{setPassword(v);setError('');}}
           placeholder="Enter your password"

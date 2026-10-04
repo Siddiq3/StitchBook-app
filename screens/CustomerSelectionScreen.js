@@ -8,6 +8,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useStitchPro } from "../context/StitchProContext";
 import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
 import AvatarCircle from "../components/AvatarCircle";
+import { formatPhone } from "../utils/formHelpers";
+import CustomerFormSheet from "../components/CustomerFormSheet";
+import { useToast } from "../context/ToastContext";
+import { showAccountInactiveAlert } from "../utils/accountStatus";
 
 /**
  * CustomerSelectionScreen
@@ -22,7 +26,27 @@ export default function CustomerSelectionScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { customersError } = useStitchPro();
-  const { customers, fetchCustomers } = useStitchPro();
+  const { customers, fetchCustomers, addCustomer } = useStitchPro();
+  const { showToast } = useToast();
+  const [showNewCustomer, setShowNewCustomer] = useState(false);
+
+  // Walk-in customer: create them here and go straight on to the order
+  const handleNewCustomer = async (form) => {
+    try {
+      const created = await addCustomer(form);
+      setShowNewCustomer(false);
+      if (created?.id) navigation.navigate("CreateOrder", { customerId: created.id });
+      return true;
+    } catch (err) {
+      if (err.code === "SUBSCRIPTION_REQUIRED") {
+        setShowNewCustomer(false);
+        showAccountInactiveAlert(t);
+        return false;
+      }
+      showToast(err.message === "DUPLICATE_PHONE" ? t("duplicatePhone") : t("customerCreateFailed"), "error");
+      return false;
+    }
+  };
   const [loadingCustomers, setLoadingCustomers] = useState(false);
   const [customerSearch, setCustomerSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -92,7 +116,12 @@ export default function CustomerSelectionScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color={colors123.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("auto_select_customer")}</Text>
-        <View style={{ width: 28 }} />
+        <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("addCustomerTitle")}
+          onPress={() => setShowNewCustomer(true)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+
+          <Ionicons name="person-add-outline" size={24} color={colors123.primary} />
+        </TouchableOpacity>
       </View>
 
       <ScrollView
@@ -124,6 +153,9 @@ export default function CustomerSelectionScreen({ navigation }) {
             <Ionicons name="people-outline" size={48} color={colors123.border} />
             <Text style={styles.emptyText}>{t("auto_no_customers_found")}</Text>
             <Text style={styles.emptySubtext}>{t("auto_add_a_customer_first")}</Text>
+            <TouchableOpacity accessibilityRole="button" onPress={() => setShowNewCustomer(true)} style={{ marginTop: spacing.md }}>
+              <Text style={{ color: colors123.primary, fontFamily: fonts.semibold, fontSize: 15 }}>+ {t("addCustomerTitle")}</Text>
+            </TouchableOpacity>
           </View>) : (
 
         /* Customers List - Optimized with FlatList */
@@ -132,7 +164,7 @@ export default function CustomerSelectionScreen({ navigation }) {
           keyExtractor={(item) => String(item.id)}
           scrollEnabled={false}
           renderItem={({ item }) =>
-          <ListRow leading={<AvatarCircle name={item.name} size={44} />} title={item.name} meta={item.phone} onPress={() => handleSelectCustomer(item)} trailing={<Ionicons name="chevron-forward" size={20} color={colors123.textMuted} />} />
+          <ListRow leading={<AvatarCircle name={item.name} size={44} />} title={item.name} meta={formatPhone(item.phone)} onPress={() => handleSelectCustomer(item)} trailing={<Ionicons name="chevron-forward" size={20} color={colors123.textMuted} />} />
           }
           maxToRenderPerBatch={10}
           updateCellsBatchingPeriod={50}
@@ -141,6 +173,7 @@ export default function CustomerSelectionScreen({ navigation }) {
 
         }
       </ScrollView>
+      <CustomerFormSheet visible={showNewCustomer} onClose={() => setShowNewCustomer(false)} onSubmit={handleNewCustomer} />
     </View>);
 
 }

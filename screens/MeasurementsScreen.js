@@ -9,7 +9,6 @@ import { MotiView } from "../components/AccessibleMotionView";
 import AppCard from "../components/AppCard";
 import AvatarBadge from "../components/AvatarBadge";
 import MeasurementSheet from "../components/MeasurementSheet";
-import ScreenHeader from "../components/ScreenHeader";
 import { ListSkeleton } from "../components/SkeletonBlock";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
@@ -130,8 +129,6 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
 
         }>
 
-        <ScreenHeader
-          title={t("auto_measurements_2")} />
 
 <InlineAlert message={measurementsError ? t("loadMeasurementsFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
         <View style={styles.summaryRow}>

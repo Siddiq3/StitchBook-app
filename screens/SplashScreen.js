@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
-    backgroundColor: colors123.background,
+    backgroundColor: colors123.surface,
   },
   machineWrap: {
     width: 180,

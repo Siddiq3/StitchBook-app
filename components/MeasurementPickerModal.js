@@ -18,6 +18,7 @@ import MeasurementSheet from "./MeasurementSheet";
 import { measurementApi } from "../services/api";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
+import { getMeasurementEntries } from "../utils/formHelpers";
 import { colors123, fonts, spacing } from "../utils/theme";
 
 export default function MeasurementPickerModal({
@@ -135,7 +136,7 @@ export default function MeasurementPickerModal({
         customer_id: customerId,
         measurements_data: measurementsData,
         outfit_type: outfitType?.id || outfitType?.label || "",
-        outfit_label: `${outfitType?.label || t("items")} - ${new Date().toLocaleDateString()}`
+        outfit_label: `${outfitType?.label || t("items")} - ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
       };
       const res = await measurementApi.create(payload);
       const created = res.data?.data;
@@ -163,21 +164,17 @@ export default function MeasurementPickerModal({
   return (
     <>
       <BottomSheet
-        visible={visible}
+        visible={visible && !showMeasurementSheet}
         onClose={onClose}
         title={t("selectMeasurements")}
         subtitle={t("selectMeasurementsSubtitle")}>
-
-        <Text style={styles.helperText}>
-          {t("savedMeasurementsHelper")}
-        </Text>
 
         {loading ?
         <ActivityIndicator size="large" color={colors123.primary} /> :
         measurements.length === 0 ?
         <View style={styles.emptyContainer}>
             <Ionicons
-            name="ruler-outline"
+            name="body-outline"
             size={48}
             color={colors123.border} />
 
@@ -194,7 +191,7 @@ export default function MeasurementPickerModal({
             {measurements.map((measurement) => {
             const isSelected = measurement.id === selectedMeasurementId;
             const data = measurement.measurementsData || measurement.measurements_data || {};
-            const entries = Object.entries(data);
+            const entries = getMeasurementEntries(data);
             const isExpanded = expandedMeasurements.includes(measurement.id);
             const visibleEntries = isExpanded ? entries : [];
 
@@ -275,6 +272,7 @@ export default function MeasurementPickerModal({
         <AppCard style={styles.actionsCard} variant="muted">
           <AppButton
             label={t("createNewMeasurement")}
+            variant={measurements.length > 0 ? "secondary" : "primary"}
             onPress={() => setShowMeasurementSheet(true)} />
 
           <TouchableOpacity style={styles.skipButton} onPress={onSkip}>

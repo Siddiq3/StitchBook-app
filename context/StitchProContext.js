@@ -24,6 +24,8 @@ import {
   subscriptionApi } from
 "../services/api";
 
+import { toLocalDateKey } from "../utils/formHelpers";
+
 const StitchProContext = createContext(null);
 
 const SUBSCRIPTION_REQUIRED_MESSAGE =
@@ -572,6 +574,7 @@ export const StitchProProvider = ({ children }) => {
         null,
         items: data.items.map((i) => ({
           type: i.type || i.typeLabel,
+          typeLabel: i.typeLabel || null,
           fabric: i.fabric,
           quantity: Number(i.quantity),
           price: Number(i.price),
@@ -662,7 +665,7 @@ export const StitchProProvider = ({ children }) => {
         orderId,
         amount: Number(amount),
         paymentMethod,
-        paymentDate: new Date().toISOString().split("T")[0],
+        paymentDate: toLocalDateKey(),
         notes
       });
       const res = await orderApi.getById(orderId);
