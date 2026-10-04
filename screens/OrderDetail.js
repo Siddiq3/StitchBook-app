@@ -150,7 +150,8 @@ export default function OrderDetail({ route, navigation }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { orderId } = route.params;
-  const { orders, customers, shop, staff, fetchStaff, updateOrderStatus, updateOrder, recordPayment, fetchActivityLogs, activityLogs, fetchPayments, payments, fetchCustomers, can } = useStitchPro();
+  const { orders, customers, shop, staff, fetchStaff, updateOrderStatus, updateOrder, recordPayment, fetchActivityLogs, activityLogs, fetchPayments, payments, fetchCustomers, can, subscription } = useStitchPro();
+  const hasStaffManagement = Boolean(subscription?.features?.hasStaffManagement);
   const { showToast } = useToast();
 
   const [jobSheetLoading, setJobSheetLoading] = useState(false);
@@ -194,8 +195,8 @@ export default function OrderDetail({ route, navigation }) {
   }, [orderFromContext, orderId]);
 
   useEffect(() => {
-    if (can("staff:read")) fetchStaff?.();
-  }, [fetchStaff]);
+    if (can("staff:read") && hasStaffManagement) fetchStaff?.();
+  }, [fetchStaff, hasStaffManagement]);
 
   // Payment Modal
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -1003,6 +1004,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   </View>
                   </View>
 
+                {hasStaffManagement &&
                 <View style={styles.assignmentPanel}>
                   <View style={styles.assignmentHeader}>
                     <View>
@@ -1060,6 +1062,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   })}
                   </View>
                 </View>
+                }
               </View>
             )}
           </View>
@@ -1193,7 +1196,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
 
       {/* Staff Assignment Modal */}
       <Modal
-        visible={Boolean(assignmentModal)}
+        visible={Boolean(assignmentModal) && hasStaffManagement}
         transparent
         animationType="slide"
         onRequestClose={() => setAssignmentModal(null)}>

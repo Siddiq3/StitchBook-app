@@ -13,19 +13,44 @@ import { colors123, spacing, formatCurrency } from "../utils/theme";
 // Period-based business numbers, kept off the home screen so home stays about today's work.
 export default function ReportsScreen() {
   const { t } = useLanguage();
-  const { dashboardStats, dashboardLoading, dashboardError, fetchDashboardStats, staff, fetchStaff } = useStitchPro();
-  const [period, setPeriod] = useState("week");
+  const { dashboardStats, dashboardLoading, dashboardError, fetchDashboardStats, staff, fetchStaff, subscription } = useStitchPro();
+  const [period, setPeriod] = useState("month");
   const [orderType, setOrderType] = useState(null);
 
-  useEffect(() => {
-    fetchDashboardStats(period, orderType);
-  }, [fetchDashboardStats, period, orderType]);
+  const reportLevel = dashboardStats?.reportLevel || subscription?.features?.reportLevel || "basic";
+  const reportPeriods =
+    dashboardStats?.reportPeriods ||
+    subscription?.features?.reportPeriods ||
+    (reportLevel === "advanced"
+      ? ["today", "week", "month", "year"]
+      : reportLevel === "full"
+        ? ["week", "month", "year"]
+        : ["month"]);
+  const canFilterOrderType = Boolean(
+    dashboardStats?.reportOrderTypeFilter ?? subscription?.features?.reportOrderTypeFilter
+  );
+  const hasFullReports = reportLevel === "full" || reportLevel === "advanced";
 
   useEffect(() => {
-    fetchStaff?.();
-  }, [fetchStaff]);
+    if (!reportPeriods.includes(period)) {
+      setPeriod(reportPeriods[0] || "month");
+      return;
+    }
+    fetchDashboardStats(period, canFilterOrderType ? orderType : null);
+  }, [fetchDashboardStats, period, orderType, canFilterOrderType, reportPeriods.join("|")]);
 
-  const onRefresh = useCallback(() => fetchDashboardStats(period, orderType), [fetchDashboardStats, period, orderType]);
+  useEffect(() => {
+    if (!canFilterOrderType && orderType !== null) setOrderType(null);
+  }, [canFilterOrderType, orderType]);
+
+  useEffect(() => {
+    if (hasFullReports) fetchStaff?.();
+  }, [fetchStaff, hasFullReports]);
+
+  const onRefresh = useCallback(
+    () => fetchDashboardStats(period, canFilterOrderType ? orderType : null),
+    [fetchDashboardStats, period, orderType, canFilterOrderType]
+  );
 
   const revenueTrendData = useMemo(() => {
     const rows = dashboardStats?.weeklyRevenue;
@@ -52,8 +77,10 @@ export default function ReportsScreen() {
       contentContainerStyle={styles.content}
       refreshControl={<RefreshControl refreshing={dashboardLoading} onRefresh={onRefresh} tintColor={colors123.primary} colors={[colors123.primary]} />}>
 
-      <SegmentedControl options={["today", "week", "month", "year"].map((v) => ({ value: v, label: t(v) }))} value={period} onChange={setPeriod} />
-      <SegmentedControl options={[{ value: null, label: t("all") }, { value: "stitching", label: t("stitching") }, { value: "alteration", label: t("alteration") }]} value={orderType} onChange={setOrderType} disabled={dashboardLoading} />
+      {reportPeriods.length > 1 &&
+      <SegmentedControl options={reportPeriods.map((v) => ({ value: v, label: t(v) }))} value={period} onChange={setPeriod} />}
+      {canFilterOrderType &&
+      <SegmentedControl options={[{ value: null, label: t("all") }, { value: "stitching", label: t("stitching") }, { value: "alteration", label: t("alteration") }]} value={orderType} onChange={setOrderType} disabled={dashboardLoading} />}
       <InlineAlert message={dashboardError ? t("loadDashboardFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
 
       <ResponsiveGrid minItemWidth={140}>
@@ -61,11 +88,14 @@ export default function ReportsScreen() {
         <StatCard icon="timer-sand" label={t("toCollect")} color={colors123.warning} value={money(dashboardStats?.outstandingBalance)} />
         <StatCard icon="clipboard-plus-outline" label={t("ordersBooked")} color={colors123.primary} value={value(dashboardStats?.ordersBooked)} />
         <StatCard icon="tag-outline" label={t("bookedValue")} color={colors123.info} value={money(dashboardStats?.bookedValue)} />
-        <StatCard icon="account-plus-outline" label={t("newCustomers")} color={colors123.accent} value={value(dashboardStats?.newCustomers)} />
-        <StatCard icon="account-cash-outline" label={t("staffEarningsMonth")} color={colors123.textSecondary} value={formatCurrency(staffEarnings)} />
+        {hasFullReports &&
+        <StatCard icon="account-plus-outline" label={t("newCustomers")} color={colors123.accent} value={value(dashboardStats?.newCustomers)} />}
+        {hasFullReports &&
+        <StatCard icon="account-cash-outline" label={t("staffEarningsMonth")} color={colors123.textSecondary} value={formatCurrency(staffEarnings)} />}
       </ResponsiveGrid>
 
-      <ChartCard data={revenueTrendData} subtitle={t("paymentsTrendSubtitle")} title={t("paymentsReceived")} />
+      {hasFullReports &&
+      <ChartCard data={revenueTrendData} subtitle={t("paymentsTrendSubtitle")} title={t("paymentsReceived")} />}
     </ScrollView>);
 
 }

@@ -13,7 +13,14 @@ export function getAccountStatusText(subscription, t) {
     const days = Math.max(0, Number(subscription.trialDaysRemaining ?? subscription.daysRemaining ?? 0));
     return `${t("freeTrial")} · ${t("auto_days_remaining")}: ${days}`;
   }
-  return subscription.isActive ? t("auto_active") : t("accountInactiveTitle");
+  if (subscription.isActive) {
+    const plan = String(subscription.planType || "").trim();
+    const planLabel = plan && !["trial", "free", "expired"].includes(plan)
+      ? plan.charAt(0).toUpperCase() + plan.slice(1)
+      : "";
+    return planLabel ? `${planLabel} · ${t("auto_active")}` : t("auto_active");
+  }
+  return t("accountInactiveTitle");
 }
 
 export function showAccountInactiveAlert(t) {
