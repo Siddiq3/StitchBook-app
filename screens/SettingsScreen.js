@@ -30,6 +30,7 @@ export default function SettingsScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { t, language, selectLanguage } = useLanguage();
   const { user, shop, logout, updateShop, subscription, can, isOwner } = useStitchPro();
+  const hasStaffManagement = Boolean(subscription?.features?.hasStaffManagement);
   const { showToast } = useToast();
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [shopEditModalVisible, setShopEditModalVisible] = useState(false);
@@ -270,7 +271,7 @@ export default function SettingsScreen({ navigation }) {
         <View style={styles.groupCard}>
           <Text style={styles.groupTitle}>{t("shop")}</Text>
           {[
-            can("staff:read") && { key: "staff", title: t("staffManagement"), icon: "account-multiple-outline", onPress: () => navigation.navigate("Staff") },
+            can("staff:read") && hasStaffManagement && { key: "staff", title: t("staffManagement"), icon: "account-multiple-outline", onPress: () => navigation.navigate("Staff") },
             can("measurements:read") && { key: "measurements", title: t("measurements"), icon: "ruler", onPress: () => navigation.navigate("Measurements") },
             { key: "notifications", title: t("notifications"), icon: "bell-outline", onPress: () => navigation.navigate("Notifications") },
           ].filter(Boolean).map(item => <ListRow key={item.key} title={item.title}
