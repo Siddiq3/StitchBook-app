@@ -10,7 +10,7 @@ export default function EmptyState({ icon = "hanger", title, description, messag
         <MaterialCommunityIcons color={colors123.primary} name={icon} size={28} />
       </View>
       <Text style={styles.title}>{title}</Text>
-      <Text style={styles.description}>{description || message}</Text>
+      {description || message ? <Text style={styles.description}>{description || message}</Text> : null}
       {action ? <View style={styles.action}>{action}</View> : null}
     </View>
   );
@@ -18,11 +18,11 @@ export default function EmptyState({ icon = "hanger", title, description, messag
 
 const styles = StyleSheet.create({
   wrapper: {
-    minHeight: 160,
+    minHeight: 120,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
+    paddingVertical: spacing.md,
   },
   illustration: {
     width: 48,

@@ -14,7 +14,7 @@ import {
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
-import { colors123, SIZES, normalize, SHADOWS } from "../utils/theme";
+import { colors123, SIZES, normalize, SHADOWS, spacing } from "../utils/theme";
 import BrandLogo from "../components/BrandLogo";
 
 const OnboardingScreen = () => {
@@ -299,9 +299,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors123.border,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: spacing.sm,
   },
   reviewLabel: { fontSize: normalize(12), color: colors123.textMuted, marginBottom: 4 },
-  reviewValue: { fontSize: normalize(15), fontFamily: fonts.semibold, color: colors123.text },
+  reviewValue: { fontSize: normalize(15), fontFamily: fonts.semibold, color: colors123.text, flex: 1, textAlign: "right" },
   buttonContainer: {
     marginTop: 16,
     gap: 10,

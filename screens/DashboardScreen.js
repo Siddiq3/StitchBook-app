@@ -1,10 +1,11 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ScreenHeader from "../components/ScreenHeader";
 import AppButton from "../components/AppButton";
 import SegmentedControl from "../components/SegmentedControl";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useEffect, useMemo, useCallback, useState } from "react";
-import { Image, Linking, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
@@ -27,8 +28,6 @@ import {
 "../utils/theme";
 
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
-const ANNOUNCEMENT_ROTATION_MS = 4200;
-const machineLogo = require("../assets/splash-machine.png");
 
 const toDate = (value) => {
   if (!value) return null;
@@ -74,27 +73,6 @@ const cleanDisplayText = (value, fallback) => {
   return text;
 };
 
-const cleanOptionalText = (value) => {
-  const text = String(value || "").trim();
-  if (!text || text === "?" || text.toLowerCase() === "undefined" || text.toLowerCase() === "null") {
-    return "";
-  }
-  return text;
-};
-
-const buildSocialUrl = (value, baseUrl) => {
-  const text = cleanOptionalText(value);
-  if (!text) return "";
-  if (/^https?:\/\//i.test(text)) return text;
-  return `${baseUrl}${text.replace(/^@/, "")}`;
-};
-
-const buildWhatsAppUrl = (value) => {
-  const digits = cleanOptionalText(value).replace(/\D/g, "");
-  if (!digits) return "";
-  return `https://wa.me/${digits.length === 10 ? `91${digits}` : digits}`;
-};
-
 function SummaryTile({ icon, label, value, toneColor, delay = 0 }) {
   return (
     <MotiView
@@ -109,6 +87,7 @@ function SummaryTile({ icon, label, value, toneColor, delay = 0 }) {
 }
 
 export default function DashboardScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { dashboardError } = useStitchPro();
   const {
@@ -127,7 +106,6 @@ export default function DashboardScreen({ navigation }) {
   } = useStitchPro();
   const [period, setPeriod] = useState("week"); // today, week, month, year
   const [orderType, setOrderType] = useState(null); // null, 'stitching', 'alteration'
-  const [announcementIndex, setAnnouncementIndex] = useState(0);
 
   // Fetch orders and dashboard stats on mount
   useEffect(() => {
@@ -233,155 +211,10 @@ export default function DashboardScreen({ navigation }) {
   const isTrialExpired = subscription?.status === "trial_expired" || subscription?.requiresSubscription;
   const trialMeta = useMemo(() => getTrialMeta(subscription), [subscription]);
   const shopName = cleanDisplayText(shop?.name, t("yourShop"));
-  const ownerName = cleanDisplayText(user?.name || user?.phone, t("shopOwnerFallback"));
-  const shopPhone = cleanDisplayText(shop?.phone || user?.phone, t("phoneNotAdded"));
-  const shopLocation = cleanDisplayText(shop?.location || shop?.address, t("locationNotAdded"));
-  const shopInstagramUrl = buildSocialUrl(
-    shop?.instagramUrl || shop?.instagram_url || shop?.instagram,
-    "https://instagram.com/"
-  );
-  const shopWhatsAppUrl = buildWhatsAppUrl(
-    shop?.whatsappNumber || shop?.whatsapp_number || shop?.phone || user?.phone
-  );
-  const subscriptionAnnouncement = useMemo(
-    () => isTrialExpired ?
-    {
-      title: t("subscriptionExpired"),
-      subtitle: t("subscriptionExpiredMessage"),
-      eyebrow: t("actionNeeded"),
-      icon: "lock-alert-outline",
-      actionIcon: "refresh",
-      cta: t("viewStatus"),
-      target: "subscription",
-      colors: [colors123.dangerLight, colors123.surface],
-      iconBg: "#FFFFFF",
-      iconColor: colors123.error,
-      textColor: colors123.text,
-      mutedColor: colors123.textMuted,
-      chipBg: "#FFFFFF",
-      chipBorder: "rgba(217,45,32,0.12)",
-      ctaBg: colors123.primary,
-      ctaText: colors123.primary,
-      featureItems: [
-      { icon: "clipboard-list-outline", label: t("orders") },
-      { icon: "account-group-outline", label: t("customers") },
-      { icon: "file-document-outline", label: t("billing") }]
-
-    } :
-    {
-      title: isTrialActive ?
-      `${trialMeta.remainingDays} ${t("freeTrial")}` :
-      t("subscriptionActive"),
-      subtitle: isTrialActive ?
-      `${t("trialEndsOn")} ${formatTrialDate(subscription?.trialEndDate || subscription?.endDate)}.` :
-      t("workspaceReady"),
-      eyebrow: isTrialActive ? t("freeTrial") : t("workspace"),
-      icon: isTrialActive ? "calendar-clock-outline" : "check-decagram-outline",
-      actionIcon: isTrialActive ? "calendar-clock-outline" : "shield-check-outline",
-      cta: isTrialActive ? t("viewPlan") : t("viewDetails"),
-      target: "subscription",
-      colors: [colors123.primarySoft, colors123.surface],
-      iconBg: colors123.surface,
-      iconColor: colors123.primary,
-      textColor: colors123.text,
-      mutedColor: colors123.textMuted,
-      chipBg: "#FFFFFF",
-      chipBorder: colors123.borderLight,
-      ctaBg: colors123.surface,
-      ctaText: colors123.primary,
-      featureItems: [
-      { icon: "calendar-clock-outline", label: t("subscription") },
-      { icon: "storefront-outline", label: t("workspace") },
-      { icon: "refresh", label: t("viewStatus") }]
-
-    },
-    [isTrialActive, isTrialExpired, subscription?.endDate, subscription?.trialEndDate, t, trialMeta.remainingDays]
-  );
-  const announcements = useMemo(
-    () => [
-    subscriptionAnnouncement,
-    {
-      title: t("followInstagram"),
-      subtitle: t("instagramMessage"),
-      eyebrow: t("community"),
-      icon: "instagram",
-      actionIcon: "instagram",
-      cta: shopInstagramUrl ? "Follow Now" : t("openSettings"),
-      target: "instagram",
-      colors: [colors123.surfaceMuted, colors123.surface],
-      iconBg: colors123.primarySoft,
-      iconColor: colors123.accent,
-      textColor: colors123.text,
-      mutedColor: colors123.textMuted,
-      chipBg: "#FFFFFF",
-      chipBorder: "rgba(179,90,0,0.12)",
-      ctaBg: colors123.primary,
-      ctaText: colors123.primary,
-      featureItems: [
-      { icon: "lightbulb-outline", label: t("community") },
-      { icon: "star-four-points-outline", label: t("follow") },
-      { icon: "store-outline", label: t("workspace") }]
-
-    },
-    {
-      title: t("connectWhatsapp"),
-      subtitle: t("whatsappMessage"),
-      eyebrow: t("support"),
-      icon: "whatsapp",
-      actionIcon: "whatsapp",
-      cta: shopWhatsAppUrl ? "Chat Now" : t("support"),
-      target: "whatsapp",
-      colors: [colors123.successLight, colors123.surface],
-      iconBg: colors123.surface,
-      iconColor: "#128C4A",
-      textColor: colors123.text,
-      mutedColor: colors123.textMuted,
-      chipBg: "#FFFFFF",
-      chipBorder: "rgba(18,140,74,0.12)",
-      ctaBg: colors123.primary,
-      ctaText: colors123.primary,
-      featureItems: [
-      { icon: "whatsapp", label: t("support") },
-      { icon: "message-text-outline", label: t("openWhatsapp") },
-      { icon: "account-heart-outline", label: t("customers") }]
-
-    }],
-
-    [shopInstagramUrl, shopWhatsAppUrl, subscriptionAnnouncement, t]
-  );
-  const activeAnnouncement = announcements[announcementIndex % announcements.length];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setAnnouncementIndex((current) => (current + 1) % announcements.length);
-    }, ANNOUNCEMENT_ROTATION_MS);
-
-    return () => clearInterval(timer);
-  }, [announcements.length]);
-
-  const handleAnnouncementPress = useCallback(async (target) => {
-    if (target === "subscription") {
-      navigation.navigate("Subscription");
-      return;
-    }
-
-    const url = target === "instagram" ? shopInstagramUrl : shopWhatsAppUrl;
-    if (url) {
-      try {
-        await Linking.openURL(url);
-        return;
-      } catch (err) {
-
-      }
-    }
-
-    navigation.navigate("Settings");
-  }, [navigation, shopInstagramUrl, shopWhatsAppUrl]);
-
   if (isBooting || (dashboardLoading && !dashboardStats && !dashboardError)) {
     return (
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm }]}
         showsVerticalScrollIndicator={false}>
 
         <DashboardSkeleton />
@@ -390,12 +223,12 @@ export default function DashboardScreen({ navigation }) {
   }
 
   if (dashboardError && !dashboardStats) {
-    return <ScrollView contentContainerStyle={styles.content}><ScreenHeader title={shopName} /><InlineAlert message={t("loadDashboardFailed")} onRetry={onRefresh} retryLabel={t("retry")} /></ScrollView>;
+    return <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm }]}><ScreenHeader title={shopName} /><InlineAlert message={t("loadDashboardFailed")} onRetry={onRefresh} retryLabel={t("retry")} /></ScrollView>;
   }
 
   return (
     <ScrollView
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm }]}
       showsVerticalScrollIndicator={false}
       refreshControl={
       <RefreshControl
@@ -406,7 +239,7 @@ export default function DashboardScreen({ navigation }) {
 
       }>
 
-      <ScreenHeader title={shopName} subtitle={t("welcomeDashboard")} action={<AppButton icon="plus" label={t("newOrder")} size="sm" onPress={() => navigation.navigate("CustomerSelection")} />} />
+      <ScreenHeader title={shopName} action={<AppButton icon="plus" label={t("newOrder")} size="sm" onPress={() => navigation.navigate("CustomerSelection")} />} />
       <InlineAlert message={dashboardError ? t("loadDashboardFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
       <SegmentedControl options={["today", "week", "month", "year"].map(value => ({ value, label: t(value) }))} value={period} onChange={setPeriod} />
       <SegmentedControl options={[{ value: null, label: t("all") }, { value: "stitching", label: t("stitching") }, { value: "alteration", label: t("alteration") }]} value={orderType} onChange={setOrderType} disabled={dashboardLoading} />
@@ -497,79 +330,15 @@ export default function DashboardScreen({ navigation }) {
         </AppCard>
       }
 
-      <View
-
-
-
-        style={[styles.heroCard, { backgroundColor: colors123.primary }]}>
-
-        <View style={styles.heroTopRow}>
-          <View>
-            <Text style={styles.heroEyebrow}>{t("revenueThisMonth")}</Text>
-            <View style={styles.heroValueRow}>
-              <Text style={styles.heroValue}>
-                {formatCompactCurrency(dashboardStats?.totalRevenue || 0)}
-              </Text>
-              <View style={styles.heroTrendIcon}>
-                <MaterialCommunityIcons
-                  color={colors123.surface}
-                  name="arrow-up-right"
-                  size={18} />
-
-              </View>
-            </View>
-          </View>
-          <View style={styles.heroBadge}>
-            <MaterialCommunityIcons
-              color={colors123.surface}
-              name="trending-up"
-              size={16} />
-
-            <Text style={styles.heroBadgeText}>{t("thisMonth")}</Text>
-          </View>
-        </View>
-
-        <View style={styles.heroActionRow}>
-          <Pressable accessibilityRole="button"
-            onPress={() => navigation.navigate("Orders")}
-            style={({ pressed }) => [
-            styles.heroAction,
-            pressed && styles.heroActionPressed]
-            }>
-
-            <MaterialCommunityIcons
-              color={colors123.primary}
-              name="clipboard-text-outline"
-              size={18} />
-
-            <Text style={styles.heroActionText}>{t("viewOrders")}</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button"
-            onPress={() => navigation.navigate("Customers")}
-            style={({ pressed }) => [
-            styles.heroActionGhost,
-            pressed && styles.heroActionPressed]
-            }>
-
-            <MaterialCommunityIcons
-              color={colors123.surface}
-              name="account-group-outline"
-              size={18} />
-
-            <Text style={styles.heroActionGhostText}>{t("customersTitle")}</Text>
-          </Pressable>
-        </View>
-      </View>
-
       <AppCard style={styles.productionCard}>
         <View style={styles.sectionRow}>
           <View>
             <Text style={styles.sectionTitle}>Production</Text>
-            <Text style={styles.sectionSubtitle}>Cutting, stitching, delivery and staff tracking</Text>
+
           </View>
           <MaterialCommunityIcons name="clipboard-list-outline" size={22} color={colors123.primary} />
         </View>
-        <ResponsiveGrid style={styles.productionGrid}>
+        <ResponsiveGrid minItemWidth={140} style={styles.productionGrid}>
           {[
           { label: "Cutting pending", value: productionStats.cuttingPending, icon: "content-cut", color: colors123.warning },
           { label: "Stitching pending", value: productionStats.stitchingPending, icon: "needle", color: colors123.primary },
@@ -588,14 +357,16 @@ export default function DashboardScreen({ navigation }) {
               <View style={[styles.productionIcon, { backgroundColor: `${item.color}18` }]}>
                 <MaterialCommunityIcons name={item.icon} size={18} color={item.color} />
               </View>
-              <Text style={styles.productionValue}>{item.value}</Text>
-              <Text style={styles.productionLabel}>{item.label}</Text>
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.productionLabel}>{item.label}</Text>
+                <Text style={styles.productionValue}>{item.value}</Text>
+              </View>
             </Pressable>
           )}
         </ResponsiveGrid>
       </AppCard>
 
-      <ResponsiveGrid style={styles.grid}>
+      <ResponsiveGrid minItemWidth={140} style={styles.grid}>
         <SummaryTile
           delay={40}
           icon="cash-multiple"
@@ -632,81 +403,26 @@ export default function DashboardScreen({ navigation }) {
         title={t("revenueTrend")} />
 
 
-      <MotiView
-        key={activeAnnouncement.title}
-        animate={{ opacity: 1, translateY: 0 }}
-        from={{ opacity: 0, translateY: -6 }}
-        transition={{ duration: 300, type: "timing" }}>
-
-        <Pressable accessibilityRole="button"
-          onPress={() => handleAnnouncementPress(activeAnnouncement.target)}
-          style={({ pressed }) => [
-          styles.announcementPressable,
-          pressed && styles.announcementPressed]
-          }>
-
-          <View
-
-
-
-            style={[styles.announcementCard, { backgroundColor: colors123.primary }]}>
-
-            <View style={styles.announcementTopRow}>
-              <View style={[styles.announcementIcon, { backgroundColor: activeAnnouncement.iconBg }]}>
-                <MaterialCommunityIcons
-                  name={activeAnnouncement.icon}
-                  size={20}
-                  color={activeAnnouncement.iconColor} />
-
-              </View>
-
-              <View style={styles.announcementCopy}>
-                <Text style={[styles.announcementEyebrow, { color: activeAnnouncement.mutedColor }]} numberOfLines={1}>
-                  {activeAnnouncement.eyebrow}
-                </Text>
-                <Text
-                  style={[styles.announcementTitle, { color: activeAnnouncement.textColor }]}
-                  numberOfLines={1}>
-
-                  {activeAnnouncement.title}
-                </Text>
-              </View>
-
-              <View style={styles.announcementAction}>
-                <Text style={[styles.announcementActionText, { color: activeAnnouncement.ctaText }]} numberOfLines={1}>
-                  {activeAnnouncement.cta}
-                </Text>
-                <MaterialCommunityIcons
-                  name={activeAnnouncement.actionIcon || "chevron-right"}
-                  size={16}
-                  color={activeAnnouncement.ctaText} />
-
-              </View>
+      {(isTrialActive || isTrialExpired) && (
+        <AppCard variant="muted">
+          <View style={styles.announcementTopRow}>
+            <View style={{ flex: 1, minWidth: 0 }}>
+              <Text style={styles.deliveryTitle}>
+                {isTrialExpired ? t("subscriptionExpired") : `${t("freeTrial")} · ${t("auto_days_remaining")}: ${trialMeta.remainingDays}`}
+              </Text>
+              {isTrialActive && <Text style={styles.deliveryMeta}>
+                {t("trialEndsOn")} {formatTrialDate(subscription?.trialEndDate || subscription?.endDate)}
+              </Text>}
             </View>
-
-            <View style={styles.announcementDots}>
-              {announcements.map((item, index) =>
-              <View
-                key={item.title}
-                style={[
-                styles.announcementDot,
-                index === announcementIndex % announcements.length && styles.announcementDotActive]
-                } />
-
-              )}
-            </View>
+            <AppButton label={t("viewPlan")} size="sm" variant="secondary" onPress={() => navigation.navigate("Subscription")} />
           </View>
-        </Pressable>
-      </MotiView>
+        </AppCard>
+      )}
 
-<InlineAlert message={dashboardError ? t("loadDashboardFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
       <AppCard>
         <View style={styles.sectionRow}>
           <View>
             <Text style={styles.sectionTitle}>{t("upcomingDeliveries")}</Text>
-            <Text style={styles.sectionSubtitle}>
-              {t("upcomingDeliveriesSubtitle")}
-            </Text>
           </View>
           <MaterialCommunityIcons
             color={colors123.textMuted}
@@ -770,223 +486,11 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     backgroundColor: colors123.background,
   },
-  announcementPressable: {
-    borderRadius: radius.md,
-    shadowColor: colors123.text,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0,
-    shadowRadius: 10,
-    elevation: 0,
-  },
-  announcementPressed: {
-    opacity: 0.78,
-  },
-  announcementCard: {
-    minHeight: 72,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    justifyContent: "space-between",
-    overflow: "hidden",
-    gap: 6,
-  },
-  announcementGlow: {
-    position: "absolute",
-    right: -26,
-    top: -34,
-    width: 92,
-    height: 92,
-    borderRadius: 46,
-    backgroundColor: "rgba(255,255,255,0.22)",
-  },
   announcementTopRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     gap: spacing.sm,
-  },
-  announcementIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.50)",
-  },
-  announcementCopy: {
-    flex: 1,
-    minWidth: 0,
-  },
-  announcementEyebrow: {
-    fontFamily: fonts.semibold,
-    fontSize: 12,
-    letterSpacing: 0,
-  },
-  announcementTitle: {
-    marginTop: 1,
-    fontFamily: fonts.bold,
-    fontSize: 14,
-    lineHeight: 18,
-  },
-  announcementAction: {
-    maxWidth: 118,
-    minHeight: 44,
-    borderRadius: radius.sm,
-    paddingHorizontal: spacing.sm,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 2,
-    backgroundColor: colors123.surface,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-  },
-  announcementActionText: {
-    fontFamily: fonts.semibold,
-    fontSize: 12,
-    flexShrink: 1,
-  },
-  announcementDots: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    gap: 4,
-  },
-  announcementDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 3,
-    backgroundColor: "rgba(100,116,139,0.28)",
-  },
-  announcementDotActive: {
-    width: 14,
-    backgroundColor: colors123.primary,
-  },
-  heroCard: {
-    borderRadius: radius.md,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.18)",
-    overflow: "hidden",
-    shadowColor: "#1A56DB",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0,
-    shadowRadius: 24,
-    elevation: 0,
-  },
-  heroGlow: {
-    position: "absolute",
-    right: -54,
-    top: -42,
-    width: 150,
-    height: 150,
-    borderRadius: 75,
-    backgroundColor: "rgba(255,255,255,0.14)",
-  },
-  heroTopRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: spacing.md,
-  },
-  heroEyebrow: {
-    fontFamily: fonts.medium,
-    color: "rgba(255,255,255,0.75)",
-    fontSize: 12,
-    marginBottom: spacing.xs,
-  },
-  heroValue: {
-    fontFamily: fonts.extrabold,
-    color: colors123.surface,
-    fontSize: 32,
-    lineHeight: 38,
-  },
-  heroValueRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-  heroTrendIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.18)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.22)",
-  },
-  heroBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    borderRadius: radius.pill,
-    backgroundColor: "rgba(255,255,255,0.16)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.24)",
-  },
-  heroBadgeText: {
-    fontFamily: fonts.semibold,
-    color: colors123.surface,
-    fontSize: 12,
-  },
-  heroTitle: {
-    marginTop: spacing.lg,
-    fontFamily: fonts.bold,
-    fontSize: 22,
-    lineHeight: 30,
-    color: colors123.surface,
-  },
-  heroSubtitle: {
-    marginTop: spacing.sm,
-    fontFamily: fonts.regular,
-    fontSize: 14,
-    lineHeight: 22,
-    color: "rgba(255,255,255,0.78)",
-  },
-  heroActionRow: {
-    marginTop: spacing.md,
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  heroAction: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: radius.sm,
-    backgroundColor: colors123.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: spacing.xs,
-  },
-  heroActionGhost: {
-    flex: 1,
-    minHeight: 44,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.22)",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: spacing.xs,
-  },
-  heroActionPressed: {
-    opacity: 0.88,
-  },
-  heroActionText: {
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors123.primary,
-  },
-  heroActionGhostText: {
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors123.surface,
   },
   grid: {
     flexDirection: "row",
@@ -1007,23 +511,26 @@ const styles = StyleSheet.create({
   },
   productionTile: {
     width: "100%",
-    minHeight: 82,
-    borderWidth: 1,
+    minHeight: 64,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
     borderRadius: radius.md,
     backgroundColor: colors123.surfaceMuted,
     padding: spacing.sm,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.xs,
   },
   productionTilePressed: {
     opacity: 0.78,
   },
   productionIcon: {
-    width: 34,
-    height: 34,
-    borderRadius: 13,
+    width: 28,
+    height: 28,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: spacing.xs,
+    marginBottom: 0,
   },
   productionValue: {
     fontFamily: fonts.extrabold,
@@ -1031,10 +538,11 @@ const styles = StyleSheet.create({
     color: colors123.text,
   },
   productionLabel: {
-    marginTop: 2,
+    marginTop: 0,
     fontFamily: fonts.medium,
-    fontSize: 12,
+    fontSize: 13,
     color: colors123.textMuted,
+    lineHeight: 18,
   },
   sectionRow: {
     flexDirection: "row",

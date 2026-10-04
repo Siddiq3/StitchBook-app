@@ -135,7 +135,7 @@ export default function NotificationScreen({ navigation }) {const { t } = useLan
 
       <ScreenHeader
         title={t("auto_notifications")}
-        subtitle={`You have ${notificationCount} unread`} />
+        subtitle={notificationCount ? `${notificationCount} unread` : null} />
 
 
 <InlineAlert message={notificationsError ? t("loadNotificationsFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
@@ -158,7 +158,7 @@ export default function NotificationScreen({ navigation }) {const { t } = useLan
         data={notifications}
         keyExtractor={(item) => item.id}
         scrollEnabled={false}
-        contentContainerStyle={{ gap: spacing.sm }}
+        contentContainerStyle={styles.list}
         renderItem={({ item }) =>
         <NotificationItem
           notification={item}
@@ -182,6 +182,7 @@ const styles = StyleSheet.create({
   markAllButton: {
     marginBottom: spacing.sm,
   },
+  list: { backgroundColor: colors123.surface, borderRadius: radius.md, overflow: "hidden" },
   notification: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -189,9 +190,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     backgroundColor: colors123.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
+    borderBottomWidth: 1,
+    borderBottomColor: colors123.borderLight,
   },
   notificationUnread: {
     backgroundColor: colors123.primarySoft,
@@ -209,14 +212,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: fonts.semibold,
     color: colors123.text,
-    marginBottom: spacing.xs,
+    marginBottom: 4,
+    lineHeight: 20,
   },
   notificationBody: {
-    fontSize: 12,
+    fontSize: 14,
     fontFamily: fonts.regular,
     color: colors123.textMuted,
     marginBottom: 4,
-    lineHeight: 17,
+    lineHeight: 21,
   },
   notificationTime: {
     fontSize: 12,

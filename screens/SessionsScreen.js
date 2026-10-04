@@ -22,7 +22,6 @@ export default function SessionsScreen(){
     catch{setError('Could not sign out this device. Please try again.');}
   };
   return <ScrollView contentContainerStyle={styles.page}>
-    <Text accessibilityRole="header" style={styles.title}>Devices and sessions</Text>
     <Text style={styles.body}>Remove a device you no longer use. Sign out all devices if you suspect someone else has access.</Text>
     <InlineAlert message={error} onRetry={load}/>
     {loading?<ListSkeleton/>:sessions.map(session=><ListRow key={session.id} title={typeof session.device==='string'?session.device:session.platform||'Device'} meta={`${session.platform||'App'}${session.current?' · This device':''}`} trailing={<AppButton size="sm" label="Sign out" variant="danger" onPress={()=>revoke(session)}/>}/>)}

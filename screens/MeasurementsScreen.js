@@ -8,7 +8,6 @@ import { format, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
 import AppCard from "../components/AppCard";
 import AvatarBadge from "../components/AvatarBadge";
-import MeasurementFigure from "../components/MeasurementFigure";
 import MeasurementSheet from "../components/MeasurementSheet";
 import ScreenHeader from "../components/ScreenHeader";
 import { ListSkeleton } from "../components/SkeletonBlock";
@@ -89,10 +88,6 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
     ) / measurementRecords.length
   ) :
   0;
-  const spotlightRecord =
-  [...measurementRecords].sort(
-    (left, right) => right.filledFields - left.filledFields
-  )[0] || null;
 
   const openSheet = (customer) => {
     // CRITICAL: Check if customer has gender set
@@ -136,51 +131,9 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
         }>
 
         <ScreenHeader
-          eyebrow="Fit Library"
-          title={t("auto_measurements_2")}
-          subtitle={t("auto_structured_reusable_fit_profiles_make_high_t")} />
-
+          title={t("auto_measurements_2")} />
 
 <InlineAlert message={measurementsError ? t("loadMeasurementsFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
-        <View style={styles.heroCard}>
-
-          <View style={styles.heroTop}>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.heroEyebrow}>{t("auto_custom_measurement_studio")}</Text>
-              <Text style={styles.heroTitle}>{t("auto_fit_profiles_that_feel_tailored_not_generic")}
-
-              </Text>
-              <Text style={styles.heroSubtitle}>{t("auto_open_a_client_profile_review_the_visual_fit_")}
-
-              </Text>
-            </View>
-            <View style={styles.heroPill}>
-              <Text style={styles.heroPillValue}>{averageCoverage}%</Text>
-              <Text style={styles.heroPillLabel}>{t("auto_avg_coverage")}</Text>
-            </View>
-          </View>
-
-          {spotlightRecord ?
-          <View style={styles.heroPreview}>
-              <View style={styles.heroPreviewCopy}>
-                <Text style={styles.heroPreviewLabel}>{t("auto_most_complete_profile")}
-
-              </Text>
-                <Text style={styles.heroPreviewName}>
-                  {spotlightRecord.customer.name}
-                </Text>
-                <Text style={styles.heroPreviewMeta}>
-                  {spotlightRecord.filledFields}/{measurementFields.length}{t("auto_fit_points_captured")}
-
-              </Text>
-              </View>
-              <View style={styles.heroFigureWrap}>
-                <MeasurementFigure compact values={spotlightRecord.profile} />
-              </View>
-            </View> :
-          null}
-        </View>
-
         <View style={styles.summaryRow}>
           <AppCard style={styles.summaryCard} variant="muted">
             <Text style={styles.summaryLabel}>{t("auto_profiles_saved")}</Text>
@@ -313,105 +266,26 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: 112,
+    paddingBottom: spacing.xl,
     gap: spacing.sm,
     backgroundColor: colors123.background,
-  },
-  heroCard: {
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 13,
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    backgroundColor: colors123.surface,
-    ...shadows.card,
-  },
-  heroTop: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: spacing.sm,
-  },
-  heroEyebrow: {
-    fontFamily: fonts.semibold,
-    fontSize: 12,
-    color: colors123.primary,
-    letterSpacing: 0.15,
-  },
-  heroTitle: {
-    marginTop: spacing.xs,
-    fontFamily: fonts.extrabold,
-    fontSize: 20,
-    lineHeight: 26,
-    color: colors123.text,
-  },
-  heroSubtitle: {
-    marginTop: spacing.xs,
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    lineHeight: 21,
-    color: colors123.textMuted,
-  },
-  heroPill: {
-    minWidth: 82,
-    borderRadius: radius.md,
-    backgroundColor: colors123.primary,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    alignItems: "center",
-    alignSelf: "flex-start",
-  },
-  heroPillValue: {
-    fontFamily: fonts.extrabold,
-    fontSize: 20,
-    color: colors123.surface,
-  },
-  heroPillLabel: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    color: "rgba(255,255,255,0.82)",
-  },
-  heroPreview: {
-    borderRadius: radius.md,
-    backgroundColor: colors123.surfaceMuted,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  heroPreviewCopy: {
-    gap: 4,
-  },
-  heroPreviewLabel: {
-    fontFamily: fonts.semibold,
-    fontSize: 12,
-    color: colors123.textSoft,
-    textTransform: "uppercase",
-  },
-  heroPreviewName: {
-    fontFamily: fonts.bold,
-    fontSize: 18,
-    color: colors123.text,
-  },
-  heroPreviewMeta: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    color: colors123.textMuted,
-  },
-  heroFigureWrap: {
-    marginTop: spacing.xs,
-    borderRadius: radius.md,
-    backgroundColor: colors123.surface,
-    overflow: "visible",
   },
   summaryRow: {
     flexDirection: "row",
     gap: spacing.sm,
+    backgroundColor: colors123.surface,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.xs,
   },
   summaryCard: {
     flex: 1,
-    minHeight: 84,
+    minHeight: 56,
     justifyContent: "center",
+    borderWidth: 0,
+    borderRadius: 0,
+    backgroundColor: "transparent",
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xs,
   },
   summaryLabel: {
     fontFamily: fonts.medium,
@@ -425,15 +299,20 @@ const styles = StyleSheet.create({
     color: colors123.text,
   },
   list: {
-    gap: spacing.sm,
+    gap: 0,
+    backgroundColor: colors123.surface,
+    borderRadius: radius.md,
+    overflow: "hidden",
   },
   recordCard: {
     backgroundColor: colors123.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
     padding: spacing.md,
     gap: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors123.borderLight,
   },
   pressedCard: {
     opacity: 0.88,
@@ -492,10 +371,14 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: radius.sm,
     backgroundColor: colors123.surfaceMuted,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    paddingVertical: 6,
+    paddingHorizontal: spacing.xs,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "baseline",
+    gap: 4,
   },
   snapshotLabel: {
     fontFamily: fonts.medium,
@@ -503,7 +386,7 @@ const styles = StyleSheet.create({
     color: colors123.textSoft,
   },
   snapshotValue: {
-    marginTop: 4,
+    marginTop: 0,
     fontFamily: fonts.bold,
     fontSize: 14,
     color: colors123.text,

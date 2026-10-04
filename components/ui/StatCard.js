@@ -7,12 +7,12 @@ export default function StatCard({ label, value, icon, color, subtitle }) {
   const tone = color || colors123.primary;
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
-        {icon ? <View style={[styles.iconWrap, { backgroundColor: `${tone}14` }]}><MaterialCommunityIcons name={icon} size={18} color={tone} /></View> : null}
+      {icon ? <View style={[styles.iconWrap, { backgroundColor: `${tone}14` }]}><MaterialCommunityIcons name={icon} size={18} color={tone} /></View> : null}
+      <View style={styles.copy}>
+        <Text style={styles.value}>{value}</Text>
         <Text style={styles.label}>{label}</Text>
+        {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       </View>
-      <Text style={styles.value}>{value}</Text>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
     </View>
   );
 }
@@ -20,18 +20,21 @@ export default function StatCard({ label, value, icon, color, subtitle }) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    minHeight: 92,
+    minHeight: 76,
     borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 13,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.sm,
     backgroundColor: colors123.surface,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
   },
-  header: { flexDirection: 'row', alignItems: 'center', marginBottom: spacing.xs },
+  copy: { flex: 1, minWidth: 0 },
   iconWrap: { width: 32, height: 32, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  label: { ...typography.label, color: colors123.textMuted, marginLeft: spacing.xs, flex: 1 },
-  value: { fontFamily: typography.h2.fontFamily, fontSize: 24, lineHeight: 29, color: colors123.text, fontVariant: ['tabular-nums'] },
+  label: { ...typography.label, color: colors123.textMuted, lineHeight: 18 },
+  value: { fontFamily: typography.h2.fontFamily, fontSize: 20, lineHeight: 26, color: colors123.text, fontVariant: ['tabular-nums'] },
   subtitle: { ...typography.caption, color: colors123.textMuted, marginTop: 4 },
 });

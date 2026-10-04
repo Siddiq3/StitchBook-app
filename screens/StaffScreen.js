@@ -568,11 +568,13 @@ export default function StaffScreen() {const { t } = useLanguage();
     );
   };
 
+  const [showWorkflowGuide, setShowWorkflowGuide] = useState(false);
+
   const renderWorkflowGuide = () =>
     <AppCard style={styles.workflowCard}>
       <Text style={styles.workflowTitle}>Staff workflow</Text>
       <Text style={styles.workflowSubtitle}>
-        Add the worker Google email for login now. Mobile number is optional and can be used later when OTP is approved.
+        Add a Google email so staff can sign in. A mobile number is optional.
       </Text>
       <View style={styles.workflowGrid}>
         {PRIMARY_STAFF_ROLES.map((role) =>
@@ -1223,11 +1225,11 @@ export default function StaffScreen() {const { t } = useLanguage();
       }>
 
       <ScreenHeader
-        title="Staff Work Access"
-        subtitle="Cutter and Stitcher login, work tracking, and owner earnings view." />
+        title="Staff" />
 
 <InlineAlert message={staffError ? t("loadStaffFailed") : null} onRetry={onRefresh} retryLabel={t("retry")} />
-      {renderWorkflowGuide()}
+      <AppButton label={showWorkflowGuide ? "Hide staff guide" : "How staff access works"} variant="ghost" icon={showWorkflowGuide ? "chevron-up" : "chevron-down"} onPress={() => setShowWorkflowGuide(value => !value)} />
+      {showWorkflowGuide && renderWorkflowGuide()}
 
       {!showForm ?
       <AppButton
@@ -1278,7 +1280,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,
-    paddingBottom: 100,
+    paddingBottom: spacing.xl,
     gap: spacing.sm,
     backgroundColor: colors123.background,
   },

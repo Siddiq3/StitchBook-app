@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InlineAlert from "../components/InlineAlert";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl, Alert } from "react-native";
@@ -19,6 +20,7 @@ import { useLanguage } from "../context/LanguageContext";
 import { colors123, radius, shadows, spacing, fonts } from "../utils/theme";
 
 export default function CustomersScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { customersError } = useStitchPro();
   const { customers, orders, isBooting, customersLoading, addCustomer, fetchCustomers, deleteCustomer, fetchOrders } = useStitchPro();
@@ -149,7 +151,7 @@ export default function CustomersScreen({ navigation }) {
   return (
     <>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
         <RefreshControl
@@ -161,9 +163,7 @@ export default function CustomersScreen({ navigation }) {
         }>
 
         <ScreenHeader
-          eyebrow={t("clientBook")}
           title={t("customersTitle")}
-          subtitle={t("customersSubtitle")}
           action={
           <AppButton
             icon="account-plus-outline"
@@ -321,18 +321,23 @@ const styles = StyleSheet.create({
     color: colors123.textMuted,
   },
   list: {
-    gap: spacing.sm,
+    gap: 0,
+    backgroundColor: colors123.surface,
+    borderRadius: radius.md,
+    overflow: "hidden",
   },
   customerCard: {
     backgroundColor: colors123.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
     paddingVertical: 12,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors123.borderLight,
   },
   pressedCard: {
     opacity: 0.88,

@@ -50,12 +50,9 @@ export default function MeasurementRow({
       }>
 
       <View style={styles.leftSection}>
-        <View style={styles.numberBadge}>
-          <Text style={styles.numberBadgeText}>{fieldIndex}</Text>
-        </View>
         <View style={styles.fieldInfo}>
           <Text style={styles.fieldName}>{fieldName}</Text>
-          <Text style={styles.fieldUnit}>{t("auto_centimeters")}</Text>
+
         </View>
       </View>
 
@@ -107,13 +104,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    marginVertical: spacing.xs,
+    paddingVertical: 4,
+    paddingHorizontal: spacing.sm,
+    marginVertical: 2,
     backgroundColor: colors123.surface,
-    borderRadius: 8,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 0,
     borderColor: colors123.border,
+    borderBottomWidth: 1,
+    borderBottomColor: colors123.borderLight,
   },
   containerFocused: {
     borderColor: colors123.primary,
@@ -128,7 +127,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     flex: 1,
-    marginRight: spacing.md,
+    marginRight: spacing.xs,
+    minWidth: 0,
   },
   numberBadge: {
     width: 28,
@@ -148,10 +148,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   fieldName: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: fonts.semibold,
     color: colors123.text,
     marginBottom: 2,
+    lineHeight: 20,
   },
   fieldUnit: {
     fontSize: 12,
@@ -160,8 +161,9 @@ const styles = StyleSheet.create({
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    width: 136,
+    width: 144,
     position: "relative",
+    gap: 4,
   },
   input: {
     flex: 1,

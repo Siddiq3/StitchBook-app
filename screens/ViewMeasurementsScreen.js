@@ -169,7 +169,7 @@ export default function ViewMeasurementsScreen({
       >
         <ScreenHeader
           title={t("auto_measurements_2")}
-          eyebrow="Customer History"
+
           subtitle={`No measurements recorded for ${customerName} yet.`}
         />
 
@@ -202,7 +202,7 @@ export default function ViewMeasurementsScreen({
     >
       <ScreenHeader
         title={t("auto_measurements_2")}
-        eyebrow="Customer History"
+
         subtitle={`${
           Object.keys(groupedMeasurements).length
         } outfit types recorded`}
@@ -264,7 +264,7 @@ export default function ViewMeasurementsScreen({
                         : "—"}
                       )
                     </Text>
-                    <ResponsiveGrid style={styles.previewGrid}>
+                    <ResponsiveGrid minItemWidth={140} style={styles.previewGrid}>
                       {outfit.fields.slice(0, 4).map((field) => (
                         <View key={field} style={styles.previewItem}>
                           <MeasurementFieldThumb
@@ -274,7 +274,7 @@ export default function ViewMeasurementsScreen({
                           />
 
                           <Text style={styles.previewItemLabel}>
-                            {field.split(" ")[0]}
+                            {field}
                           </Text>
                           <Text style={styles.previewItemValue}>
                             {renderMeasurementValue(latestMeasurement, field)}
@@ -349,7 +349,7 @@ export default function ViewMeasurementsScreen({
                         </View>
 
                         {/* Measurement grid */}
-                        <ResponsiveGrid style={styles.measurementGrid}>
+                        <ResponsiveGrid minItemWidth={140} style={styles.measurementGrid}>
                           {outfit.fields.map((field) => (
                             <View
                               key={field}
@@ -471,11 +471,11 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   latestPreview: {
-    backgroundColor: colors123.surface,
-    paddingHorizontal: spacing.md,
+    backgroundColor: "transparent",
+    paddingHorizontal: 0,
     paddingVertical: spacing.sm,
     borderRadius: radius.md,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
   },
   previewTitle: {
@@ -494,16 +494,22 @@ const styles = StyleSheet.create({
   previewItem: {
     width: "100%",
     alignItems: "center",
-    paddingVertical: spacing.sm,
-    backgroundColor: colors123.surfaceMuted,
+    paddingVertical: spacing.xs,
+    backgroundColor: colors123.surface,
     borderRadius: radius.md,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    paddingHorizontal: spacing.xs,
   },
   previewItemLabel: {
     fontSize: 12,
     color: colors123.textMuted,
-    marginBottom: 2,
+    marginBottom: 0,
+    flex: 1,
+    lineHeight: 18,
   },
   previewItemValue: {
     fontSize: 13,

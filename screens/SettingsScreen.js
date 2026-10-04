@@ -4,7 +4,6 @@ import {
   ScrollView,
   Text,
   TouchableOpacity,
-  SafeAreaView,
   StatusBar,
   StyleSheet,
   Modal,
@@ -15,9 +14,10 @@ import {
   Platform } from
 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors123, spacing, fonts, radius } from '../utils/theme';
 import ScreenHeader from '../components/ScreenHeader';
+import ListRow from '../components/ListRow';
 import AppButton from '../components/AppButton';
 import { useLanguage } from '../context/LanguageContext';
 import { useStitchPro } from '../context/StitchProContext';
@@ -162,7 +162,7 @@ export default function SettingsScreen({ navigation }) {
   user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'S';
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
       <StatusBar barStyle="dark-content" />
       <View style={styles.headerWrap}>
         <ScreenHeader title={t('settings')} />
@@ -331,9 +331,17 @@ export default function SettingsScreen({ navigation }) {
         </View>
         */}
 
-        <AppButton label="Password & security" variant="secondary" onPress={() => navigation.navigate("Password")} />
-        <AppButton label="Devices and sessions" variant="secondary" onPress={() => navigation.navigate("Sessions")} />
-        <AppButton label="Delete account" variant="danger" onPress={() => navigation.navigate('DeleteAccount')} />
+        <View style={styles.securityMenu}>
+          <Text style={styles.sectionTitle}>Account</Text>
+          {[
+            { title: "Password & security", icon: "lock-outline", route: "Password", onPress: () => navigation.navigate("Password") },
+            { title: "Devices and sessions", icon: "devices", route: "Sessions", onPress: () => navigation.navigate("Sessions") },
+            { title: "Delete account", icon: "delete-outline", route: "DeleteAccount", onPress: () => navigation.navigate("DeleteAccount") },
+          ].map(item => <ListRow key={item.route} title={item.title}
+            leading={<MaterialCommunityIcons name={item.icon} size={20} color={colors123.textSecondary} />}
+            trailing={<MaterialCommunityIcons name="chevron-right" size={20} color={colors123.textMuted} />}
+            onPress={item.onPress} />)}
+        </View>
         {/* Settings Menu */}
         <View style={styles.settingsMenu}>
           <Text style={styles.sectionTitle}>{t("shopDetails")}</Text>
@@ -532,6 +540,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     backgroundColor: colors123.background,
   },
+  securityMenu: { marginHorizontal: spacing.md, paddingHorizontal: spacing.md, backgroundColor: colors123.surface, borderRadius: radius.md },
   profileSection: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
@@ -593,11 +602,12 @@ const styles = StyleSheet.create({
   shopInfoCard: {
     marginTop: spacing.md,
     padding: spacing.md,
-    backgroundColor: colors123.surfaceMuted,
+    backgroundColor: "transparent",
     borderRadius: radius.md,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
     gap: spacing.sm,
+    paddingHorizontal: 0,
   },
   shopInfoRow: {
     flexDirection: "row",

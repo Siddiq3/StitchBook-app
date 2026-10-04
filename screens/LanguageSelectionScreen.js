@@ -41,7 +41,10 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
     fontFamily: fonts.regular,
   },
   languageList: {
-    gap: spacing.sm,
+    gap: 0,
+    backgroundColor: colors123.surface,
+    borderRadius: radius.md,
+    overflow: "hidden",
   },
   languageOption: {
     flexDirection: "row",
@@ -49,10 +52,12 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
     paddingVertical: spacing.sm,
     paddingHorizontal: spacing.md,
     minHeight: 56,
-    borderRadius: radius.md,
-    borderWidth: 1,
+    borderRadius: 0,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
     backgroundColor: colors123.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors123.borderLight,
   },
   languageOptionSelected: {
     borderColor: colors123.primary,

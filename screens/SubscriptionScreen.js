@@ -243,12 +243,9 @@ const SubscriptionScreen = () => {const { t } = useLanguage();
       showsVerticalScrollIndicator={false}>
 
       <ScreenHeader
-        eyebrow="Account"
-        title={t("auto_subscription")}
-        subtitle={t("subscriptionScreenSubtitle")} />
+        title={t("auto_subscription")} />
 
-
-      <InlineAlert message={subscriptionError ? t("loadSubscriptionFailed") : null} onRetry={handleRefreshStatus} retryLabel={t("retry")} />
+<InlineAlert message={subscriptionError ? t("loadSubscriptionFailed") : null} onRetry={handleRefreshStatus} retryLabel={t("retry")} />
       {subscriptionLoading && !subscriptionData ?
       <View style={styles.loadingContainer}>
           <ActivityIndicator color={colors123.primary} size="large" />
@@ -556,7 +553,7 @@ const getSubscriptionStyles = () => {
   heroStatsRow: {
     flexDirection: "row",
     gap: spacing.sm,
-    marginTop: spacing.lg,
+    marginTop: spacing.sm,
   },
   heroStat: {
     flex: 1,

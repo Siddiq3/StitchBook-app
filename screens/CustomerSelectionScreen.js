@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ListRow from "../components/ListRow";
 import IconInput from "../components/IconInput";
 import InlineAlert from "../components/InlineAlert";
@@ -17,7 +18,9 @@ import AvatarCircle from "../components/AvatarCircle";
  * Navigation:
  * - On customer select → Navigate to CreateOrder with customerId
  */import { useLanguage } from "../context/LanguageContext";
-export default function CustomerSelectionScreen({ navigation }) {const { t } = useLanguage();
+export default function CustomerSelectionScreen({ navigation }) {
+  const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
   const { customersError } = useStitchPro();
   const { customers, fetchCustomers } = useStitchPro();
   const [loadingCustomers, setLoadingCustomers] = useState(false);
@@ -81,7 +84,7 @@ export default function CustomerSelectionScreen({ navigation }) {const { t } = u
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
         <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")}
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -131,11 +134,6 @@ export default function CustomerSelectionScreen({ navigation }) {const { t } = u
           renderItem={({ item }) =>
           <ListRow leading={<AvatarCircle name={item.name} size={44} />} title={item.name} meta={item.phone} onPress={() => handleSelectCustomer(item)} trailing={<Ionicons name="chevron-forward" size={20} color={colors123.textMuted} />} />
           }
-          getItemLayout={(data, index) => ({
-            length: 84,
-            offset: 84 * index,
-            index
-          })}
           maxToRenderPerBatch={10}
           updateCellsBatchingPeriod={50}
           initialNumToRender={10}

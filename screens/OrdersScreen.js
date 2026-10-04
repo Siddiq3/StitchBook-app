@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import SegmentedControl from "../components/SegmentedControl";
 import InlineAlert from "../components/InlineAlert";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
@@ -83,6 +84,7 @@ const getOrderAmountDetails = (order) => {
 };
 
 export default function OrdersScreen({ navigation, route }) {
+  const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { ordersError, ordersLoading } = useStitchPro();
   const { customerId } = route?.params || {};
@@ -192,7 +194,7 @@ export default function OrdersScreen({ navigation, route }) {
   return (
     <>
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
         <RefreshControl
@@ -204,9 +206,7 @@ export default function OrdersScreen({ navigation, route }) {
         }>
 
         <ScreenHeader
-          eyebrow={t("productionFlow")}
           title={t("ordersTitle")}
-          subtitle={t("ordersSubtitle")}
           action={
           <AppButton
             icon="plus"
@@ -214,7 +214,7 @@ export default function OrdersScreen({ navigation, route }) {
             onPress={handleAddOrderPress}
             style={styles.addButton} />
 
-          } />
+} />
 
 
         <View style={styles.miniStats}>
@@ -369,15 +369,20 @@ const styles = StyleSheet.create({
   miniStats: {
     flexDirection: "row",
     gap: spacing.sm,
+    backgroundColor: colors123.surface,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.xs,
   },
   miniStatCard: {
     flex: 1,
-    minHeight: 68,
+    minHeight: 56,
     justifyContent: "center",
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
-    borderRadius: radius.md,
-    backgroundColor: colors123.surface,
+    borderRadius: 0,
+    backgroundColor: "transparent",
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.xs,
   },
   miniStatLabel: {
     fontFamily: fonts.medium,
@@ -391,14 +396,20 @@ const styles = StyleSheet.create({
     color: colors123.text,
   },
   list: {
-    gap: 10,
+    gap: 0,
+    backgroundColor: colors123.surface,
+    borderRadius: radius.md,
+    overflow: "hidden",
   },
   orderCard: {
-    gap: spacing.sm,
-    borderWidth: 1,
+    gap: spacing.xs,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
-    borderRadius: radius.md,
+    borderRadius: 0,
     backgroundColor: colors123.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors123.borderLight,
+    paddingVertical: spacing.sm,
   },
   orderHeader: {
     flexDirection: "row",
@@ -408,13 +419,13 @@ const styles = StyleSheet.create({
   customerLine: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
-    marginBottom: spacing.sm,
+    gap: spacing.xs,
+    marginBottom: 4,
   },
   customerAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors123.primarySoft,
@@ -440,9 +451,9 @@ const styles = StyleSheet.create({
   quantityText: {
     overflow: "hidden",
     borderRadius: radius.pill,
-    backgroundColor: colors123.surfaceMuted,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
+    backgroundColor: "transparent",
+    paddingHorizontal: 0,
+    paddingVertical: 0,
     fontFamily: fonts.semibold,
     fontSize: 12,
     color: colors123.textSecondary,
@@ -468,6 +479,10 @@ const styles = StyleSheet.create({
   },
   amountInfo: {
     flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "baseline",
+    gap: 6,
   },
   amountLabel: {
     fontFamily: fonts.medium,
@@ -475,17 +490,18 @@ const styles = StyleSheet.create({
     color: colors123.textMuted,
   },
   amountValue: {
-    marginTop: 3,
+    marginTop: 0,
     fontFamily: fonts.extrabold,
     fontSize: 14,
     color: colors123.text,
+    lineHeight: 20,
   },
   balanceDueText: {
     color: colors123.warning,
   },
   amountDivider: {
     width: 1,
-    height: 28,
+    height: 16,
     backgroundColor: colors123.borderLight,
     marginHorizontal: spacing.sm,
   },
@@ -501,15 +517,15 @@ const styles = StyleSheet.create({
   },
   orderTypeBadge: {
     alignSelf: "flex-start",
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
     borderRadius: radius.pill,
-    borderWidth: 1,
+    borderWidth: 0,
   },
   orderTypeText: {
     fontFamily: fonts.semibold,
     fontSize: 12,
-    textTransform: "uppercase",
+    textTransform: "none",
   },
   orderTypeStitching: {
     backgroundColor: colors123.primary + "15",

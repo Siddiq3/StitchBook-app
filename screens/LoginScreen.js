@@ -40,13 +40,10 @@ export default function LoginScreen({navigation}){
           <Text style={s.wordmark}>StitchBook</Text>
           <View style={s.secure}><Ionicons name="shield-checkmark" size={14} color={colors123.primary}/><Text style={s.secureText}>Secure</Text></View>
         </View>
-        <Text style={s.heroTitle}>Welcome back</Text>
-        <Text style={s.heroCopy}>Sign in with the email address or mobile number linked to your StitchBook account.</Text>
       </View>
 
       <View style={s.card}>
         <Text style={s.title}>Sign in</Text>
-        <Text style={s.subtitle}>Use your email or mobile number and password.</Text>
         <IconInput
           label="Email or mobile number"
           icon="account-outline"

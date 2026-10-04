@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useState, useEffect } from "react";
@@ -15,6 +16,7 @@ import MeasurementPickerModal from "../components/MeasurementPickerModal";
 import CreateItemDetail from "./CreateItemDetail";
 
 export default function CreateOrder({ navigation, route }) {
+  const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { customersError } = useStitchPro();
   const { addOrder, customers, fetchCustomers } = useStitchPro();
@@ -302,7 +304,7 @@ export default function CreateOrder({ navigation, route }) {
   if (currentStep === 1) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
           <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")}
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -405,7 +407,7 @@ export default function CreateOrder({ navigation, route }) {
 
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
           <TouchableOpacity accessibilityRole="button"
             onPress={() => setCurrentStep(1)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -480,7 +482,7 @@ export default function CreateOrder({ navigation, route }) {
           }
 
           {/* Outfit Selection Grid */}
-          <ResponsiveGrid style={styles.outfitsGrid}>
+          <ResponsiveGrid minItemWidth={140} style={styles.outfitsGrid}>
             {availableOutfits.map((outfit) => {
               const isSelected = currentOutfitType?.id === outfit.id;
               return (
@@ -538,7 +540,7 @@ export default function CreateOrder({ navigation, route }) {
   if (currentStep === 4) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
           <TouchableOpacity accessibilityRole="button"
             onPress={() => setCurrentStep(2)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -617,7 +619,7 @@ export default function CreateOrder({ navigation, route }) {
   if (currentStep === 5) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
           <TouchableOpacity accessibilityRole="button"
             onPress={() => setCurrentStep(2)}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -930,15 +932,17 @@ const styles = StyleSheet.create({
   },
   outfitCard: {
     width: "100%",
-    minHeight: 96,
+    minHeight: 76,
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     borderWidth: 1,
     borderColor: colors123.borderLight,
-    justifyContent: "center",
+    justifyContent: "flex-start",
     alignItems: "center",
     padding: spacing.sm,
     ...shadows.card,
+    flexDirection: "row",
+    gap: spacing.xs,
   },
   outfitCardSelected: {
     backgroundColor: colors123.primarySoft,
@@ -956,13 +960,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   outfitIconContainer: {
-    width: 44,
-    height: 44,
+    width: 32,
+    height: 32,
     borderRadius: 12,
     backgroundColor: colors123.surfaceMuted,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: spacing.sm,
+    marginBottom: 0,
   },
   outfitIconContainerSelected: {
     backgroundColor: colors123.primary,
@@ -972,7 +976,8 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontFamily: fonts.extrabold,
     color: colors123.text,
-    textAlign: "center",
+    textAlign: "left",
+    flex: 1,
   },
   outfitLabelSelected: {
     color: colors123.primaryDark,

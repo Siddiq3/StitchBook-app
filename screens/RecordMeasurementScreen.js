@@ -285,7 +285,7 @@ export default function RecordMeasurementScreen({
         </View>
 
         {/* Body Diagram */}
-        <BodyDiagram
+        <BodyDiagram compact
           outfitType={outfit.bodyType}
           focusedField={focusedField}
           gender={customerGender}

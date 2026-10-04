@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useState, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator, Modal, TextInput, Alert, Linking } from "react-native";
@@ -144,7 +145,9 @@ const getMeasurementBodyType = (value) => {
   return "upper";
 };
 
-export default function OrderDetail({ route, navigation }) {const { t } = useLanguage();
+export default function OrderDetail({ route, navigation }) {
+  const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
   const { orderId } = route.params;
   const { orders, customers, shop, staff, fetchStaff, updateOrderStatus, updateOrder, recordPayment, fetchActivityLogs, activityLogs, fetchPayments, payments, fetchCustomers } = useStitchPro();
   const { showToast } = useToast();
@@ -746,7 +749,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
   if (loadingOrder && !order) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
           <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={28} color={colors123.primary} />
           </TouchableOpacity>
@@ -763,7 +766,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
   if (!order) {
     return (
       <View style={styles.container}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
           <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")} onPress={() => navigation.goBack()}>
             <Ionicons name="chevron-back" size={28} color={colors123.primary} />
           </TouchableOpacity>
@@ -784,7 +787,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: insets.top + spacing.sm }]}>
         <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("back")}
           onPress={() => navigation.goBack()}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
@@ -891,7 +894,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               null}
               </View>
               <View style={styles.divider} />
-              <View style={styles.measurementList}>
+              <ResponsiveGrid minItemWidth={140} style={styles.measurementList}>
                 {Object.entries(measurementData).map(([key, value]) =>
               <View key={key} style={styles.measurementRow}>
                     <MeasurementFieldThumb
@@ -905,7 +908,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                     </View>
                   </View>
               )}
-              </View>
+              </ResponsiveGrid>
             </View> :
 
           <View>
@@ -1689,13 +1692,14 @@ const styles = StyleSheet.create({
   measurementRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: spacing.sm,
+    gap: spacing.xs,
     paddingVertical: spacing.xs,
     paddingHorizontal: spacing.xs,
-    backgroundColor: colors123.surface,
+    backgroundColor: colors123.surfaceMuted,
     borderRadius: radius.md,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
+    width: "100%",
   },
   measurementRowCopy: {
     flex: 1,

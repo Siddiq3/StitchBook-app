@@ -96,6 +96,13 @@ test("grids fit narrow forms, nested panels and tablet sheets", () => {
   assert.equal(getGridLayout(348).columns, 2);
   assert.equal(getGridLayout(560).columns, 2);
   assert.equal(getGridLayout(0).columns, 1);
+  // Numeric cards and measurement summaries remain paired inside phone panels.
+  for (const width of [296, 328, 360]) {
+    const compact = getGridLayout(width, 140);
+    assert.equal(compact.columns, 2);
+    assert.ok(compact.columns * compact.itemWidth + 12 <= width);
+  }
+  assert.equal(getGridLayout(280, 140).columns, 1);
   for (const width of [280, 328, 348, 560, 1000]) {
     const { columns, itemWidth } = getGridLayout(width);
     assert.ok(columns * itemWidth + (columns - 1) * 12 <= width + 0.001);
@@ -125,4 +132,33 @@ test("literal translation keys resolve in English across the mobile source", () 
   for (const dir of ["screens", "components", "navigation"])
     scan(path.join(root, dir));
   assert.deepEqual(missing, []);
+});
+
+test("UI theme references have an import or local binding", () => {
+  const traverse = require("@babel/traverse").default;
+  const tokens = new Set(["spacing", "radius", "colors123", "fonts", "typography", "SIZES", "normalize"]);
+  const unbound = [];
+  function scan(dir) {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const file = path.join(dir, entry.name);
+      if (entry.isDirectory()) scan(file);
+      else if (file.endsWith(".js")) {
+        const ast = babel.parseSync(fs.readFileSync(file, "utf8"), {
+          configFile: false,
+          babelrc: false,
+          parserOpts: { plugins: ["jsx"] },
+        });
+        traverse(ast, {
+          ReferencedIdentifier(reference) {
+            const name = reference.node.name;
+            if (tokens.has(name) && !reference.scope.hasBinding(name)) {
+              unbound.push(`${path.relative(root, file)}:${reference.node.loc.start.line} ${name}`);
+            }
+          },
+        });
+      }
+    }
+  }
+  for (const dir of ["screens", "components", "navigation"]) scan(path.join(root, dir));
+  assert.deepEqual(unbound, [], "Unbound theme tokens can crash the app while loading modules");
 });

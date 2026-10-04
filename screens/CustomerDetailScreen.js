@@ -1,3 +1,4 @@
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useEffect, useMemo, useState } from "react";
@@ -17,7 +18,9 @@ import { useToast } from "../context/ToastContext";
 import { measurementApi } from "../services/api";
 import { colors123, fonts, formatCurrency, radius, shadows, spacing } from "../utils/theme";import { useLanguage } from "../context/LanguageContext";
 
-export default function CustomerDetailScreen({ navigation, route }) {const { t } = useLanguage();
+export default function CustomerDetailScreen({ navigation, route }) {
+  const insets = useSafeAreaInsets();
+  const { t } = useLanguage();
   const { customerId } = route.params || {};
   const { customers, measurements, orders, addOrder, addMeasurement, updateMeasurement, deleteMeasurement, fetchMeasurements, fetchOrders, fetchCustomers, measurementsLoading, ordersLoading } =
   useStitchPro();
@@ -247,7 +250,7 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
 
       <>
           <ScrollView
-          contentContainerStyle={styles.content}
+          contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.sm }]}
           showsVerticalScrollIndicator={false}>
 
             {/* Header */}
@@ -383,7 +386,7 @@ export default function CustomerDetailScreen({ navigation, route }) {const { t }
                             </Pressable>
                           </View>
                         </View>
-                        <ResponsiveGrid style={styles.measurementGrid}>
+                        <ResponsiveGrid minItemWidth={140} style={styles.measurementGrid}>
                           {visibleEntries.map(([key, value]) =>
                       <View key={key} style={styles.measurementGridItem}>
                               <MeasurementFieldThumb
@@ -551,7 +554,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors123.borderLight,
     padding: spacing.md,
-    marginBottom: spacing.md,
+    marginBottom: 0,
     ...shadows.card,
   },
   customerCardHeader: {
@@ -610,7 +613,7 @@ const styles = StyleSheet.create({
   // Action Cards
   actionCardsRow: {
     gap: spacing.sm,
-    marginBottom: spacing.md,
+    marginBottom: 0,
   },
   actionCard: {
     flexDirection: "row",
@@ -642,7 +645,7 @@ const styles = StyleSheet.create({
 
   // Sections
   section: {
-    marginBottom: spacing.md,
+    marginBottom: 0,
   },
   sectionHeader: {
     marginBottom: spacing.sm,
@@ -667,7 +670,7 @@ const styles = StyleSheet.create({
     padding: spacing.md,
     alignItems: "center",
     justifyContent: "center",
-    minHeight: 160,
+    minHeight: 120,
     ...shadows.soft,
   },
   emptyStateTitle: {
@@ -750,11 +753,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
     backgroundColor: colors123.background,
-    borderRadius: radius.md,
-    borderWidth: 1,
+    borderRadius: radius.sm,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
     padding: spacing.xs,
-    minHeight: 56,
+    minHeight: 48,
   },
   measurementGridCopy: {
     flex: 1,
@@ -769,7 +772,7 @@ const styles = StyleSheet.create({
     fontFamily: fonts.bold,
     fontSize: 15,
     color: colors123.text,
-    marginTop: spacing.xs,
+    marginTop: 2,
   },
   viewMoreButton: {
     alignSelf: "flex-start",

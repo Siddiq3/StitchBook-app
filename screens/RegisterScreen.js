@@ -46,7 +46,7 @@ export default function RegisterScreen({navigation}){
         <Ionicons name="arrow-back" size={20} color={colors123.text}/><Text style={s.backText}>Back</Text>
       </TouchableOpacity>
       <Text style={s.title}>Create your account</Text>
-      <Text style={s.subtitle}>Use one account for StitchBook on mobile and web.</Text>
+
 
       <View style={s.card}>
         <IconInput label="Your name" icon="account-outline" value={form.name} onChangeText={set('name')} placeholder="Enter your name" autoCapitalize="words" autoComplete="name"/>

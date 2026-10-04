@@ -261,7 +261,7 @@ export default function CreateItemDetail({
                 />
               </View>
 
-              <ResponsiveGrid style={styles.measurementGrid}>
+              <ResponsiveGrid minItemWidth={140} style={styles.measurementGrid}>
                 {visibleMeasurementEntries.map(([key, value], index) => (
                   <MotiView
                     key={`${selectedMeasurement.id || "selected"}-${key}`}
@@ -595,12 +595,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: spacing.xs,
-    borderWidth: 1,
+    borderWidth: 0,
     borderColor: colors123.borderLight,
     borderRadius: 14,
     backgroundColor: colors123.surface,
     padding: spacing.xs,
-    minHeight: 62,
+    minHeight: 48,
   },
   measurementRowCopy: {
     flex: 1,
