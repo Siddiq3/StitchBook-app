@@ -41,13 +41,13 @@ const PRIMARY_STAFF_ROLES = [
     id: "cutter",
     title: "Cutter",
     icon: "content-cut",
-    summary: "Can login with Google email and view current order measurements for cutting.",
+    summary: "Signs in with email and password; sees current orders and measurements for cutting.",
   },
   {
     id: "stitcher",
     title: "Stitcher",
     icon: "needle",
-    summary: "Can login with Google email, see assigned stitching work, completed items, and earnings.",
+    summary: "Signs in with email and password; sees assigned stitching work, completed items, and earnings.",
   },
 ];
 
@@ -85,10 +85,10 @@ const payRuleText = (staff = {}) => {
 
 const roleSummaryFor = (role) => {
   if (role === "cutter") {
-    return "Google login: current customer orders and measurements for cutting.";
+    return "App login: current customer orders and measurements for cutting.";
   }
   if (role === "stitcher") {
-    return "Google login: assigned stitching work, completed items, and earnings.";
+    return "App login: assigned stitching work, completed items, and earnings.";
   }
   return "Owner-managed staff record and work ledger.";
 };
@@ -136,7 +136,7 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
               color={colors123.primary} />
 
             <Text style={styles.staffRoleText}>
-              {roleLabel} Google access
+              {roleLabel} app access
             </Text>
           </View>
           <View style={styles.staffRole}>
@@ -258,6 +258,7 @@ export default function StaffScreen() {const { t } = useLanguage();
     name: "",
     phone: "",
     email: "",
+    password: "",
     role: "cutter",
     access_role: "cutter",
     can_login: true,
@@ -315,20 +316,15 @@ export default function StaffScreen() {const { t } = useLanguage();
   workStaff?.id]
   );
 
-  useEffect(() => {
-    fetchStaff();
-    fetchOrders({ limit: 50 });
-  }, [fetchOrders, fetchStaff]);
-
   useFocusEffect(
     useCallback(() => {
       fetchStaff();
-      fetchOrders({ limit: 50 });
+      fetchOrders();
     }, [fetchOrders, fetchStaff])
   );
 
   const onRefresh = useCallback(async () => {
-    await Promise.all([fetchStaff(), fetchOrders({ limit: 50 })]);
+    await Promise.all([fetchStaff(), fetchOrders({ force: true })]);
   }, [fetchOrders, fetchStaff]);
 
   const resetStaffForm = () => {
@@ -357,7 +353,14 @@ export default function StaffScreen() {const { t } = useLanguage();
       return;
     }
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      showToast("Enter staff Google email for login", "error");
+      showToast(t("staffEmailRequired"), "error");
+      return;
+    }
+    // Owner sets the first password when adding staff; staff can reset it later
+    // with "Forgot password" on the login screen.
+    const password = formData.password;
+    if (!editingId && (password.length < 8 || !/[A-Za-z]/.test(password) || !/\d/.test(password))) {
+      showToast(t("staffPasswordRule"), "error");
       return;
     }
 
@@ -376,7 +379,8 @@ export default function StaffScreen() {const { t } = useLanguage();
       payment_type: formData.payment_type,
       pay_rate: payRate,
       salary: formData.payment_type === "monthly" ? payRate : undefined,
-      is_active: true
+      is_active: true,
+      ...(editingId ? {} : { password })
     };
 
     try {
@@ -574,7 +578,7 @@ export default function StaffScreen() {const { t } = useLanguage();
     <AppCard style={styles.workflowCard}>
       <Text style={styles.workflowTitle}>Staff workflow</Text>
       <Text style={styles.workflowSubtitle}>
-        Add a Google email so staff can sign in. A mobile number is optional.
+        Set a login email and password so staff can sign in. A mobile number is optional.
       </Text>
       <View style={styles.workflowGrid}>
         {PRIMARY_STAFF_ROLES.map((role) =>
@@ -621,7 +625,7 @@ export default function StaffScreen() {const { t } = useLanguage();
       </View>
 
       <View style={styles.formGroup}>
-        <Text style={styles.label}>Google email for login</Text>
+        <Text style={styles.label}>{t("staffLoginEmail")}</Text>
         <View style={styles.input}>
           <MaterialCommunityIcons
           name="email-outline"
@@ -639,10 +643,32 @@ export default function StaffScreen() {const { t } = useLanguage();
           returnKeyType="next" />
 
         </View>
-        <Text style={styles.helpText}>
-          Staff must open StitchBook and continue with this Google account.
-        </Text>
       </View>
+
+      {!editingId &&
+      <View style={styles.formGroup}>
+        <Text style={styles.label}>{t("staffLoginPassword")}</Text>
+        <View style={styles.input}>
+          <MaterialCommunityIcons
+          name="lock-outline"
+          size={18}
+          color={colors123.primary} />
+
+          <TextInput accessibilityLabel={t("staffLoginPassword")}
+          style={styles.textInput}
+          value={formData.password}
+          onChangeText={(text) => setFormData({ ...formData, password: text })}
+          placeholder={t("staffPasswordRule")}
+          placeholderTextColor={colors123.textMuted}
+          secureTextEntry
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="next" />
+
+        </View>
+        <Text style={styles.helpText}>{t("staffLoginHelp")}</Text>
+      </View>
+      }
 
       <View style={styles.formGroup}>
         <Text style={styles.label}>{t("auto_phone")} {t("optional")}</Text>

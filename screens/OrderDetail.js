@@ -150,11 +150,10 @@ export default function OrderDetail({ route, navigation }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { orderId } = route.params;
-  const { orders, customers, shop, staff, fetchStaff, updateOrderStatus, updateOrder, recordPayment, fetchActivityLogs, activityLogs, fetchPayments, payments, fetchCustomers } = useStitchPro();
+  const { orders, customers, shop, staff, fetchStaff, updateOrderStatus, updateOrder, recordPayment, fetchActivityLogs, activityLogs, fetchPayments, payments, fetchCustomers, can } = useStitchPro();
   const { showToast } = useToast();
 
   const [jobSheetLoading, setJobSheetLoading] = useState(false);
-  const [invoiceData, setInvoiceData] = useState(null);
   const [whatsappLoading, setWhatsappLoading] = useState(false);
   const [copyLoading, setCopyLoading] = useState(false);
   const [showWhatsappModal, setShowWhatsappModal] = useState(false);
@@ -195,7 +194,7 @@ export default function OrderDetail({ route, navigation }) {
   }, [orderFromContext, orderId]);
 
   useEffect(() => {
-    fetchStaff?.();
+    if (can("staff:read")) fetchStaff?.();
   }, [fetchStaff]);
 
   // Payment Modal
@@ -211,21 +210,10 @@ export default function OrderDetail({ route, navigation }) {
   useEffect(() => {
     if (orderId) {
       loadActivity();
-      loadPayments();
-      loadInvoiceData();
-      fetchCustomers();
+      if (can("payments:read")) loadPayments();
+      if (can("customers:read")) fetchCustomers();
     }
   }, [orderId]);
-
-  const loadInvoiceData = async () => {
-    if (!orderId) return;
-    try {
-      const res = await api.get(`/invoice/order/${orderId}`);
-      setInvoiceData(res.data?.data || res.data || null);
-    } catch (err) {
-
-    }
-  };
 
   const getOrderTypeLabel = (type) => {
     if (!type) return "";
@@ -276,23 +264,6 @@ export default function OrderDetail({ route, navigation }) {
     const dateObj = safeParseDate(value);
     if (dateObj) return format(dateObj, "dd MMM yyyy");
     return value ? String(value).split("T")[0] : fallback;
-  };
-
-  const buildInvoiceShareUrl = () => {
-    const baseUrl =
-    invoiceData?.shareUrl ||
-    invoiceData?.share_url ||
-    invoiceData?.publicUrl ||
-    invoiceData?.public_url ||
-    null;
-
-    if (baseUrl) return baseUrl;
-
-    const webBaseUrl =
-    process.env.EXPO_PUBLIC_WEB_APP_URL ||
-    "https://stitch-book-web.vercel.app";
-
-    return `${webBaseUrl.replace(/\/$/, "")}/invoice/order/${order?.id}`;
   };
 
   const buildInvoiceMessage = () => {
@@ -371,7 +342,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
     }
     setCopyLoading(true);
     try {
-      const shareText = `${buildInvoiceMessage()}\n\nInvoice link: ${buildInvoiceShareUrl()}`;
+      const shareText = buildInvoiceMessage();
       await Clipboard.setStringAsync(shareText);
       showToast(t("auto_link_copied"), 'success');
     } catch (err) {
@@ -800,7 +771,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             }
           </TouchableOpacity>
 
-          {/* ✅ FIXED: Alert.alert array properly closed, header View properly closed */}
+          {can("orders:write") &&
           <TouchableOpacity accessibilityRole="button"
             onPress={() => {
               Alert.alert(t("auto_order_options"), "", [
@@ -818,6 +789,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
 
             <Ionicons name="ellipsis-vertical" size={24} color={colors123.primary} />
           </TouchableOpacity>
+          }
         </View>
       </View>
 
@@ -969,7 +941,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             )}
           </View>
 
-          {hasNextStatus &&
+          {hasNextStatus && can("orders:update_status") &&
           <AppButton
             title={`${t("markAs")} ${t(statusConfig.nextStatus)}`}
             onPress={handleAdvanceStatus}
@@ -1048,6 +1020,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                       <TouchableOpacity accessibilityRole="button" accessibilityState={{ selected: Boolean(hasAssigned) }}
                         key={role}
                         style={[styles.assignmentChip, hasAssigned && styles.assignmentChipActive]}
+                        disabled={!can("orders:write")}
                         onPress={() => setAssignmentModal({ itemIndex: index, role })}>
 
                         <View style={[
@@ -1151,7 +1124,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
           </View>
 
           {/* Collect sits right under the balance it settles; it is the one primary action here */}
-          {balanceDue > 0 &&
+          {balanceDue > 0 && can("payments:write") &&
           <AppButton
             icon="cash-plus"
             title={t("auto_record_payment")}

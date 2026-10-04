@@ -31,7 +31,7 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
   // Fetch customers and their measurements on mount
   useEffect(() => {
     async function loadData() {
-      await fetchCustomers({ limit: 50 });
+      await fetchCustomers();
     }
     loadData();
   }, []);
@@ -48,7 +48,7 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
   // Pull to refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchCustomers({ limit: 50 });
+    await fetchCustomers();
     const customerList = customers && customers.length > 0 ? customers : [];
     await Promise.all(
       customerList.map((customer) =>

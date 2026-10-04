@@ -99,10 +99,6 @@ export default function NotificationScreen({ navigation }) {const { t } = useLan
     markNotificationRead
   } = useStitchPro();
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
   useFocusEffect(
     useCallback(() => {
       fetchNotifications();

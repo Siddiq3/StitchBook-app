@@ -83,12 +83,14 @@ export default function DashboardScreen({ navigation }) {
     shop,
     customers,
     fetchCustomers,
+    can,
+    isOwner,
     ordersLoading,
     ordersError
   } = useStitchPro();
   useEffect(() => {
     fetchOrders();
-    fetchCustomers?.();
+    if (can("customers:read")) fetchCustomers?.();
   }, [fetchOrders, fetchCustomers]);
 
   const customerName = (order) =>
@@ -104,7 +106,7 @@ export default function DashboardScreen({ navigation }) {
   }, [fetchSubscription, subscription]);
 
   // Handle pull-to-refresh
-  const onRefresh = useCallback(() => fetchOrders(), [fetchOrders]);
+  const onRefresh = useCallback(() => fetchOrders({ force: true }), [fetchOrders]);
 
   const overdueOrders = useMemo(() => {
     if (!orders || !Array.isArray(orders)) return [];
@@ -168,8 +170,8 @@ export default function DashboardScreen({ navigation }) {
 
       }>
 
-      <ScreenHeader title={shopName} action={<AppButton icon="plus" label={t("newOrder")} size="sm" onPress={() => navigation.navigate("CustomerSelection")} />} />
-      {(isTrialActive || isTrialExpired) && (
+      <ScreenHeader title={shopName} action={can("orders:write") ? <AppButton icon="plus" label={t("newOrder")} size="sm" onPress={() => navigation.navigate("CustomerSelection")} /> : null} />
+      {isOwner && (isTrialActive || isTrialExpired) && (
         <AppCard variant="muted">
           <View style={styles.announcementTopRow}>
             <MaterialCommunityIcons
@@ -185,7 +187,7 @@ export default function DashboardScreen({ navigation }) {
           </View>
         </AppCard>
       )}
-      {!ordersLoading && !ordersError && !(orders?.length > 0) &&
+      {isOwner && !ordersLoading && !ordersError && !(orders?.length > 0) &&
       <SetupChecklist
         t={t}
         steps={[
@@ -263,6 +265,7 @@ export default function DashboardScreen({ navigation }) {
         </ResponsiveGrid>
       </AppCard>
 
+      {can("dashboard:read") &&
       <Pressable accessibilityRole="button"
         onPress={() => navigation.navigate("Reports")}
         style={({ pressed }) => [styles.reportsRow, pressed && styles.productionTilePressed]}>
@@ -274,6 +277,7 @@ export default function DashboardScreen({ navigation }) {
         </View>
         <MaterialCommunityIcons name="chevron-right" size={22} color={colors123.textMuted} />
       </Pressable>
+      }
 
       <AppCard>
         <View style={styles.sectionRow}>

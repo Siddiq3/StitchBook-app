@@ -29,7 +29,7 @@ import { languages } from '../localization/translations';
 export default function SettingsScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { t, language, selectLanguage } = useLanguage();
-  const { user, shop, logout, updateShop, subscription } = useStitchPro();
+  const { user, shop, logout, updateShop, subscription, can, isOwner } = useStitchPro();
   const { showToast } = useToast();
   const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [shopEditModalVisible, setShopEditModalVisible] = useState(false);
@@ -125,6 +125,7 @@ export default function SettingsScreen({ navigation }) {
               <Text style={styles.profileName}>{user?.name || t('user')}</Text>
               <Text style={styles.profileRole}>{shop?.name || t('shopOwner')}</Text>
             </View>
+            {can('shop:write') &&
             <TouchableOpacity accessibilityRole="button" accessibilityLabel={t('editShopDetails')}
               style={styles.editButton}
               onPress={() => setShopEditModalVisible(true)}>
@@ -135,6 +136,7 @@ export default function SettingsScreen({ navigation }) {
                 color={colors123.text} />
 
             </TouchableOpacity>
+            }
           </View>
 
           {/* Shop Info Card */}
@@ -268,10 +270,10 @@ export default function SettingsScreen({ navigation }) {
         <View style={styles.groupCard}>
           <Text style={styles.groupTitle}>{t("shop")}</Text>
           {[
-            { key: "staff", title: t("staffManagement"), icon: "account-multiple-outline", onPress: () => navigation.navigate("Staff") },
-            { key: "measurements", title: t("measurements"), icon: "ruler", onPress: () => navigation.navigate("Measurements") },
+            can("staff:read") && { key: "staff", title: t("staffManagement"), icon: "account-multiple-outline", onPress: () => navigation.navigate("Staff") },
+            can("measurements:read") && { key: "measurements", title: t("measurements"), icon: "ruler", onPress: () => navigation.navigate("Measurements") },
             { key: "notifications", title: t("notifications"), icon: "bell-outline", onPress: () => navigation.navigate("Notifications") },
-          ].map(item => <ListRow key={item.key} title={item.title}
+          ].filter(Boolean).map(item => <ListRow key={item.key} title={item.title}
             leading={<MaterialCommunityIcons name={item.icon} size={20} color={colors123.textSecondary} />}
             trailing={<MaterialCommunityIcons name="chevron-right" size={20} color={colors123.textMuted} />}
             onPress={item.onPress} />)}
@@ -279,8 +281,10 @@ export default function SettingsScreen({ navigation }) {
 
         <View style={styles.groupCard}>
           <Text style={styles.groupTitle}>{t("account")}</Text>
+          {isOwner &&
           <ListRow title={t("accountStatus")} meta={getAccountStatusText(subscription, t) || "—"}
             leading={<MaterialCommunityIcons name="shield-check-outline" size={20} color={colors123.textSecondary} />} />
+          }
           {[
             { key: "password", title: t("passwordSecurity"), icon: "lock-outline", onPress: () => navigation.navigate("Password") },
             { key: "sessions", title: t("devicesSessions"), icon: "devices", onPress: () => navigation.navigate("Sessions") },

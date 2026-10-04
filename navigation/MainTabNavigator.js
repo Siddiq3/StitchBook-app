@@ -55,6 +55,7 @@ const LazyFallback = () =>
 
 function StudioTabs() {
   const insets = useSafeAreaInsets();
+  const { can } = useStitchPro();
   const { t } = useLanguage();
   const tabLabelMap = {
     Dashboard: t('dashboardTab'),
@@ -107,7 +108,7 @@ function StudioTabs() {
 
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
       <Tab.Screen name="Orders" component={OrdersScreen} />
-      <Tab.Screen name="Customers" component={CustomersScreen} />
+      {can("customers:read") && <Tab.Screen name="Customers" component={CustomersScreen} />}
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
     {/* Edge-to-edge: keep scrolled content from showing through the status bar */}

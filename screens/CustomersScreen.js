@@ -39,11 +39,12 @@ export default function CustomersScreen({ navigation }) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Fetch customers and orders on mount
+  // Search the server so customers beyond the first loaded page are findable
   useEffect(() => {
-    fetchCustomers();
-    fetchOrders();
-  }, [fetchCustomers, fetchOrders]);
+    const query = debouncedQuery.trim();
+    if (query.length >= 2) fetchCustomers({ search: query });
+    else if (!query) fetchCustomers();
+  }, [debouncedQuery, fetchCustomers]);
 
   // Auto-refresh when screen comes into focus (user navigates back)
   useFocusEffect(
@@ -57,7 +58,7 @@ export default function CustomersScreen({ navigation }) {
   // Handle pull-to-refresh
   const onRefresh = useCallback(async () => {
 
-    await Promise.all([fetchCustomers(), fetchOrders()]);
+    await Promise.all([fetchCustomers({ force: true }), fetchOrders({ force: true })]);
   }, [fetchCustomers, fetchOrders]);
 
   const filteredCustomers = useMemo(() => {

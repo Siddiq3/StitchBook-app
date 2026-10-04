@@ -64,7 +64,7 @@ export default function OrdersScreen({ navigation, route }) {
   const { t } = useLanguage();
   const { ordersError, ordersLoading } = useStitchPro();
   const { customerId, status: routeStatus } = route?.params || {};
-  const { orders, customers, isBooting, addOrder, fetchOrders, fetchCustomers } =
+  const { orders, customers, isBooting, addOrder, fetchOrders, fetchCustomers, can } =
   useStitchPro();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -86,14 +86,14 @@ export default function OrdersScreen({ navigation, route }) {
 
   // Fetch orders and customers on mount
   useEffect(() => {
-    fetchOrders({ limit: 50 });
-    fetchCustomers();
+    fetchOrders();
+    if (can("customers:read")) fetchCustomers();
   }, [fetchOrders, fetchCustomers]);
 
   // Pull to refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await Promise.all([fetchOrders({ limit: 50 }), fetchCustomers()]);
+    await Promise.all([fetchOrders({ force: true }), can("customers:read") ? fetchCustomers({ force: true }) : null]);
     setRefreshing(false);
   }, [fetchOrders, fetchCustomers]);
 
@@ -174,7 +174,7 @@ export default function OrdersScreen({ navigation, route }) {
 
         <ScreenHeader
           title={t("ordersTitle")}
-          action={
+          action={can("orders:write") &&
           <AppButton
             icon="plus"
             label={t("add")}

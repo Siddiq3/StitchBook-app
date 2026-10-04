@@ -26,13 +26,15 @@ function provider({shopError, subscriptionError} = {}) {
     useState(initial) {state = initial; return [state, updater => {state = typeof updater === 'function' ? updater(state) : updater;}];},
     useEffect: callback => effects.push(callback),
     useCallback:callback => callback,
+    useRef:initial => ({current:initial}),
     createElement:(_type,props) => props,
   };
+  let orderCalls = 0;
   const api = {
     shopApi:{get:async () => {if(shopError) throw shopError; return {data:{data:session.shop}};}},
     subscriptionApi:{getStatus:async () => {if(subscriptionError) throw subscriptionError; return {data:{data:{isActive:true}}};}},
     customerApi:{getAll:async () => ({data:{data:{customers:[{id:3}],pagination:{total:1}}}})},
-    orderApi:{getAll:async () => ({data:{data:{orders:[{id:4}],pagination:{total:1}}}})},
+    orderApi:{getAll:async () => {orderCalls++; return {data:{data:{orders:[{id:4}],pagination:{total:1}}}};}},
   };
   const module = load('context/StitchProContext.js', {
     react,
@@ -42,7 +44,7 @@ function provider({shopError, subscriptionError} = {}) {
     '../utils/formHelpers':{toLocalDateKey:()=>'2026-01-01'},
   });
   const value = module.StitchProProvider({children:null}).value;
-  return {value, effects, state:()=>state, cleared:()=>cleared, savedShop:()=>savedShop};
+  return {value, effects, state:()=>state, cleared:()=>cleared, savedShop:()=>savedShop, orderCalls:()=>orderCalls};
 }
 const networkError = () => new Error('Network unavailable');
 const shopResponseError = (status, message, code) => ({response:{status,data:{message,error:code ? {code} : null}}});
@@ -82,6 +84,16 @@ test('customer and order API payloads populate state', async()=>{
   const p=provider(); await p.value.fetchCustomers(); await p.value.fetchOrders();
   assert.equal(p.state().customers[0].id,3); assert.equal(p.state().orders[0].id,4);
   assert.equal(p.state().customersLoading,false); assert.equal(p.state().ordersLoading,false);
+});
+test('identical list requests are reused until forced or invalidated', async()=>{
+  const p=provider();
+  await Promise.all([p.value.fetchOrders(), p.value.fetchOrders()]);
+  await p.value.fetchOrders();
+  assert.equal(p.orderCalls(),1,'Repeat list request within the freshness window hit the API');
+  await p.value.fetchOrders({force:true});
+  assert.equal(p.orderCalls(),2,'Pull-to-refresh must always reach the API');
+  await p.value.fetchOrders({status:'ready'});
+  assert.equal(p.orderCalls(),3,'Different filters must not reuse another list');
 });
 test('subscription network failure must not turn successful login into auth failure', async()=>{
   const p=provider({subscriptionError:networkError()});

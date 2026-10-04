@@ -85,7 +85,7 @@ export default function CustomerSelectionScreen({ navigation }) {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await fetchCustomers({ search: customerSearch, page: 1, limit: 100 });
+      await fetchCustomers({ search: customerSearch, page: 1, limit: 100, force: true });
     } catch (err) {
 
     } finally {

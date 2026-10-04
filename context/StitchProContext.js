@@ -4,7 +4,8 @@ import React, {
   useContext,
   useState,
   useEffect,
-  useCallback } from
+  useCallback,
+  useRef } from
 "react";
 import { authService } from "../services/authService";
 import { storage } from "../services/storage";
@@ -101,6 +102,31 @@ const INITIAL = {
 export const StitchProProvider = ({ children }) => {
   const [state, setState] = useState(INITIAL);
 
+  // Screens re-request the same list on every mount and tab focus. Reuse an
+  // identical list request for LIST_FRESH_MS (and share one in flight) to cut
+  // API and database load. Any mutation, pull-to-refresh, login or logout
+  // clears it, so users never see their own changes go stale.
+  const LIST_FRESH_MS = 30000;
+  const listRequests = useRef({});
+  const invalidateLists = () => {
+    listRequests.current = {};
+  };
+  const runListFetch = (name, params, force, request) => {
+    const key = JSON.stringify(params);
+    const entry = listRequests.current[name];
+    if (!force && entry && entry.key === key) {
+      if (entry.pending) return entry.pending;
+      if (Date.now() - entry.at < LIST_FRESH_MS) return Promise.resolve();
+    }
+    const pending = request().then((ok) => {
+      if (listRequests.current[name]?.pending === pending) {
+        listRequests.current[name] = ok ? { key, at: Date.now() } : undefined;
+      }
+    });
+    listRequests.current[name] = { key, pending };
+    return pending;
+  };
+
   // Safe updater — always spreads previous state
   const set = useCallback((updates) => {
     setState((prev) => {
@@ -195,6 +221,7 @@ export const StitchProProvider = ({ children }) => {
   // ════════════════════════════════════════
 
   const completeLogin = async (authPromise, label) => {
+    invalidateLists();
 
     set({ authError: null });
 
@@ -280,7 +307,17 @@ export const StitchProProvider = ({ children }) => {
     set({ user });
   };
 
+  // UI-side permission check, mirroring the server (which still enforces
+  // everything). Sessions saved before permissions were stored are treated as
+  // owners so nobody is locked out by an old cached user.
+  const can = (permission) => {
+    const permissions = state.user?.permissions;
+    if (!Array.isArray(permissions)) return true;
+    return permissions.includes("*") || permissions.includes(permission);
+  };
+
   const logout = async () => {
+    invalidateLists();
 
     await authService.logout();
     // Reset to initial but keep isBooting false
@@ -293,6 +330,7 @@ export const StitchProProvider = ({ children }) => {
   // ════════════════════════════════════════
 
   const createShop = async ({ name, phone, location }) => {
+    invalidateLists();
     const res = await shopApi.create({ name, phone, location });
     const shop = res.data.data;
     await storage.saveShop(shop);
@@ -301,6 +339,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const updateShop = async (data) => {
+    invalidateLists();
     const res = await shopApi.update(data);
     const shop = res.data.data;
     await storage.saveShop(shop);
@@ -384,7 +423,7 @@ export const StitchProProvider = ({ children }) => {
   // ════════════════════════════════════════
 
   const fetchCustomers = useCallback(
-    async ({ search = "", page = 1, limit = 20 } = {}) => {
+    async ({ search = "", page = 1, limit = 100, force = false } = {}) => runListFetch("customers", { search, page, limit }, force, async () => {
       set({ customersLoading: true, customersError: null });
       try {
 
@@ -417,6 +456,7 @@ export const StitchProProvider = ({ children }) => {
           customersPagination: pagination,
           customersLoading: false
         });
+        return true;
       } catch (err) {
         const status = err.response?.status;
         const message = err.response?.data?.message || err.message;
@@ -431,12 +471,14 @@ export const StitchProProvider = ({ children }) => {
 
         }
         set({ customersLoading: false, customersError: err.message || "Unable to load data" });
+        return false;
       }
-    },
+    }),
     []
   );
 
   const addCustomer = async (data) => {
+    invalidateLists();
     try {
 
 
@@ -473,6 +515,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const updateCustomer = async (id, data) => {
+    invalidateLists();
     try {
       await customerApi.update(id, data);
       await fetchCustomers();
@@ -485,6 +528,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const deleteCustomer = async (id) => {
+    invalidateLists();
     try {
       await customerApi.delete(id);
       setState((prev) => ({
@@ -504,7 +548,7 @@ export const StitchProProvider = ({ children }) => {
   // ════════════════════════════════════════
 
   const fetchOrders = useCallback(
-    async ({ status, customerId, page = 1, limit = 20 } = {}) => {
+    async ({ status, customerId, page = 1, limit = 100, force = false } = {}) => runListFetch("orders", { status, customerId, page, limit }, force, async () => {
       set({ ordersLoading: true, ordersError: null });
       try {
 
@@ -538,6 +582,7 @@ export const StitchProProvider = ({ children }) => {
           ordersPagination: pagination,
           ordersLoading: false
         });
+        return true;
       } catch (err) {
         const status = err.response?.status;
         const message = err.response?.data?.message || err.message;
@@ -548,12 +593,14 @@ export const StitchProProvider = ({ children }) => {
 
 
         set({ ordersLoading: false, ordersError: err.message || "Unable to load data" });
+        return false;
       }
-    },
+    }),
     []
   );
 
   const addOrder = async (data) => {
+    invalidateLists();
     try {
       const measurementSnapshots = (data.items || []).
       filter((item) => item.measurementSnapshot).
@@ -608,6 +655,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const updateOrderStatus = async (id, status) => {
+    invalidateLists();
     try {
       await orderApi.updateStatus(id, status);
       setState((prev) => ({
@@ -625,6 +673,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const updateOrder = async (id, data) => {
+    invalidateLists();
     try {
       const res = await orderApi.update(id, data);
       const updatedOrder = res.data?.data || { id, ...data };
@@ -645,6 +694,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const deleteOrder = async (id) => {
+    invalidateLists();
     try {
       await orderApi.delete(id);
       setState((prev) => ({
@@ -660,6 +710,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const recordPayment = async ({ orderId, amount, paymentMethod, notes }) => {
+    invalidateLists();
     try {
       await paymentApi.record({
         orderId,
@@ -736,6 +787,7 @@ export const StitchProProvider = ({ children }) => {
     outfitLabel,
     measurementsData
   }) => {
+    invalidateLists();
     const clean = {};
     Object.keys(measurementsData).forEach((k) => {
       clean[k] = parseFloat(measurementsData[k]) || 0;
@@ -761,6 +813,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const updateMeasurement = async (id, customerId, data) => {
+    invalidateLists();
     try {
       await measurementApi.update(id, data);
       await fetchMeasurements(customerId);
@@ -773,6 +826,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const deleteMeasurement = async (id, customerId) => {
+    invalidateLists();
     try {
       await measurementApi.delete(id);
       await fetchMeasurements(customerId);
@@ -836,6 +890,7 @@ export const StitchProProvider = ({ children }) => {
   }, [state.shop?.id]);
 
   const addStaff = async (data) => {
+    invalidateLists();
     try {
       const shopId = state.shop?.id;
       if (!shopId) {
@@ -861,6 +916,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const updateStaff = async (id, data) => {
+    invalidateLists();
     try {
       const res = await staffApi.update(id, data);
       const updatedStaff = res.data?.data || { id, ...data };
@@ -880,6 +936,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const deleteStaff = async (id) => {
+    invalidateLists();
     try {
       await staffApi.delete(id);
       set((prev) => ({
@@ -930,6 +987,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const addStaffWorkLog = async (staffId, data) => {
+    invalidateLists();
     try {
       const res = await staffApi.addWorkLog(staffId, data);
       const workLog = res.data?.data || res.data;
@@ -949,6 +1007,7 @@ export const StitchProProvider = ({ children }) => {
   };
 
   const deleteStaffWorkLog = async (staffId, workLogId) => {
+    invalidateLists();
     try {
       await staffApi.deleteWorkLog(staffId, workLogId);
       set((prev) => ({
@@ -1118,6 +1177,8 @@ export const StitchProProvider = ({ children }) => {
     <StitchProContext.Provider
       value={{
         ...state,
+        can,
+        isOwner: can("*"),
 
         // Auth
         retryShop: fetchShopSilently,
