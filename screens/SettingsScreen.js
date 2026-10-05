@@ -24,6 +24,7 @@ import { useStitchPro } from '../context/StitchProContext';
 import { useToast } from '../context/ToastContext';
 import { getAccountStatusText } from '../utils/accountStatus';
 import { formatPhone } from '../utils/formHelpers';
+import { PRIVACY_URL, TERMS_URL, openLink } from '../utils/legalLinks';
 import { languages } from '../localization/translations';
 
 export default function SettingsScreen({ navigation }) {
@@ -289,6 +290,8 @@ export default function SettingsScreen({ navigation }) {
           {[
             { key: "password", title: t("passwordSecurity"), icon: "lock-outline", onPress: () => navigation.navigate("Password") },
             { key: "sessions", title: t("devicesSessions"), icon: "devices", onPress: () => navigation.navigate("Sessions") },
+            { key: "privacy", title: t("privacyPolicy"), icon: "shield-lock-outline", onPress: () => openLink(PRIVACY_URL) },
+            { key: "terms", title: t("termsOfService"), icon: "file-document-outline", onPress: () => openLink(TERMS_URL) },
             { key: "delete", title: t("deleteAccount"), icon: "delete-outline", onPress: () => navigation.navigate("DeleteAccount") },
           ].map(item => <ListRow key={item.key} title={item.title}
             leading={<MaterialCommunityIcons name={item.icon} size={20} color={colors123.textSecondary} />}

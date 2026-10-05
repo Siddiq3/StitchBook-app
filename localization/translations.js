@@ -389,6 +389,8 @@ export const translations = {
     workInProgress: 'Work in progress',
     ok: 'OK',
     markAs: 'Mark as',
+    privacyPolicy: 'Privacy policy',
+    termsOfService: 'Terms of service',
     staffLoginEmail: 'Login email',
     staffLoginPassword: 'Login password',
     staffEmailRequired: 'Enter an email for the staff login',

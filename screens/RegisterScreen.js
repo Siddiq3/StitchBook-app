@@ -7,6 +7,7 @@ import {useStitchPro} from '../context/StitchProContext';
 import {useToast} from '../context/ToastContext';
 import IconInput from '../components/IconInput';
 import AppButton from '../components/AppButton';
+import {PRIVACY_URL,TERMS_URL,openLink} from '../utils/legalLinks';
 import {colors123,fonts,radius,spacing,typography} from '../utils/theme';
 
 const validEmail=(value)=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||'').trim());
@@ -72,7 +73,12 @@ export default function RegisterScreen({navigation}){
         <IconInput label="Confirm password" icon="lock-check-outline" value={form.confirm} onChangeText={set('confirm')} placeholder="Re-enter your password" secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" returnKeyType="go" onSubmitEditing={submit}/>
         {error?<Text accessibilityLiveRegion="polite" style={s.error}>{error}</Text>:null}
         <AppButton label="Create account" loading={loading} onPress={submit}/>
-        <Text style={s.legal}>By creating an account, you confirm these details belong to you and your tailoring business.</Text>
+        <Text style={s.legal}>
+          By creating an account, you agree to the{' '}
+          <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(TERMS_URL)}>Terms of service</Text>
+          {' '}and{' '}
+          <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(PRIVACY_URL)}>Privacy policy</Text>.
+        </Text>
       </View>
 
       <TouchableOpacity accessibilityRole="button" style={s.alt} onPress={()=>navigation.goBack()}>
@@ -93,6 +99,7 @@ const s=StyleSheet.create({
   error:{...typography.small,color:colors123.danger},
   legal:{...typography.caption,color:colors123.textMuted,textAlign:'center'},
   alt:{minHeight:48,alignItems:'center',justifyContent:'center',flexDirection:'row',marginTop:spacing.xs},
+  legalLink:{color:colors123.primary,fontFamily:fonts.semibold,textDecorationLine:'underline'},
   altMuted:{...typography.small,color:colors123.textMuted},
   altLink:{...typography.small,color:colors123.primary,fontFamily:fonts.semibold},
 });
