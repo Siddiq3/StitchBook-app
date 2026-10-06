@@ -2,6 +2,17 @@ import { authApi } from './api';
 import { storage } from './storage';
 
 export const authService = {
+  refreshProfile: async () => {
+    const res = await authApi.profile();
+    const user = res.data.data;
+    // Never turn a legacy/incomplete profile into unrestricted cached access.
+    if (!user?.id || !Array.isArray(user.permissions)) {
+      throw new Error('Could not verify your shop permissions. Please try again.');
+    }
+    await storage.setUser(user);
+    return user;
+  },
+
   registerWithPassword: async (data) => {
     const res = await authApi.register(data);
     const { token, refreshToken, user } = res.data.data;
