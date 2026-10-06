@@ -155,6 +155,7 @@ api.interceptors.response.use(
 
 // ── AUTH ──────────────────────────────
 export const authApi = {
+  profile: () => api.get("/auth/profile"),
   logout: () => api.post("/auth/logout"),
   logoutAll: () => api.post("/auth/logout-all"),
   sessions: () => api.get("/auth/sessions"),

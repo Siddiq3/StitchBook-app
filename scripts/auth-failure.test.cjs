@@ -17,13 +17,13 @@ function load(file, imports) {
   }});
   return exports;
 }
-function provider({shopError, subscriptionError} = {}) {
-  let state, cleared = 0, savedShop;
+function provider({shopError, subscriptionError, profileError, cachedUser, profileUser} = {}) {
+  let state, cleared = 0, savedShop, savedUser, createCalls = 0;
   const effects = [];
-  const session = {token:'test-token',user:{id:1},shop:{id:7}};
+  const session = {token:'test-token',user:cachedUser || {id:1},shop:{id:7}};
   const react = {
     createContext:() => ({Provider:'provider'}),
-    useState(initial) {state = initial; return [state, updater => {state = typeof updater === 'function' ? updater(state) : updater;}];},
+    useState(initial) {state ??= initial; return [state, updater => {state = typeof updater === 'function' ? updater(state) : updater;}];},
     useEffect: callback => effects.push(callback),
     useCallback:callback => callback,
     useRef:initial => ({current:initial}),
@@ -31,20 +31,20 @@ function provider({shopError, subscriptionError} = {}) {
   };
   let orderCalls = 0;
   const api = {
-    shopApi:{get:async () => {if(shopError) throw shopError; return {data:{data:session.shop}};}},
+    shopApi:{create:async () => {createCalls++; return {data:{data:session.shop}};},get:async () => {if(shopError) throw shopError; return {data:{data:session.shop}};}},
     subscriptionApi:{getStatus:async () => {if(subscriptionError) throw subscriptionError; return {data:{data:{isActive:true}}};}},
     customerApi:{getAll:async () => ({data:{data:{customers:[{id:3}],pagination:{total:1}}}})},
     orderApi:{getAll:async () => {orderCalls++; return {data:{data:{orders:[{id:4}],pagination:{total:1}}}};}},
   };
   const module = load('context/StitchProContext.js', {
     react,
-    '../services/authService':{authService:{restoreSession:async () => session,loginWithGoogle:async () => session,registerWithPassword:async () => session}},
+    '../services/authService':{authService:{refreshProfile:async () => {if(profileError) throw profileError; savedUser = profileUser || {id:1,role:'owner',permissions:['*']};return savedUser;},restoreSession:async () => session,loginWithGoogle:async () => session,registerWithPassword:async () => session}},
     '../services/storage':{storage:{saveShop:async shop=>{savedShop=shop;},clearAll:async()=>{cleared++;}}},
     '../services/api':api,
     '../utils/formHelpers':{toLocalDateKey:()=>'2026-01-01'},
   });
   const value = module.StitchProProvider({children:null}).value;
-  return {value, effects, state:()=>state, cleared:()=>cleared, savedShop:()=>savedShop, orderCalls:()=>orderCalls};
+  return {value, effects, state:()=>state, cleared:()=>cleared, savedShop:()=>savedShop, orderCalls:()=>orderCalls, savedUser:()=>savedUser, createCalls:()=>createCalls, render:()=>module.StitchProProvider({children:null}).value};
 }
 const networkError = () => new Error('Network unavailable');
 const shopResponseError = (status, message, code) => ({response:{status,data:{message,error:code ? {code} : null}}});
@@ -118,4 +118,50 @@ test('logout must remove locally saved customer measurement records', async()=>{
   }).default;
   await storage.clearAll();
   assert.equal(local.has('measurement_3_shirt_123'),false,'Customer measurements survive logout');
+});
+
+
+const pendingOwner = {id:1,role:'pending_owner',permissions:['shop:read','shop:write']};
+test('shop creation refreshes pending owner permissions before entering the shop', async()=>{
+  const p=provider({cachedUser:pendingOwner});
+  await p.value.createShop({name:'New shop'});
+  const current=p.render();
+  assert.equal(current.isOwner,true);
+  for(const permission of ['customers:read','orders:write','staff:read']) assert.equal(current.can(permission),true);
+  assert.equal(p.savedUser().role,'owner');
+  assert.equal(p.state().shopError,null);
+});
+test('restart repairs cached setup permissions from the server', async()=>{
+  const p=provider({cachedUser:pendingOwner}); p.effects[0]();
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(p.render().can('orders:write'),true);
+  assert.equal(p.savedUser().role,'owner');
+});
+test('restart applies staff restrictions even if cached user was an owner', async()=>{
+  const p=provider({cachedUser:{id:1,permissions:['*']},profileUser:{id:1,role:'helper',permissions:['orders:read','shop:read']}});
+  p.effects[0](); await new Promise(resolve=>setImmediate(resolve));
+  const current=p.render();
+  assert.equal(current.isOwner,false);
+  assert.equal(current.can('customers:read'),false);
+  assert.equal(current.can('orders:write'),false);
+});
+test('profile outage after shop creation keeps saved shop and offers retry without creating again', async()=>{
+  const p=provider({profileError:networkError()});
+  await p.value.createShop({name:'New shop'});
+  assert.equal(p.savedShop().id,7);
+  assert.ok(p.state().shopError);
+  await p.value.retryShop();
+  assert.equal(p.createCalls(),1);
+});
+test('profile refresh validates and persists server permissions', async()=>{
+  let response={id:1,role:'owner',permissions:['*']}, saved;
+  const service=load('services/authService.js',{
+    './api':{authApi:{profile:async()=>({data:{data:response}})}},
+    './storage':{storage:{setUser:async user=>{saved=user;}}},
+  }).authService;
+  assert.equal((await service.refreshProfile()).role,'owner');
+  assert.equal(saved,response);
+  response={id:1};
+  await assert.rejects(()=>service.refreshProfile(),/verify your shop permissions/);
+  assert.equal(saved.role,'owner');
 });

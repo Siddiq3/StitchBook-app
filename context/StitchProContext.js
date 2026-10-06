@@ -191,6 +191,18 @@ export const StitchProProvider = ({ children }) => {
   // SHOP — fetch silently after login/boot
   // ════════════════════════════════════════
 
+  // Reconcile server permissions before exposing the shop, including on restart.
+  // A failed refresh must offer recovery, not repeat an already successful create.
+  const syncShopAccess = async (shop) => {
+    try {
+      const user = await authService.refreshProfile();
+      invalidateLists();
+      set({ shop, user, shopError: null });
+    } catch (err) {
+      set({ shop, shopError: "Your shop is saved, but we could not refresh your access. Please try again." });
+    }
+  };
+
   const fetchShopSilently = async () => {
 
     set({ shopError: null });
@@ -199,7 +211,7 @@ export const StitchProProvider = ({ children }) => {
       const shop = res.data.data;
 
       await storage.saveShop(shop);
-      set({ shop });
+      await syncShopAccess(shop);
     } catch (err) {
       const response = err.response;
       const code = response?.data?.error?.code;
@@ -334,7 +346,7 @@ export const StitchProProvider = ({ children }) => {
     const res = await shopApi.create({ name, phone, location });
     const shop = res.data.data;
     await storage.saveShop(shop);
-    set({ shop });
+    await syncShopAccess(shop);
     // Navigator auto-switches to MainTabNavigator
   };
 
