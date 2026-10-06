@@ -58,7 +58,7 @@ export default function MeasurementRow({
 
       <View style={styles.inputWrapper}>
         <TextInput
-          accessibilityLabel={`${fieldName} (cm)`}
+          accessibilityLabel={`${fieldName} (inches)`}
           ref={inputRef}
           style={[
           styles.input,
@@ -93,7 +93,7 @@ export default function MeasurementRow({
           </Pressable>
         }
 
-        <Text style={styles.unit}>cm</Text>
+        <Text style={styles.unit}>in</Text>
       </View>
     </Pressable>);
 

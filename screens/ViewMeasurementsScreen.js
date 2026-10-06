@@ -122,7 +122,7 @@ export default function ViewMeasurementsScreen({
   const renderMeasurementValue = (measurement, fieldName) => {
     const value = measurement[fieldName];
     return value !== undefined && value !== null && value !== ""
-      ? `${value} cm`
+      ? `${value}"`
       : "—";
   };
 
