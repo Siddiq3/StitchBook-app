@@ -1,5 +1,6 @@
 import React from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import PressableScale from "./PressableScale";
 import { colors123, fonts, spacing } from "../utils/theme";
 export default function ListRow({
   leading,
@@ -21,7 +22,8 @@ export default function ListRow({
     </>
   );
   return onPress ? (
-    <Pressable
+    <PressableScale
+      scaleTo={0.985}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel || title}
       onPress={onPress}
@@ -32,7 +34,7 @@ export default function ListRow({
       ]}
     >
       {content}
-    </Pressable>
+    </PressableScale>
   ) : (
     <View style={[styles.row, style]}>{content}</View>
   );

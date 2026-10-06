@@ -1539,7 +1539,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
+    ...shadows.card,
   },
   cardTitle: {
     fontSize: fonts.base.fontSize,
@@ -1747,10 +1748,11 @@ const styles = StyleSheet.create({
   },
   itemWorkCard: {
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
     borderRadius: radius.md,
     backgroundColor: colors123.surface,
     padding: spacing.md,
+    ...shadows.card,
   },
   itemWorkHeader: {
     flexDirection: "row",

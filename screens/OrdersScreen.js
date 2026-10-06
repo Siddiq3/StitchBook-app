@@ -4,7 +4,6 @@ import InlineAlert from "../components/InlineAlert";
 import React, { useEffect, useMemo, useState, useCallback } from "react";
 import {
   Alert,
-  Pressable,
   RefreshControl,
   ScrollView,
   StyleSheet,
@@ -14,6 +13,7 @@ import {
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, isValid, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
+import PressableScale from "../components/PressableScale";
 import AppButton from "../components/AppButton";
 import { getOrderCustomerId, getOrderItemsText, getOrderSearchText } from "../utils/formHelpers";
 import AppCard from "../components/AppCard";
@@ -242,9 +242,10 @@ export default function OrdersScreen({ navigation, route }) {
                   type: "timing"
                 }}>
 
-                  <Pressable accessibilityRole="button"
+                  <PressableScale accessibilityRole="button"
                   onPress={() => navigation.navigate("OrderDetail", { orderId: order.id })}
-                  style={({ pressed }) => [styles.orderCardWrapper, pressed && { opacity: 0.7 }]}>
+                  scaleTo={0.98}
+                  style={styles.orderCardWrapper}>
 
                     <AppCard style={styles.orderCard}>
                     <View style={styles.orderHeader}>
@@ -263,7 +264,7 @@ export default function OrdersScreen({ navigation, route }) {
                         </View>
                         <View style={styles.orderTitleRow}>
                           <Text style={styles.orderTitle}>{itemText}</Text>
-                          <Text style={styles.quantityText}>Qty {quantity}</Text>
+                          <Text style={styles.quantityText}>{t("quantity")} {quantity}</Text>
                         {order.orderType ?
                           <View style={[
                           styles.orderTypeBadge,
@@ -307,11 +308,11 @@ export default function OrdersScreen({ navigation, route }) {
                           name="calendar-clock-outline"
                           size={15} />
 
-                      <Text style={styles.deliveryText}>Delivery: {deliveryText}</Text>
+                      <Text style={styles.deliveryText}>{t("delivery")}: {deliveryText}</Text>
                     </View>
 
                   </AppCard>
-                  </Pressable>
+                  </PressableScale>
                 </MotiView>);
 
           })}
@@ -364,19 +365,10 @@ const styles = StyleSheet.create({
     color: colors123.text,
   },
   list: {
-    gap: 0,
-    backgroundColor: colors123.surface,
-    borderRadius: radius.md,
-    overflow: "hidden",
+    gap: spacing.sm,
   },
   orderCard: {
     gap: spacing.xs,
-    borderWidth: 0,
-    borderColor: colors123.borderLight,
-    borderRadius: 0,
-    backgroundColor: colors123.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight,
     paddingVertical: spacing.sm,
   },
   orderHeader: {
@@ -444,6 +436,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     paddingVertical: 2,
     paddingHorizontal: 0,
+    ...shadows.card,
   },
   amountInfo: {
     flex: 1,

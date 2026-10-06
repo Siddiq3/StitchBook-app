@@ -1,7 +1,7 @@
 import PrivateImage from './PrivateImage';
 import React, { useState, useEffect } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
-import { colors123, fonts } from "../utils/theme";
+import { COLORS, fonts } from "../utils/theme";
 
 const getFallbackInitials = (name = "") => {
   const words = String(name || "")
@@ -20,6 +20,13 @@ const normalizeInitials = (initials, name) => {
   return value.slice(0, 2).toUpperCase();
 };
 
+// Same name, same colour: a soft tint of one brand-safe accent per person
+const tintFor = (name = "") => {
+  let hash = 0;
+  for (const char of String(name)) hash = (hash * 31 + char.charCodeAt(0)) | 0;
+  return COLORS.avatarColors[Math.abs(hash) % COLORS.avatarColors.length];
+};
+
 export default function AvatarBadge({
   initials,
   name,
@@ -30,6 +37,7 @@ export default function AvatarBadge({
   const [imageFailed, setImageFailed] = useState(false);
   useEffect(() => setImageFailed(false), [photoUrl]);
   const displayInitials = normalizeInitials(initials, name);
+  const tint = tintFor(name || initials);
 
   if (photoUrl && !imageFailed)
     return (
@@ -49,12 +57,13 @@ export default function AvatarBadge({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: colors123.surfaceMuted,
+          backgroundColor: `${tint}1A`,
+          borderColor: `${tint}33`,
         },
         style,
       ]}
     >
-      <Text style={[styles.initials, { fontSize: size * 0.34 }]}>
+      <Text style={[styles.initials, { fontSize: size * 0.34, color: tint }]}>
         {displayInitials}
       </Text>
     </View>
@@ -66,10 +75,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: colors123.borderLight,
   },
   initials: {
-    color: colors123.textSecondary,
     fontFamily: fonts.bold,
   },
 });

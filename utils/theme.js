@@ -23,20 +23,20 @@ export const COLORS = {
   info: "#245EA8",
   infoLight: "#EEF5FC",
 
-  text: "#1F1A17",
-  textSecondary: "#57504A",
-  textMuted: "#756D67",
-  textDisabled: "#9E9791",
-  border: "#DCD6D0",
-  borderLight: "#E8E3DE",
-  borderSubtle: "#F0ECE8",
-  background: "#F7F5F2",
+  text: "#101828",
+  textSecondary: "#475467",
+  textMuted: "#667085",
+  textDisabled: "#98A2B3",
+  border: "#D0D7E2",
+  borderLight: "#E4E9F0",
+  borderSubtle: "#EEF2F6",
+  background: "#F4F7FB",
   surface: "#FFFFFF",
-  surfaceMuted: "#F1EEEA",
-  overlay: "rgba(16,16,20,0.52)",
+  surfaceMuted: "#F0F4F9",
+  overlay: "rgba(16,24,40,0.52)",
 
-  pendingBg: "#F1EEEA",
-  pendingText: "#57504A",
+  pendingBg: "#EEF2F6",
+  pendingText: "#475467",
   progressBg: "#EEF5FC",
   progressText: "#245EA8",
   readyBg: "#EDF8F1",
@@ -102,7 +102,7 @@ export const colors123 = {
   textDisabled: COLORS.textDisabled,
   textSoft: COLORS.textSecondary,
   white: COLORS.surface,
-  shadow: "rgba(16,16,20,0.08)",
+  shadow: "rgba(16,24,40,0.08)",
   overlay: COLORS.overlay,
   pendingBg: COLORS.pendingBg,
   pendingText: COLORS.pendingText,
@@ -208,11 +208,19 @@ export const typography = {
 };
 
 const flatShadow = { shadowOpacity: 0, shadowRadius: 0, elevation: 0 };
+// Soft, blue-tinted depth for cards; kept low so dense screens stay calm
+const softShadow = (height, opacity, blur, elevation) => ({
+  shadowColor: "#1D3B66",
+  shadowOffset: { width: 0, height },
+  shadowOpacity: opacity,
+  shadowRadius: blur,
+  elevation,
+});
 export const SHADOWS = {
   none: flatShadow,
-  xs: flatShadow,
-  sm: flatShadow,
-  md: flatShadow,
+  xs: softShadow(1, 0.05, 3, 1),
+  sm: softShadow(2, 0.07, 8, 2),
+  md: softShadow(6, 0.09, 16, 4),
   lg: {
     shadowColor: COLORS.text,
     shadowOffset: { width: 0, height: 6 },
@@ -230,7 +238,7 @@ export const SHADOWS = {
   colored: () => flatShadow,
 };
 
-export const shadows = { card: SHADOWS.none, soft: SHADOWS.none, floating: SHADOWS.lg };
+export const shadows = { card: SHADOWS.sm, soft: SHADOWS.xs, floating: SHADOWS.lg };
 
 export const motion = { fast: 180, base: 280, slow: 440 };
 export const wp = (percent) => (SCREEN_W * percent) / 100;

@@ -273,6 +273,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     paddingHorizontal: spacing.xs,
+    ...shadows.card,
   },
   summaryCard: {
     flex: 1,
@@ -300,16 +301,18 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     overflow: "hidden",
+    ...shadows.card,
   },
   recordCard: {
     backgroundColor: colors123.surface,
     borderRadius: 0,
     borderWidth: 0,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
     padding: spacing.md,
     gap: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors123.borderLight,
+    ...shadows.card,
   },
   pressedCard: {
     opacity: 0.88,

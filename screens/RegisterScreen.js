@@ -8,7 +8,7 @@ import {useToast} from '../context/ToastContext';
 import IconInput from '../components/IconInput';
 import AppButton from '../components/AppButton';
 import {PRIVACY_URL,TERMS_URL,openLink} from '../utils/legalLinks';
-import {colors123,fonts,radius,spacing,typography} from '../utils/theme';
+import {colors123,fonts,radius,spacing,typography,shadows} from '../utils/theme';
 
 const validEmail=(value)=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||'').trim());
 const validPhone=(value)=>{const d=String(value||'').replace(/\D/g,'');return d.length===10||(d.length===12&&d.startsWith('91'));};
@@ -95,7 +95,7 @@ const s=StyleSheet.create({
   backText:{...typography.small,color:colors123.text},
   title:{...typography.h1,color:colors123.text,marginTop:spacing.sm},
   subtitle:{...typography.small,color:colors123.textMuted,marginTop:4,marginBottom:spacing.md},
-  card:{gap:spacing.md},
+  card:{gap:spacing.md,marginTop:spacing.md,padding:20,borderRadius:radius.xl,backgroundColor:colors123.surface,...shadows.card},
   error:{...typography.small,color:colors123.danger},
   legal:{...typography.caption,color:colors123.textMuted,textAlign:'center'},
   alt:{minHeight:48,alignItems:'center',justifyContent:'center',flexDirection:'row',marginTop:spacing.xs},

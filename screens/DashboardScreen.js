@@ -1,5 +1,8 @@
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ScreenHeader from "../components/ScreenHeader";
+import Reveal from "../components/Reveal";
+import PressableScale from "../components/PressableScale";
+import { LinearGradient } from "expo-linear-gradient";
 import AppButton from "../components/AppButton";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
@@ -7,7 +10,6 @@ import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, parseISO } from "date-fns";
-import { MotiView } from "../components/AccessibleMotionView";
 import AppCard from "../components/AppCard";
 import StatusBadge from "../components/ui/StatusBadge";
 import { DashboardSkeleton } from "../components/SkeletonBlock";
@@ -18,9 +20,8 @@ import { getAccountStatusText, isAccountInactive } from "../utils/accountStatus"
 import { getDeliveryDateKey, getOrderCustomerId, getOrderItemsText, toLocalDateKey } from "../utils/formHelpers";
 import {
   colors123,
-  SIZES,
-  normalize,
   radius,
+  shadows,
   spacing,
   fonts,
   formatCurrency } from
@@ -189,6 +190,15 @@ export default function DashboardScreen({ navigation }) {
       pending: count((order) => !order.status || order.status === "pending" || order.status === "new")
     };
   }, [orders]);
+  const heroStats = useMemo(() => {
+    const today = toLocalDateKey();
+    const open = (Array.isArray(orders) ? orders : []).filter((order) => order.status !== "delivered");
+    return {
+      dueToday: open.filter((order) => getDeliveryDateKey(order) === today).length,
+      overdue: overdueOrders.length,
+      active: open.length,
+    };
+  }, [orders, overdueOrders]);
   const isTrialActive = subscription?.status === "trial" && subscription?.isActive;
   const isTrialExpired = isAccountInactive(subscription);
   const shopName = cleanDisplayText(shop?.name, t("yourShop"));
@@ -220,8 +230,32 @@ export default function DashboardScreen({ navigation }) {
 
       }>
 
-      <ScreenHeader title={shopName} action={can("orders:write") ? <AppButton icon="plus" label={t("newOrder")} size="sm" onPress={() => navigation.navigate("CustomerSelection")} /> : null} />
-      {showMyWork && <MyWorkCard t={t} work={myWork} onOpen={(orderId) => navigation.navigate("OrderDetail", { orderId })} onDone={confirmDone} />}
+      <Reveal>
+        <LinearGradient colors={["#1A8CFF", colors123.primary, "#0057B8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+          <View style={styles.heroGlow} />
+          <Text style={styles.heroDate}>{format(new Date(), "EEEE, d MMM")}</Text>
+          <Text accessibilityRole="header" numberOfLines={2} style={styles.heroTitle}>{shopName}</Text>
+          <View style={styles.heroStats}>
+            {[
+            { key: "today", label: t("dueToday"), value: heroStats.dueToday },
+            { key: "overdue", label: t("overdue"), value: heroStats.overdue },
+            { key: "active", label: t("inProgress"), value: heroStats.active }].
+            map((stat) =>
+            <View key={stat.key} accessible accessibilityLabel={`${stat.label}: ${stat.value}`} style={styles.heroStat}>
+                <Text style={styles.heroStatValue}>{stat.value}</Text>
+                <Text numberOfLines={2} style={styles.heroStatLabel}>{stat.label}</Text>
+              </View>
+            )}
+          </View>
+          {can("orders:write") &&
+          <PressableScale accessibilityRole="button" onPress={() => navigation.navigate("CustomerSelection")} style={styles.heroButton}>
+              <MaterialCommunityIcons name="plus" size={20} color={colors123.primary} />
+              <Text style={styles.heroButtonText}>{t("newOrder")}</Text>
+            </PressableScale>
+          }
+        </LinearGradient>
+      </Reveal>
+      {showMyWork && <Reveal index={1}><MyWorkCard t={t} work={myWork} onOpen={(orderId) => navigation.navigate("OrderDetail", { orderId })} onDone={confirmDone} /></Reveal>}
       {isOwner && (isTrialActive || isTrialExpired) && (
         <AppCard variant="muted">
           <View style={styles.announcementTopRow}>
@@ -249,12 +283,8 @@ export default function DashboardScreen({ navigation }) {
       }
       {/* Overdue Orders Alert */}
       {overdueOrders.length > 0 &&
-      <MotiView
-        animate={{ opacity: 1, translateY: 0 }}
-        from={{ opacity: 0, translateY: -10 }}
-        transition={{ duration: 300 }}>
-
-          <Pressable accessibilityRole="button"
+      <Reveal index={1}>
+          <PressableScale accessibilityRole="button"
           style={styles.alertCard}
           onPress={() => navigation.navigate("Orders")}>
 
@@ -279,10 +309,11 @@ export default function DashboardScreen({ navigation }) {
             name="chevron-right"
             size={20} />
 
-          </Pressable>
-        </MotiView>
+          </PressableScale>
+        </Reveal>
       }
 
+      <Reveal index={2}>
       <AppCard style={styles.productionCard}>
         <View style={styles.sectionRow}>
           <Text style={styles.sectionTitle}>{t("workInProgress")}</Text>
@@ -295,7 +326,7 @@ export default function DashboardScreen({ navigation }) {
           { key: "stitching", label: t("stitching"), value: workStats.stitching, icon: "needle", color: colors123.primary, status: "stitching" },
           { key: "ready", label: t("readyForPickupTile"), value: workStats.ready, icon: "cube-send", color: colors123.success, status: "ready" }].
           map((item) =>
-          <Pressable accessibilityRole="button"
+          <PressableScale accessibilityRole="button"
             accessibilityLabel={`${item.label}: ${item.value}`}
             key={item.key}
             onPress={() => navigation.navigate("Orders", { status: item.status })}
@@ -311,25 +342,31 @@ export default function DashboardScreen({ navigation }) {
                 <Text style={styles.productionLabel}>{item.label}</Text>
                 <Text style={styles.productionValue}>{item.value}</Text>
               </View>
-            </Pressable>
+            </PressableScale>
           )}
         </ResponsiveGrid>
       </AppCard>
+      </Reveal>
 
       {can("dashboard:read") &&
-      <Pressable accessibilityRole="button"
+      <Reveal index={3}>
+      <PressableScale accessibilityRole="button"
         onPress={() => navigation.navigate("Reports")}
         style={({ pressed }) => [styles.reportsRow, pressed && styles.productionTilePressed]}>
 
-        <MaterialCommunityIcons name="chart-box-outline" size={22} color={colors123.primary} />
+        <View style={styles.reportsIcon}>
+          <MaterialCommunityIcons name="chart-box-outline" size={22} color={colors123.primary} />
+        </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.sectionTitle}>{t("viewReports")}</Text>
           <Text style={styles.sectionSubtitle}>{t("viewReportsSubtitle")}</Text>
         </View>
         <MaterialCommunityIcons name="chevron-right" size={22} color={colors123.textMuted} />
-      </Pressable>
+      </PressableScale>
+      </Reveal>
       }
 
+      <Reveal index={4}>
       <AppCard>
         <View style={styles.sectionRow}>
           <View>
@@ -345,7 +382,7 @@ export default function DashboardScreen({ navigation }) {
         <View style={{ gap: spacing.md }}>
           {upcomingOrders.length > 0 ?
           upcomingOrders.map((order, index) =>
-          <Pressable
+          <PressableScale
             key={order.id}
             accessibilityRole="button"
             onPress={() => navigation.navigate("OrderDetail", { orderId: order.id })}
@@ -368,7 +405,7 @@ export default function DashboardScreen({ navigation }) {
                   </Text>
                   <StatusBadge compact status={order.status} />
                 </View>
-              </Pressable>
+              </PressableScale>
           ) :
 
           <View style={styles.emptyState}>
@@ -382,6 +419,7 @@ export default function DashboardScreen({ navigation }) {
           }
         </View>
       </AppCard>
+      </Reveal>
     </ScrollView>);
 
 }
@@ -400,12 +438,49 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: spacing.sm,
   },
-  grid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.md,
-    justifyContent: "space-between",
+  hero: {
+    borderRadius: radius.xl,
+    padding: spacing.lg,
+    gap: spacing.xs,
+    overflow: "hidden",
+    ...shadows.floating,
+    shadowColor: colors123.primary,
+    shadowOpacity: 0.3,
   },
+  heroGlow: {
+    position: "absolute",
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    right: -70,
+    top: -90,
+    backgroundColor: "rgba(255,255,255,0.12)",
+  },
+  heroDate: { fontFamily: fonts.medium, fontSize: 13, color: "rgba(255,255,255,0.8)" },
+  heroTitle: { fontFamily: fonts.bold, fontSize: 26, lineHeight: 32, letterSpacing: -0.5, color: colors123.surface },
+  heroStats: { flexDirection: "row", gap: spacing.xs, marginTop: spacing.sm },
+  heroStat: {
+    flex: 1,
+    borderRadius: radius.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  heroStatValue: { fontFamily: fonts.bold, fontSize: 22, color: colors123.surface },
+  heroStatLabel: { fontFamily: fonts.medium, fontSize: 12, lineHeight: 16, color: "rgba(255,255,255,0.85)" },
+  heroButton: {
+    marginTop: spacing.sm,
+    minHeight: 48,
+    borderRadius: radius.pill,
+    backgroundColor: colors123.surface,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: spacing.xs,
+  },
+  heroButtonText: { fontFamily: fonts.semibold, fontSize: 15, color: colors123.primary },
   productionCard: {
     gap: spacing.sm,
   },
@@ -505,10 +580,19 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     minHeight: 64,
     padding: spacing.md,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
     backgroundColor: colors123.surface,
+    ...shadows.card,
+  },
+  reportsIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: colors123.primarySoft,
+    alignItems: "center",
+    justifyContent: "center",
   },
   checklistCard: { gap: spacing.xs },
   checklistTitle: { fontFamily: fonts.semibold, fontSize: 16, color: colors123.text },
@@ -554,203 +638,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 14,
     color: colors123.textMuted,
-  },
-  splitSummaryRow: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  splitSummaryCard: {
-    flex: 1,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    backgroundColor: colors123.surface,
-    padding: spacing.md,
-  },
-  splitSummaryHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    marginBottom: spacing.sm,
-  },
-  splitSummaryTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors123.text,
-  },
-  splitSummaryCount: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: colors123.textMuted,
-    marginBottom: spacing.xs,
-  },
-  splitSummaryRevenue: {
-    fontFamily: fonts.bold,
-    fontSize: 16,
-    color: colors123.text,
-  },
-  shopProfileShadow: {
-    borderRadius: radius.lg,
-    shadowColor: colors123.text,
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0,
-    shadowRadius: 24,
-    elevation: 0,
-  },
-  shopProfileCard: {
-    padding: spacing.lg,
-    borderRadius: radius.lg,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.16)",
-    overflow: "hidden",
-  },
-  shopProfileHeader: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: spacing.md,
-    marginBottom: spacing.md,
-  },
-  shopProfileAvatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: colors123.surface,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.82)",
-    position: "relative",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0,
-    shadowRadius: 12,
-    elevation: 0,
-  },
-  shopProfileLogo: {
-    width: 52,
-    height: 52,
-    borderRadius: 18,
-  },
-  shopProfileAvatarBadge: {
-    position: "absolute",
-    right: -4,
-    bottom: -4,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: colors123.success,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    borderColor: colors123.surface,
-  },
-  shopProfileInfo: {
-    flex: 1,
-    minWidth: 0,
-  },
-  shopProfileTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
-  },
-  shopProfileEyebrow: {
-    fontFamily: fonts.extrabold,
-    fontSize: 12,
-    color: "rgba(255,255,255,0.72)",
-    textTransform: "uppercase",
-  },
-  shopProfileStatusPill: {
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 5,
-    backgroundColor: "rgba(255,255,255,0.16)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.22)",
-  },
-  shopProfileStatusText: {
-    fontFamily: fonts.extrabold,
-    fontSize: 12,
-    color: colors123.surface,
-  },
-  shopProfileName: {
-    fontFamily: fonts.extrabold,
-    fontSize: 21,
-    color: colors123.surface,
-    lineHeight: 27,
-  },
-  shopProfileRole: {
-    fontFamily: fonts.semibold,
-    fontSize: 13,
-    color: "rgba(255,255,255,0.78)",
-    marginTop: spacing.xs,
-  },
-  shopProfileDescription: {
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    lineHeight: 20,
-    color: "rgba(255,255,255,0.76)",
-    marginBottom: spacing.md,
-  },
-  shopProfileMetaGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  shopProfileMetaItem: {
-    flexGrow: 1,
-    flexBasis: "47%",
-    minHeight: 42,
-    borderRadius: 12,
-    paddingHorizontal: spacing.sm,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    backgroundColor: "rgba(255,255,255,0.14)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.20)",
-  },
-  shopProfileMetaText: {
-    flex: 1,
-    fontFamily: fonts.semibold,
-    fontSize: 12,
-    color: colors123.surface,
-  },
-  shopProfileActions: {
-    flexDirection: "row",
-    gap: spacing.sm,
-  },
-  actionButton: {
-    flex: 1,
-    minHeight: 46,
-    borderRadius: radius.lg,
-    paddingHorizontal: spacing.sm,
-    backgroundColor: "rgba(255,255,255,0.12)",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "row",
-    gap: spacing.xs,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.26)",
-  },
-  actionButtonPrimary: {
-    backgroundColor: colors123.surface,
-    borderColor: colors123.surface,
-  },
-  actionButtonPressed: {
-    opacity: 0.82,
-  },
-  actionButtonText: {
-    fontFamily: fonts.extrabold,
-    fontSize: 12,
-    color: colors123.surface,
-  },
-  actionButtonPrimaryText: {
-    fontFamily: fonts.extrabold,
-    fontSize: 12,
-    color: colors123.primary,
   },
 });

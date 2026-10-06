@@ -28,9 +28,29 @@ import NotificationScreen from '../screens/NotificationScreen';
 import { useStitchPro } from '../context/StitchProContext';
 import { useLanguage } from '../context/LanguageContext';
 
-import { colors123, SIZES, normalize } from '../utils/theme';
+import { colors123, SIZES, normalize, SHADOWS } from '../utils/theme';
+import Animated, { useAnimatedStyle, withSpring, withTiming } from 'react-native-reanimated';
 
 const Tab = createBottomTabNavigator();
+
+// Active tab: the pill fades in and the icon pops slightly
+function TabIcon({ name, focused, color }) {
+  const pillStyle = useAnimatedStyle(() => ({
+    opacity: withTiming(focused ? 1 : 0, { duration: 180 }),
+    transform: [{ scaleX: withSpring(focused ? 1 : 0.6, { damping: 16, stiffness: 260 }) }],
+  }));
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: withSpring(focused ? 1.08 : 1, { damping: 14, stiffness: 300 }) }],
+  }));
+  return (
+    <View style={styles.tabIconWrap}>
+      <Animated.View style={[StyleSheet.absoluteFill, styles.tabIconPill, pillStyle]} />
+      <Animated.View style={iconStyle}>
+        <MaterialCommunityIcons color={color} name={focused ? iconMap[name] : iconOutlineMap[name]} size={22} />
+      </Animated.View>
+    </View>
+  );
+}
 const Stack = createNativeStackNavigator();
 
 const iconMap = {
@@ -78,28 +98,17 @@ function StudioTabs() {
           fontFamily: fonts.medium,
           marginBottom: 2
         },
-        tabBarIcon: ({ color, focused }) =>
-          <View style={[styles.tabIconWrap, focused && styles.tabIconWrapActive]}>
-            <MaterialCommunityIcons
-              color={color}
-              name={focused ? iconMap[route.name] : iconOutlineMap[route.name]}
-              size={22}
-            />
-          </View>,
+        tabBarIcon: ({ color, focused }) => <TabIcon name={route.name} focused={focused} color={color} />,
 
         tabBarStyle: {
           height: 64 + insets.bottom,
           paddingTop: 6,
           paddingBottom: Math.max(insets.bottom, 6),
           paddingHorizontal: 8,
-          borderTopWidth: 1,
-          borderColor: colors123.borderLight,
+          borderTopWidth: 0,
           backgroundColor: colors123.surface,
-          elevation: 0,
-          shadowColor: colors123.text,
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0,
-          shadowRadius: 12
+          ...SHADOWS.md,
+          shadowOffset: { width: 0, height: -4 },
         },
         tabBarItemStyle: {
           borderRadius: 12
@@ -116,6 +125,16 @@ function StudioTabs() {
     </View>);
 
 }
+
+const stackOptions = {
+  headerShown: false,
+  animation: 'slide_from_right',
+  headerShadowVisible: false,
+  headerStyle: { backgroundColor: colors123.background },
+  headerTintColor: colors123.primary,
+  headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text },
+  contentStyle: { backgroundColor: colors123.background },
+};
 
 export default function MainTabNavigator() {
   const { subscription, subscriptionLoading, subscriptionState, fetchSubscription } = useStitchPro();
@@ -143,29 +162,26 @@ export default function MainTabNavigator() {
   }
 
   return (
-    <Stack.Navigator initialRouteName="StudioTabs" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="StudioTabs" screenOptions={stackOptions}>
       <Stack.Screen name="Sessions" component={SessionsScreen} options={{headerShown:true,title:"Devices and sessions"}} />
       <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{headerShown:true,title:"Delete account"}} />
-      <Stack.Screen name="Password" component={PasswordScreen} options={{headerShown:true,title:"Password & security",headerTintColor:colors123.primary,headerTitleStyle:{fontFamily:fonts.semibold,color:colors123.text}}} />
+      <Stack.Screen name="Password" component={PasswordScreen} options={{headerShown:true,title:"Password & security"}} />
       <Stack.Screen name="StudioTabs" component={StudioTabs} />
-      <Stack.Screen name="RecordMeasurement" component={RecordMeasurementScreen} options={{ headerShown: true, title: 'Record measurement', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
-      <Stack.Screen name="ViewMeasurements" component={ViewMeasurementsScreen} options={{ headerShown: true, title: 'Measurement history', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
-      <Stack.Screen name="Reports" component={ReportsScreen} options={{ headerShown: true, title: 'Reports', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
-      <Stack.Screen name="Measurements" component={MeasurementsScreen} options={{ headerShown: true, title: 'Measurements', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
+      <Stack.Screen name="RecordMeasurement" component={RecordMeasurementScreen} options={{ headerShown: true, title: 'Record measurement' }} />
+      <Stack.Screen name="ViewMeasurements" component={ViewMeasurementsScreen} options={{ headerShown: true, title: 'Measurement history' }} />
+      <Stack.Screen name="Reports" component={ReportsScreen} options={{ headerShown: true, title: 'Reports' }} />
+      <Stack.Screen name="Measurements" component={MeasurementsScreen} options={{ headerShown: true, title: 'Measurements' }} />
       <Stack.Screen
         name="CustomerDetail"
         component={CustomerDetailScreen}
-        options={{ animation: 'slide_from_right' }} />
+      />
 
       <Stack.Screen
         name="CustomerSelection"
         component={CustomerSelectionScreen}
-        options={{ animation: 'slide_from_right' }} />
+      />
 
-      <Stack.Screen
-        name="CreateOrder"
-        options={{ animation: 'slide_from_right' }}>
-
+      <Stack.Screen name="CreateOrder">
         {(props) =>
         <Suspense fallback={<LazyFallback />}>
             <CreateOrder {...props} />
@@ -175,22 +191,20 @@ export default function MainTabNavigator() {
       <Stack.Screen
         name="OrderDetail"
         component={OrderDetail}
-        options={{ animation: 'slide_from_right' }} />
+      />
 
       <Stack.Screen
         name="Staff"
         component={StaffScreen}
         options={{
-          animation: 'slide_from_right',
-          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text }
+          presentation: 'card', headerShown: true
         }} />
 
       <Stack.Screen
         name="Notifications"
         component={NotificationScreen}
         options={{
-          animation: 'slide_from_right',
-          presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text }
+          presentation: 'card', headerShown: true
         }} />
 
 
@@ -213,14 +227,14 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.background,
   },
   tabIconWrap: {
-    minWidth: 40,
+    minWidth: 56,
     height: 30,
     paddingHorizontal: 9,
-    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
   },
-  tabIconWrapActive: {
+  tabIconPill: {
+    borderRadius: 15,
     backgroundColor: colors123.primarySoft,
   },
 });

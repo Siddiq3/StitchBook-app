@@ -307,12 +307,13 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     overflow: "hidden",
+    ...shadows.card,
   },
   customerCard: {
     backgroundColor: colors123.surface,
     borderRadius: 0,
     borderWidth: 0,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
     paddingVertical: 12,
     paddingHorizontal: spacing.md,
     flexDirection: "row",
@@ -320,6 +321,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     borderBottomWidth: 1,
     borderBottomColor: colors123.borderLight,
+    ...shadows.card,
   },
   pressedCard: {
     opacity: 0.88,

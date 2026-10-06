@@ -58,7 +58,7 @@ const StitchProNavigator = () => {
   if (!isAuthenticated) {
     return (
       <NavigationContainer theme={activeTheme}>
-        <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+        <AuthStack.Navigator screenOptions={{ headerShown: false, animation: 'fade_from_bottom' }}>
           <AuthStack.Screen name="Login" component={LoginScreen} />
           <AuthStack.Screen name="Register" component={RegisterScreen} />
           <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />

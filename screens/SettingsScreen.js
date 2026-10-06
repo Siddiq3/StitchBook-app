@@ -15,7 +15,7 @@ import {
 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors123, spacing, fonts, radius } from '../utils/theme';
+import { colors123, spacing, fonts, radius, shadows } from '../utils/theme';
 import ScreenHeader from '../components/ScreenHeader';
 import ListRow from '../components/ListRow';
 import AppButton from '../components/AppButton';
@@ -477,7 +477,7 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     backgroundColor: colors123.background,
   },
-  groupCard: { marginTop: spacing.md, marginHorizontal: spacing.md, paddingHorizontal: spacing.md, paddingTop: spacing.sm, backgroundColor: colors123.surface, borderRadius: radius.md, borderWidth: 1, borderColor: colors123.borderLight },
+  groupCard: { marginTop: spacing.md, marginHorizontal: spacing.md, paddingHorizontal: spacing.md, paddingTop: spacing.sm, backgroundColor: colors123.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors123.borderSubtle, ...shadows.card },
   groupTitle: { fontSize: 14, color: colors123.textMuted, fontFamily: fonts.semibold, paddingTop: spacing.xs },
   profileSection: {
     paddingHorizontal: spacing.md,
@@ -485,13 +485,9 @@ const styles = StyleSheet.create({
     marginHorizontal: spacing.md,
     backgroundColor: colors123.surface,
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
     borderRadius: radius.md,
-    shadowColor: colors123.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0,
-    shadowRadius: 10,
-    elevation: 0,
+    ...shadows.card,
   },
   profileHeader: {
     flexDirection: "row",
@@ -621,13 +617,9 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
     gap: spacing.md,
-    shadowColor: colors123.text,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0,
-    shadowRadius: 4,
-    elevation: 0,
+    ...shadows.card,
   },
   languageIconContainer: {
     width: 40,

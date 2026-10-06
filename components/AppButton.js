@@ -1,7 +1,8 @@
 import React from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import PressableScale from "./PressableScale";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { colors123, fonts, radius, spacing } from "../utils/theme";
+import { colors123, fonts, radius, spacing, shadows } from "../utils/theme";
 
 export default function AppButton({
   label, title, onPress, icon, variant = "primary", size = "md", style, textStyle,
@@ -19,7 +20,7 @@ export default function AppButton({
   }[variant] || { bg: colors123.primary, border: colors123.primary, text: colors123.surface };
 
   return (
-    <Pressable
+    <PressableScale
       {...props}
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel || buttonLabel}
@@ -31,6 +32,7 @@ export default function AppButton({
         size === "sm" && styles.small,
         size === "lg" && styles.large,
         { backgroundColor: palette.bg, borderColor: palette.border },
+        variant === "primary" && !unavailable && styles.raised,
         pressed && !unavailable && styles.pressed,
         pressed && !unavailable && variant === "primary" && { backgroundColor: colors123.primaryPressed },
         unavailable && styles.unavailable,
@@ -44,14 +46,14 @@ export default function AppButton({
           {buttonLabel}
         </Text>
       </View>
-    </Pressable>
+    </PressableScale>
   );
 }
 
 const styles = StyleSheet.create({
   base: {
     minHeight: 48,
-    borderRadius: radius.sm,
+    borderRadius: radius.md,
     justifyContent: "center",
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
@@ -61,6 +63,7 @@ const styles = StyleSheet.create({
   large: { minHeight: 52, paddingHorizontal: spacing.lg },
   content: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: spacing.xs },
   label: { flexShrink: 1, textAlign: "center", fontFamily: fonts.semibold, fontSize: 14, lineHeight: 21 },
-  pressed: { opacity: 0.88 },
+  pressed: { opacity: 0.92 },
+  raised: { ...shadows.card, shadowColor: colors123.primary, shadowOpacity: 0.22 },
   unavailable: { opacity: 0.55, backgroundColor: colors123.surfaceMuted, borderColor: colors123.borderLight },
 });

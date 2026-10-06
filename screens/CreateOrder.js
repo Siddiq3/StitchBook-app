@@ -840,7 +840,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
+    ...shadows.card,
   },
   customerInfo: {
     flex: 1,
@@ -952,7 +953,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
+    ...shadows.card,
   },
   itemDetails: {
     flex: 1,
@@ -1004,7 +1006,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
+    ...shadows.card,
   },
   cardTitle: {
     fontSize: fonts.base.fontSize,

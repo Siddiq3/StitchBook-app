@@ -7,7 +7,7 @@ import {authService} from '../services/authService';
 import {useToast} from '../context/ToastContext';
 import IconInput from '../components/IconInput';
 import AppButton from '../components/AppButton';
-import {colors123,fonts,radius,spacing,typography} from '../utils/theme';
+import {colors123,fonts,radius,spacing,typography,shadows} from '../utils/theme';
 
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -165,7 +165,7 @@ const s=StyleSheet.create({
   iconWrap:{marginTop:spacing.lg,width:48,height:48,borderRadius:radius.sm,alignItems:'center',justifyContent:'center',backgroundColor:colors123.primarySoft},
   title:{...typography.h1,color:colors123.text,marginTop:spacing.md},
   subtitle:{...typography.small,color:colors123.textMuted,marginTop:6,maxWidth:380},
-  card:{marginTop:spacing.md,gap:spacing.md},
+  card:{marginTop:spacing.md,gap:spacing.md,padding:20,borderRadius:radius.xl,backgroundColor:colors123.surface,...shadows.card},
   helper:{...typography.caption,color:colors123.textMuted},
   error:{...typography.small,color:colors123.danger},
   linkButton:{minHeight:44,alignItems:'center',justifyContent:'center'},

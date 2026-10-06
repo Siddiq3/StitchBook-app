@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { colors123, fonts, radius, spacing } from '../utils/theme';
+import { colors123, fonts, radius, spacing, shadows } from '../utils/theme';
 import { useLanguage } from '../context/LanguageContext';
 
 const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
@@ -45,6 +45,7 @@ const createStyles = (colors123, fonts, radius, spacing) => StyleSheet.create({
     backgroundColor: colors123.surface,
     borderRadius: radius.md,
     overflow: "hidden",
+    ...shadows.card,
   },
   languageOption: {
     flexDirection: "row",

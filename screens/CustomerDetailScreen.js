@@ -128,6 +128,18 @@ export default function CustomerDetailScreen({ navigation, route }) {
     });
   }, [customerMeasurements]);
 
+  // Hooks stay above the early returns below.
+  // The sheet edits measurement values only; passing the whole record made
+  // id/customer_id/timestamps get saved back as "measurements".
+  const measurementSheetValues = useMemo(() => {
+    if (!selectedMeasurement) return {};
+    return {
+      outfitType: selectedMeasurement.outfitType || selectedMeasurement.outfit_type,
+      outfitLabel: selectedMeasurement.outfitLabel || selectedMeasurement.outfit_label,
+      ...Object.fromEntries(getMeasurementEntries(selectedMeasurement.measurementsData || selectedMeasurement.measurements_data))
+    };
+  }, [selectedMeasurement]);
+
   if (isLoadingCustomer) {
     return (
       <View style={styles.loadingContainer}>
@@ -162,17 +174,6 @@ export default function CustomerDetailScreen({ navigation, route }) {
     setMeasurementSheetMode("add");
     setShowMeasurementSheet(true);
   };
-
-  // The sheet edits measurement values only; passing the whole record made
-  // id/customer_id/timestamps get saved back as "measurements".
-  const measurementSheetValues = useMemo(() => {
-    if (!selectedMeasurement) return {};
-    return {
-      outfitType: selectedMeasurement.outfitType || selectedMeasurement.outfit_type,
-      outfitLabel: selectedMeasurement.outfitLabel || selectedMeasurement.outfit_label,
-      ...Object.fromEntries(getMeasurementEntries(selectedMeasurement.measurementsData || selectedMeasurement.measurements_data))
-    };
-  }, [selectedMeasurement]);
 
   const openEditMeasurementSheet = (measurement) => {
     setSelectedMeasurement(measurement);

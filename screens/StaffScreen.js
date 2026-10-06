@@ -1390,10 +1390,11 @@ const styles = StyleSheet.create({
   },
   previewOrderCard: {
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
     borderRadius: radius.md,
     backgroundColor: colors123.surface,
     padding: spacing.md,
+    ...shadows.card,
   },
   previewOrderTop: {
     flexDirection: "row",
@@ -1513,11 +1514,12 @@ const styles = StyleSheet.create({
   },
   accessRoleCard: {
     borderWidth: 1,
-    borderColor: colors123.borderLight,
+    borderColor: colors123.borderSubtle,
     borderRadius: radius.md,
     backgroundColor: colors123.surface,
     paddingHorizontal: spacing.md,
     paddingVertical: 13,
+    ...shadows.card,
   },
   accessRoleCardActive: {
     borderColor: colors123.primary,

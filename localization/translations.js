@@ -3599,6 +3599,8 @@ const appTranslationExtensions = {
     "ankle": "গোড়ালি"
   },
   "hi": {
+    "overdue": "समय निकल गया",
+    "dueToday": "आज देने हैं",
     "tailorShopManager": "दर्जी की दुकान प्रबंधक",
     "secure": "सुरक्षित",
     "loginHeroTitle": "बिना कागजी झंझट के अपनी दर्जी की दुकान चलाएँ।",

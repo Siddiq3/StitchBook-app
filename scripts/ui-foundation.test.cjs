@@ -62,9 +62,9 @@ test("status labels and tones support API and legacy spelling", () => {
 test("premium SaaS visual tokens stay consistent", () => {
   assert.equal(theme.COLORS.primary, "#007FFF");
   assert.equal(theme.COLORS.primaryLight, "#EAF4FF");
-  assert.equal(theme.COLORS.background, "#F7F5F2");
+  assert.equal(theme.COLORS.background, "#F4F7FB");
   assert.equal(theme.COLORS.surface, "#FFFFFF");
-  assert.equal(theme.COLORS.text, "#1F1A17");
+  assert.equal(theme.COLORS.text, "#101828");
   assert.equal(theme.spacing.xxs, 4);
   assert.equal(theme.spacing.xs, 8);
   assert.equal(theme.spacing.sm, 12);
