@@ -107,7 +107,7 @@ function StudioTabs() {
       })}>
 
       <Tab.Screen name="Dashboard" component={DashboardScreen} />
-      <Tab.Screen name="Orders" component={OrdersScreen} />
+      {can('orders:read') && (<Tab.Screen name="Orders" component={OrdersScreen} />)}
       {can("customers:read") && <Tab.Screen name="Customers" component={CustomersScreen} />}
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
@@ -118,7 +118,7 @@ function StudioTabs() {
 }
 
 export default function MainTabNavigator() {
-  const { subscription, subscriptionLoading, subscriptionState, fetchSubscription } = useStitchPro();
+  const { can, subscription, subscriptionLoading, subscriptionState, fetchSubscription } = useStitchPro();
   const requestedSubscription = useRef(false);
 
   useEffect(() => {
@@ -148,21 +148,21 @@ export default function MainTabNavigator() {
       <Stack.Screen name="DeleteAccount" component={DeleteAccountScreen} options={{headerShown:true,title:"Delete account"}} />
       <Stack.Screen name="Password" component={PasswordScreen} options={{headerShown:true,title:"Password & security",headerTintColor:colors123.primary,headerTitleStyle:{fontFamily:fonts.semibold,color:colors123.text}}} />
       <Stack.Screen name="StudioTabs" component={StudioTabs} />
-      <Stack.Screen name="RecordMeasurement" component={RecordMeasurementScreen} options={{ headerShown: true, title: 'Record measurement', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
-      <Stack.Screen name="ViewMeasurements" component={ViewMeasurementsScreen} options={{ headerShown: true, title: 'Measurement history', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
-      <Stack.Screen name="Reports" component={ReportsScreen} options={{ headerShown: true, title: 'Reports', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
-      <Stack.Screen name="Measurements" component={MeasurementsScreen} options={{ headerShown: true, title: 'Measurements', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />
-      <Stack.Screen
+      {can('measurements:write') && (<Stack.Screen name="RecordMeasurement" component={RecordMeasurementScreen} options={{ headerShown: true, title: 'Record measurement', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />)}
+      {can('measurements:read') && (<Stack.Screen name="ViewMeasurements" component={ViewMeasurementsScreen} options={{ headerShown: true, title: 'Measurement history', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />)}
+      {can('dashboard:read') && can('payments:read') && (<Stack.Screen name="Reports" component={ReportsScreen} options={{ headerShown: true, title: 'Reports', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />)}
+      {can('measurements:read') && can('customers:read') && (<Stack.Screen name="Measurements" component={MeasurementsScreen} options={{ headerShown: true, title: 'Measurements', headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text } }} />)}
+      {can('customers:read') && (<Stack.Screen
         name="CustomerDetail"
         component={CustomerDetailScreen}
-        options={{ animation: 'slide_from_right' }} />
+        options={{ animation: 'slide_from_right' }} />)}
 
-      <Stack.Screen
+      {can('orders:write') && can('customers:read') && (<Stack.Screen
         name="CustomerSelection"
         component={CustomerSelectionScreen}
-        options={{ animation: 'slide_from_right' }} />
+        options={{ animation: 'slide_from_right' }} />)}
 
-      <Stack.Screen
+      {can('orders:write') && (<Stack.Screen
         name="CreateOrder"
         options={{ animation: 'slide_from_right' }}>
 
@@ -171,27 +171,27 @@ export default function MainTabNavigator() {
             <CreateOrder {...props} />
           </Suspense>
         }
-      </Stack.Screen>
-      <Stack.Screen
+      </Stack.Screen>)}
+      {can('orders:read') && (<Stack.Screen
         name="OrderDetail"
         component={OrderDetail}
-        options={{ animation: 'slide_from_right' }} />
+        options={{ animation: 'slide_from_right' }} />)}
 
-      <Stack.Screen
+      {can('staff:read') && (<Stack.Screen
         name="Staff"
         component={StaffScreen}
         options={{
           animation: 'slide_from_right',
           presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text }
-        }} />
+        }} />)}
 
-      <Stack.Screen
+      {can('payments:read') && (<Stack.Screen
         name="Notifications"
         component={NotificationScreen}
         options={{
           animation: 'slide_from_right',
           presentation: 'card', headerShown: true, headerTintColor: colors123.primary, headerTitleStyle: { fontFamily: fonts.semibold, color: colors123.text }
-        }} />
+        }} />)}
 
 
     </Stack.Navigator>);
@@ -224,3 +224,4 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.primarySoft,
   },
 });
+

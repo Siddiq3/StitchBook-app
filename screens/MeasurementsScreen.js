@@ -1,3 +1,6 @@
+import usePagedList from '../hooks/usePagedList';
+import PagedListFooter from '../components/PagedListFooter';
+import { customerApi } from '../services/api';
 import AppButton from "../components/AppButton";
 import EmptyState from "../components/EmptyState";
 import InlineAlert from "../components/InlineAlert";
@@ -21,42 +24,20 @@ function countFilledFields(values) {
 
 export default function MeasurementsScreen({ navigation }) {const { t } = useLanguage();
   const { measurementsError } = useStitchPro();
-  const { customers, measurements, addMeasurement, fetchMeasurements, measurementsLoading, fetchCustomers } =
+  const { can, measurements, addMeasurement, fetchMeasurements, measurementsLoading, fetchCustomers } =
   useStitchPro();
   const { showToast } = useToast();
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [sheetVisible, setSheetVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch customers and their measurements on mount
+  const customerList = usePagedList(customerApi.getAll, 'customers');
+  const customers = customerList.items;
   useEffect(() => {
-    async function loadData() {
-      await fetchCustomers();
-    }
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    if (!customers || customers.length === 0) return;
-    Promise.all(
-      customers.map((customer) =>
-        fetchMeasurements(customer.id).catch(() => null)
-      )
-    );
+    if (!can('measurements:read')) return;
+    Promise.all(customers.map(customer => fetchMeasurements(customer.id).catch(() => null)));
   }, [customers, fetchMeasurements]);
-
-  // Pull to refresh
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await fetchCustomers();
-    const customerList = customers && customers.length > 0 ? customers : [];
-    await Promise.all(
-      customerList.map((customer) =>
-      fetchMeasurements(customer.id).catch(() => null)
-      )
-    );
-    setRefreshing(false);
-  }, [fetchCustomers, fetchMeasurements, customers]);
+  const onRefresh = customerList.reload;
 
   const measurementRecords = useMemo(
     () => {
@@ -122,7 +103,7 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
         showsVerticalScrollIndicator={false}
         refreshControl={
         <RefreshControl
-          refreshing={refreshing}
+          refreshing={customerList.loading}
           onRefresh={onRefresh}
           tintColor={colors123.primary}
           colors={[colors123.primary]} />
@@ -158,7 +139,7 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
             }}>
 
                 <Pressable accessibilityRole="button"
-              onPress={() => openSheet(record.customer)}
+              onPress={() => can('measurements:write') ? openSheet(record.customer) : navigation.navigate('ViewMeasurements', {customerId:record.customer.id,customerName:record.customer.name,customerGender:record.customer.gender})}
               style={({ pressed }) => [
               styles.recordCard,
               pressed && styles.pressedCard]
@@ -244,6 +225,7 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
           )}
           </View>
         }
+      <PagedListFooter list={customerList} />
       </ScrollView>
 
       <MeasurementSheet
@@ -410,3 +392,4 @@ const styles = StyleSheet.create({
     color: colors123.primary,
   },
 });
+

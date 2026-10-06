@@ -17,7 +17,7 @@ function load(file, imports) {
   }});
   return exports;
 }
-function provider({shopError, subscriptionError, profileError, cachedUser, profileUser} = {}) {
+function provider({shopError, subscriptionError, profileError, cachedUser, profileUser, customerCreateError} = {}) {
   let state, cleared = 0, savedShop, savedUser, createCalls = 0;
   const effects = [];
   const session = {token:'test-token',user:cachedUser || {id:1},shop:{id:7}};
@@ -33,7 +33,7 @@ function provider({shopError, subscriptionError, profileError, cachedUser, profi
   const api = {
     shopApi:{create:async () => {createCalls++; return {data:{data:session.shop}};},get:async () => {if(shopError) throw shopError; return {data:{data:session.shop}};}},
     subscriptionApi:{getStatus:async () => {if(subscriptionError) throw subscriptionError; return {data:{data:{isActive:true}}};}},
-    customerApi:{getAll:async () => ({data:{data:{customers:[{id:3}],pagination:{total:1}}}})},
+    customerApi:{create:async()=>{throw customerCreateError;},getAll:async () => ({data:{data:{customers:[{id:3}],pagination:{total:1}}}})},
     orderApi:{getAll:async () => {orderCalls++; return {data:{data:{orders:[{id:4}],pagination:{total:1}}}};}},
   };
   const module = load('context/StitchProContext.js', {
@@ -164,4 +164,18 @@ test('profile refresh validates and persists server permissions', async()=>{
   response={id:1};
   await assert.rejects(()=>service.refreshProfile(),/verify your shop permissions/);
   assert.equal(saved.role,'owner');
+});
+
+for (const code of ['PLAN_LIMIT_REACHED','STAFF_LIMIT_REACHED','STAFF_PLAN_REQUIRED']) {
+  test(`${code} preserves active account access`, async()=>{
+    const error=shopResponseError(402,'Plan limit reached',code);
+    const p=provider({customerCreateError:error});
+    await p.value.registerWithPassword({name:'Owner'});
+    await assert.rejects(p.render().addCustomer({name:'Customer'}),err=>err===error);
+    assert.equal(p.state().subscription.isActive,true);
+    assert.notEqual(p.state().subscription.status,'trial_expired');
+  });
+}
+test('missing permissions fail closed',()=>{
+  assert.equal(provider().render().can('staff:read'),false);
 });

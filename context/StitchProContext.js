@@ -57,6 +57,7 @@ const INITIAL = {
 
   // Orders
   orders: [],
+  ordersSummary: null,
   ordersLoading: false,
   ordersError: null,
   ordersPagination: { page: 1, limit: 20, total: 0 },
@@ -324,7 +325,7 @@ export const StitchProProvider = ({ children }) => {
   // owners so nobody is locked out by an old cached user.
   const can = (permission) => {
     const permissions = state.user?.permissions;
-    if (!Array.isArray(permissions)) return true;
+    if (!Array.isArray(permissions)) return false;
     return permissions.includes("*") || permissions.includes(permission);
   };
 
@@ -395,7 +396,7 @@ export const StitchProProvider = ({ children }) => {
   const isSubscriptionRequiredError = (err) => {
     const details = err.response?.data?.error;
     return (
-      err.response?.status === 402 ||
+      (err.response?.status === 402 && !details?.code) ||
       details?.code === "SUBSCRIPTION_REQUIRED" ||
       err.code === "SUBSCRIPTION_REQUIRED");
 
@@ -592,6 +593,7 @@ export const StitchProProvider = ({ children }) => {
         set({
           orders: items,
           ordersPagination: pagination,
+          ordersSummary: responseData.summary || null,
           ordersLoading: false
         });
         return true;
@@ -1271,3 +1273,4 @@ export const StitchProProvider = ({ children }) => {
     </StitchProContext.Provider>);
 
 };
+
