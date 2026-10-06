@@ -1,3 +1,5 @@
+import usePagedList from '../hooks/usePagedList';
+import PagedListFooter from '../components/PagedListFooter';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
@@ -15,7 +17,7 @@ import StatusBadge from "../components/StatusBadge";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
 
-import { measurementApi } from "../services/api";
+import { measurementApi, customerApi, orderApi } from "../services/api";
 import { colors123, fonts, formatCurrency, getOrderAmounts, radius, shadows, spacing } from "../utils/theme";
 import { useLanguage } from "../context/LanguageContext";
 import { formatPhone, getDeliveryDateKey, getMeasurementEntries, getOrderCustomerId, getOrderItemsText, normalizePhone } from "../utils/formHelpers";
@@ -25,7 +27,7 @@ export default function CustomerDetailScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { customerId } = route.params || {};
-  const { customers, measurements, orders, addOrder, addMeasurement, updateMeasurement, deleteMeasurement, fetchMeasurements, fetchOrders, fetchCustomers, measurementsLoading, ordersLoading } =
+  const { can, customers, measurements, addOrder, addMeasurement, updateMeasurement, deleteMeasurement, fetchMeasurements, fetchOrders, fetchCustomers, measurementsLoading, ordersLoading } =
   useStitchPro();
   const { showToast } = useToast();
   const [showMeasurementSheet, setShowMeasurementSheet] = useState(false);
@@ -36,6 +38,9 @@ export default function CustomerDetailScreen({ navigation, route }) {
   const [measurementListLoading, setMeasurementListLoading] = useState(false);
   const [measurementListError, setMeasurementListError] = useState(false);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
+  const [customer,setCustomer] = useState(null);
+  const customerOrderList = usePagedList(orderApi.getAll,'orders',{customerId});
+  const customerOrders = customerOrderList.items;
 
   const normalizeOutfitType = (value) => {
     if (!value) return "";
@@ -81,39 +86,14 @@ export default function CustomerDetailScreen({ navigation, route }) {
     }
   };
 
-  // Fetch customer data on mount
   useEffect(() => {
-    async function loadCustomerData() {
-      setIsLoadingCustomer(true);
-      try {
-        await Promise.all([
-        fetchCustomers(),
-        fetchMeasurements(customerId),
-        fetchOrders(),
-        loadMeasurementList(customerId)]
-        );
-      } catch (error) {
-
-      } finally {
-        setIsLoadingCustomer(false);
-      }
-    }
-    if (customerId) {
-      loadCustomerData();
-    }
-  }, [customerId, fetchCustomers, fetchMeasurements, fetchOrders]);
-
-  const customer = useMemo(
-    () => customers && customers.find((entry) => entry.id === customerId),
-    [customerId, customers]
-  );
-  const customerOrders = useMemo(
-    () => {
-      if (!orders || !Array.isArray(orders)) return [];
-      return orders.filter((entry) => String(getOrderCustomerId(entry)) === String(customerId));
-    },
-    [customerId, orders]
-  );
+    let active=true;
+    setIsLoadingCustomer(true);
+    customerApi.getById(customerId).then(response=>{if(active)setCustomer(response.data?.data);})
+      .catch(()=>{if(active)setCustomer(null);}).finally(()=>{if(active)setIsLoadingCustomer(false);});
+    if (can('measurements:read')) loadMeasurementList(customerId);
+    return ()=>{active=false;};
+  },[customerId]);
   const sortedMeasurements = useMemo(() => {
     if (!Array.isArray(customerMeasurements)) return [];
     return [...customerMeasurements].sort((left, right) => {
@@ -264,9 +244,9 @@ export default function CustomerDetailScreen({ navigation, route }) {
               <View style={styles.headerContent}>
                 <Text style={styles.headerTitle}>{customer?.name || 'Unknown'}</Text>
               </View>
-              <Pressable accessibilityRole="button" accessibilityLabel={t("newOrder")} onPress={handleCreateOrderPress} style={styles.createOrderButton}>
+              {can("orders:write") && (<Pressable accessibilityRole="button" accessibilityLabel={t("newOrder")} onPress={handleCreateOrderPress} style={styles.createOrderButton}>
                 <MaterialCommunityIcons color={colors123.surface} name="plus" size={22} />
-              </Pressable>
+              </Pressable>)}
             </View>
 
             {/* Customer Info Card */}
@@ -296,24 +276,24 @@ export default function CustomerDetailScreen({ navigation, route }) {
               {/* Stats Row */}
               <View style={styles.statsRow}>
                 <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{customerOrders.length}</Text>
+                  <Text style={styles.statValue}>{customerOrderList.pagination?.total ?? 0}</Text>
                   <Text style={styles.statLabel}>{t("auto_orders")}</Text>
                 </View>
                 <View style={styles.divider} />
                 <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{customerOrders.filter((order) => order.status !== "delivered").length}</Text>
+                  <Text style={styles.statValue}>{customerOrderList.summary?.active ?? 0}</Text>
                   <Text style={styles.statLabel}>{t("auto_active")}</Text>
                 </View>
                 <View style={styles.divider} />
-                <View style={styles.statItem}>
-                  <Text style={styles.statValue}>{formatCurrency(customerOrders.reduce((sum, o) => sum + getOrderAmounts(o).total, 0))}</Text>
+                {can("payments:read") && (<View style={styles.statItem}>
+                  <Text style={styles.statValue}>{formatCurrency(Number(customerOrderList.summary?.revenue || 0))}</Text>
                   <Text style={styles.statLabel}>{t("auto_revenue")}</Text>
-                </View>
+                </View>)}
               </View>
             </View>
 
             {/* Measurements Section */}
-            <View style={styles.section}>
+            {can("measurements:read") && (<View style={styles.section}>
               <View style={styles.sectionHeader}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.sectionTitle}>{t("auto_measurements_2")}</Text>
@@ -334,12 +314,12 @@ export default function CustomerDetailScreen({ navigation, route }) {
                   <MaterialCommunityIcons color={colors123.border} name="ruler" size={32} />
                   <Text style={styles.emptyStateTitle}>{t("auto_no_measurements_saved")}</Text>
                   <Text style={styles.emptyStateText}>{t("auto_add_measurements_to_speed_up_order_creation")}</Text>
-                  <Pressable accessibilityRole="button"
+                  {can("measurements:write") && (<Pressable accessibilityRole="button"
                 onPress={openAddMeasurementSheet}
                 style={styles.emptyStateButton}>
 
                     <Text style={styles.emptyStateButtonText}>{t("auto_add_first_measurement")}</Text>
-                  </Pressable>
+                  </Pressable>)}
                 </View> :
 
             <View style={styles.measurementsList}>
@@ -362,12 +342,12 @@ export default function CustomerDetailScreen({ navigation, route }) {
                             </Text>
                           </View>
                           <View style={styles.measurementCardActions}>
-                            <Pressable accessibilityRole="button" onPress={() => openEditMeasurementSheet(measurement)} style={styles.iconButton}>
+                            {can("measurements:write") && (<Pressable accessibilityRole="button" onPress={() => openEditMeasurementSheet(measurement)} style={styles.iconButton}>
                               <MaterialCommunityIcons name="pencil" size={18} color={colors123.primary} />
-                            </Pressable>
-                            <Pressable accessibilityRole="button" onPress={() => handleDeleteMeasurement(measurement)} style={styles.iconButton}>
+                            </Pressable>)}
+                            {can("measurements:write") && (<Pressable accessibilityRole="button" onPress={() => handleDeleteMeasurement(measurement)} style={styles.iconButton}>
                               <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors123.danger} />
-                            </Pressable>
+                            </Pressable>)}
                           </View>
                         </View>
                         <ResponsiveGrid minItemWidth={140} style={styles.measurementGrid}>
@@ -404,7 +384,7 @@ export default function CustomerDetailScreen({ navigation, route }) {
               })}
                 </View>
             }
-            </View>
+            </View>)}
 
             {/* Orders Section */}
             <View style={styles.section}>
@@ -420,12 +400,12 @@ export default function CustomerDetailScreen({ navigation, route }) {
                   <MaterialCommunityIcons color={colors123.border} name="clipboard-outline" size={32} />
                   <Text style={styles.emptyStateTitle}>{t("auto_no_orders_yet")}</Text>
                   <Text style={styles.emptyStateText}>{t("auto_create_the_first_order_for_this_customer")}</Text>
-                  <Pressable accessibilityRole="button"
+                  {can("orders:write") && (<Pressable accessibilityRole="button"
                 onPress={handleCreateOrderPress}
                 style={styles.emptyStateButton}>
 
                     <Text style={styles.emptyStateButtonText}>{t("auto_create_order")}</Text>
-                  </Pressable>
+                  </Pressable>)}
                 </View> :
 
             <View style={styles.ordersList}>
@@ -450,9 +430,9 @@ export default function CustomerDetailScreen({ navigation, route }) {
                           </View>
                           <View style={styles.orderCardActions}>
                             <StatusBadge compact status={order.status} />
-                            <Text style={styles.orderCardAmount}>
+                            {can("payments:read") && (<Text style={styles.orderCardAmount}>
                               {formatCurrency(getOrderAmounts(order).total)}
-                            </Text>
+                            </Text>)}
                           </View>
                         </View>
                         {getDeliveryDateKey(order) ?
@@ -470,7 +450,8 @@ export default function CustomerDetailScreen({ navigation, route }) {
             }
             </View>
 
-          </ScrollView>
+          <PagedListFooter list={customerOrderList} />
+      </ScrollView>
 
           <MeasurementSheet
           customer={customer}
@@ -855,3 +836,4 @@ const styles = StyleSheet.create({
     color: colors123.textMuted,
   },
 });
+

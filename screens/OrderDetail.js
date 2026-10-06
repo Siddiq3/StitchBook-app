@@ -1,3 +1,4 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useState, useEffect } from "react";
@@ -161,38 +162,39 @@ export default function OrderDetail({ route, navigation }) {
   const [whatsappMessage, setWhatsappMessage] = useState("");
 
   const orderFromContext = orders.find((o) => o.id === orderId);
-  const [orderDetail, setOrderDetail] = useState(orderFromContext || null);
+  const [orderDetail, setOrderDetail] = useState(null);
   const [loadingOrder, setLoadingOrder] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingStatus, setLoadingStatus] = useState(false);
   const [assignmentModal, setAssignmentModal] = useState(null);
   const [assignmentSaving, setAssignmentSaving] = useState(false);
 
+  const [orderError, setOrderError] = useState(null);
   const loadOrderDetail = async () => {
     if (!orderId) return;
     setLoadingOrder(true);
+    setOrderError(null);
     try {
       const res = await orderApi.getById(orderId);
-      const orderData = res.data?.data || null;
-
-      setOrderDetail(orderData);
+      setOrderDetail(res.data?.data || null);
     } catch (err) {
-
+      setOrderDetail(null);
+      setOrderError(err.response?.data?.message || 'Unable to load this order');
     } finally {
       setLoadingOrder(false);
     }
   };
 
-  useEffect(() => {
-    if (orderFromContext) {
-      setOrderDetail(orderFromContext);
-      if (!orderFromContext.measurement) {
-        loadOrderDetail();
-      }
-    } else {
-      loadOrderDetail();
-    }
-  }, [orderFromContext, orderId]);
+  useFocusEffect(React.useCallback(() => {
+    let active = true;
+    setOrderDetail(null);
+    setLoadingOrder(true);
+    setOrderError(null);
+    orderApi.getById(orderId).then(res => {if (active) setOrderDetail(res.data?.data || null);})
+      .catch(err => {if (active) {setOrderDetail(null);setOrderError(err.response?.data?.message || 'Unable to load this order');}})
+      .finally(() => {if (active) setLoadingOrder(false);});
+    return () => {active = false;};
+  }, [orderId, orderFromContext]));
 
   useEffect(() => {
     if (can("staff:read") && hasStaffManagement) fetchStaff?.();
@@ -210,7 +212,7 @@ export default function OrderDetail({ route, navigation }) {
   // Load activity, payments, and customers on mount
   useEffect(() => {
     if (orderId) {
-      loadActivity();
+      if (can("payments:read")) loadActivity();
       if (can("payments:read")) loadPayments();
       if (can("customers:read")) fetchCustomers();
     }
@@ -397,7 +399,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
         try {
           await updateOrderStatus(orderId, statusConfig.nextStatus);
           showToast(`${t("orderMovedTo")} ${statusName(statusConfig.nextStatus)}`, "success");
-          loadActivity();
+          if (can("payments:read")) loadActivity();
         } catch (err) {
           showToast(err.message || "Failed to update status", "error");
         } finally {
@@ -427,7 +429,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
       showToast(t("auto_payment_recorded_successfully"), "success");
       setShowPaymentModal(false);
       setPaymentForm({ amount: "", method: "cash", notes: "" });
-      loadActivity();
+      if (can("payments:read")) loadActivity();
     } catch (err) {
       showToast(err.message || "Failed to record payment", "error");
     } finally {
@@ -630,7 +632,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
       const updated = await updateOrder(order.id, buildOrderUpdatePayload(updatedItems));
       setOrderDetail(updated || { ...order, items: updatedItems });
       setAssignmentModal(null);
-      loadActivity();
+      if (can("payments:read")) loadActivity();
       showToast(`${role === "cutter" ? "Cutter" : "Stitcher"} assigned`, "success");
     } catch (err) {
       showToast(err.message || "Unable to assign staff", "error");
@@ -688,7 +690,8 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
   }, [orderDetail, customers]);
 
   const order = enrichedOrder || orderDetail;
-  const snapshot = order?.measurement_snapshot || order?.measurement || null;
+  const itemProfiles = (order?.items || []).map(item => item.measurementSnapshot || item.measurement_snapshot || (item.measurementData ? {outfitType:item.type, measurementsData:item.measurementData} : null)).filter(Boolean);
+  const snapshot = order?.measurement_snapshot || order?.measurement || (itemProfiles.length ? {profiles:itemProfiles} : null);
   const snapshotProfiles =
   snapshot?.profiles || (Array.isArray(snapshot) ? snapshot : snapshot ? [snapshot] : []);
   const profile = snapshotProfiles[0] || null;
@@ -730,7 +733,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
           <View style={{ width: 28 }} />
         </View>
         <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-          <Text style={styles.errorText}>{t("auto_order_not_found")}</Text>
+          <Text style={styles.errorText}>{orderError || t("auto_order_not_found")}</Text>
         </View>
       </View>);
 
@@ -760,7 +763,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
         </View>
 
         <View style={styles.headerActions}>
-          <TouchableOpacity accessibilityRole="button"
+          {can("payments:read") && (<TouchableOpacity accessibilityRole="button"
             onPress={handleShareJobSheet}
             disabled={jobSheetLoading}
             style={styles.headerActionButton}>
@@ -770,7 +773,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
 
             <Text style={styles.headerActionText}>{t("auto_job_sheet_2")}</Text>
             }
-          </TouchableOpacity>
+          </TouchableOpacity>)}
 
           {can("orders:write") &&
           <TouchableOpacity accessibilityRole="button"
@@ -800,10 +803,10 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
           <View style={styles.summaryRow}>
             <View>
               <Text style={styles.label}>{t("auto_customer")}</Text>
-              <Text style={styles.value}>{order?.customer_name || 'Unknown Customer'}</Text>
+              <Text style={styles.value}>{order?.customer_name || order?.customerName || 'Unknown Customer'}</Text>
             </View>
             <View style={{ alignItems: "flex-end", gap: spacing.xs }}>
-              <StatusBadge compact status={paymentStatus} />
+              {can("payments:read") && (<StatusBadge compact status={paymentStatus} />)}
             </View>
           </View>
 
@@ -834,7 +837,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
         </View>
 
         {/* Measurement Profile */}
-        <View style={styles.card}>
+        {can("measurements:read") && (<View style={styles.card}>
           <Text style={styles.cardTitle}>{t("auto_measurement_profile")}</Text>
           {profile ?
           <View>
@@ -876,19 +879,19 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             </Text>
             </View>
           }
-        </View>
+        </View>)}
 
         {/* Status Pipeline */}
         <View style={styles.card}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
             <Text style={styles.cardTitle}>{t("auto_order_status")}</Text>
-            <TouchableOpacity accessibilityRole="button"
+            {can("payments:read") && (<TouchableOpacity accessibilityRole="button"
               onPress={handleOpenWhatsAppModal}
               style={styles.whatsappButton}>
 
               <MaterialCommunityIcons name="whatsapp" size={18} color="white" />
               <Text style={styles.whatsappButtonText}>{t("auto_message")}</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>)}
           </View>
 
           <View style={styles.statusPipeline}>
@@ -953,7 +956,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
         </View>
 
         {/* WhatsApp Automation */}
-        <View style={styles.card}>
+        {can("payments:read") && (<View style={styles.card}>
           <View style={styles.sectionHeaderRow}>
             <View>
               <Text style={styles.cardTitle}>WhatsApp reminders</Text>
@@ -977,7 +980,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               </TouchableOpacity>
             )}
           </ResponsiveGrid>
-        </View>
+        </View>)}
 
         {/* Items List */}
         <View style={styles.card}>
@@ -1000,7 +1003,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   </View>
                   <View style={styles.itemMetaStack}>
                     <Text style={styles.itemMetaText}>Qty {item.quantity}</Text>
-                    <Text style={styles.itemPriceText}>{formatCurrency(item.price * item.quantity)}</Text>
+                    {can("payments:read") && (<Text style={styles.itemPriceText}>{formatCurrency(item.price * item.quantity)}</Text>)}
                   </View>
                   </View>
 
@@ -1094,7 +1097,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             </View> :
           null}
 
-          <View style={styles.totalsContainer}>
+          {can("payments:read") && (<View style={styles.totalsContainer}>
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>{t("auto_subtotal")}</Text>
               <Text style={styles.totalValue}>{formatCurrency(orderTotal)}</Text>
@@ -1124,7 +1127,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                 {formatCurrency(balanceDue)}
               </Text>
             </View>
-          </View>
+          </View>)}
 
           {/* Collect sits right under the balance it settles; it is the one primary action here */}
           {balanceDue > 0 && can("payments:write") &&
@@ -1135,7 +1138,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             style={{ marginTop: spacing.md }} />
           }
 
-          <View style={styles.invoiceActions}>
+          {can("payments:read") && (<View style={styles.invoiceActions}>
             <AppButton
               icon="whatsapp"
               variant="secondary"
@@ -1151,11 +1154,11 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               loading={copyLoading}
               style={styles.invoiceActionButton} />
 
-          </View>
+          </View>)}
         </View>
 
         {/* Activity Timeline */}
-        <View style={styles.card}>
+        {can("payments:read") && (<View style={styles.card}>
           <Text style={styles.cardTitle}>{t("auto_activity")}</Text>
           {!activityLogs || activityLogs.length === 0 ?
           <Text style={styles.emptyText}>{t("auto_no_activity_yet")}</Text> :
@@ -1191,7 +1194,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             )}
             </View>
           }
-        </View>
+        </View>)}
       </ScrollView>
 
       {/* Staff Assignment Modal */}
@@ -2214,3 +2217,4 @@ const styles = StyleSheet.create({
     textAlignVertical: "top",
   },
 });
+

@@ -1,3 +1,6 @@
+import usePagedList from '../hooks/usePagedList';
+import PagedListFooter from '../components/PagedListFooter';
+import { customerApi } from '../services/api';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ListRow from "../components/ListRow";
 import IconInput from "../components/IconInput";
@@ -25,8 +28,8 @@ import { showAccountInactiveAlert } from "../utils/accountStatus";
 export default function CustomerSelectionScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
-  const { customersError } = useStitchPro();
-  const { customers, fetchCustomers, addCustomer } = useStitchPro();
+
+  const { addCustomer, can } = useStitchPro();
   const { showToast } = useToast();
   const [showNewCustomer, setShowNewCustomer] = useState(false);
 
@@ -43,7 +46,7 @@ export default function CustomerSelectionScreen({ navigation }) {
         showAccountInactiveAlert(t);
         return false;
       }
-      showToast(err.message === "DUPLICATE_PHONE" ? t("duplicatePhone") : t("customerCreateFailed"), "error");
+      showToast(err.message === "DUPLICATE_PHONE" ? t("duplicatePhone") : err.response?.data?.message || err.message || t("customerCreateFailed"), "error");
       return false;
     }
   };
@@ -51,54 +54,12 @@ export default function CustomerSelectionScreen({ navigation }) {
   const [customerSearch, setCustomerSearch] = useState("");
   const [refreshing, setRefreshing] = useState(false);
 
-  // Load customers on mount (once only)
-  useEffect(() => {
-    const loadInitial = async () => {
-      setLoadingCustomers(true);
-      try {
-        await fetchCustomers({ search: "", page: 1, limit: 100 });
-      } catch (err) {
-
-      } finally {
-        setLoadingCustomers(false);
-      }
-    };
-    loadInitial();
-  }, []); // Empty deps - runs once on mount
-
-  // Debounced search effect
-  useEffect(() => {
-    if (customerSearch.length === 0) return; // Don't search on empty string (initial state)
-
-    const timer = setTimeout(() => {
-      if (customerSearch.length >= 2) {
-        setLoadingCustomers(true);
-        fetchCustomers({ search: customerSearch, page: 1, limit: 100 }).
-        catch((err) => {}).
-        finally(() => setLoadingCustomers(false));
-      }
-    }, 400); // debounce 400ms for search only
-    return () => clearTimeout(timer);
-  }, [customerSearch, fetchCustomers]);
-
-  // Pull-to-refresh handler
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    try {
-      await fetchCustomers({ search: customerSearch, page: 1, limit: 100, force: true });
-    } catch (err) {
-
-    } finally {
-      setRefreshing(false);
-    }
-  }, [customerSearch, fetchCustomers]);
-
-  const filteredCustomers =
-  customerSearch.length > 0 ?
-  customers.filter((c) =>
-  c.name.toLowerCase().includes(customerSearch.toLowerCase())
-  ) :
-  customers;
+  const [debouncedSearch,setDebouncedSearch] = useState('');
+  useEffect(() => {const timer=setTimeout(()=>setDebouncedSearch(customerSearch.trim()),300);return ()=>clearTimeout(timer);},[customerSearch]);
+  const customerList = usePagedList(customerApi.getAll,'customers',{search:debouncedSearch});
+  const filteredCustomers = customerList.items;
+  const customersError = customerList.error;
+  const onRefresh = customerList.reload;
 
   const handleSelectCustomer = (customer) => {
     // Navigate to CreateOrder with customerId
@@ -116,12 +77,12 @@ export default function CustomerSelectionScreen({ navigation }) {
           <Ionicons name="chevron-back" size={28} color={colors123.primary} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>{t("auto_select_customer")}</Text>
-        <TouchableOpacity accessibilityRole="button" accessibilityLabel={t("addCustomerTitle")}
+        {can("customers:write") && (<TouchableOpacity accessibilityRole="button" accessibilityLabel={t("addCustomerTitle")}
           onPress={() => setShowNewCustomer(true)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
 
           <Ionicons name="person-add-outline" size={24} color={colors123.primary} />
-        </TouchableOpacity>
+        </TouchableOpacity>)}
       </View>
 
       <ScrollView
@@ -129,7 +90,7 @@ export default function CustomerSelectionScreen({ navigation }) {
         contentContainerStyle={styles.contentScroll}
         refreshControl={
         <RefreshControl
-          refreshing={refreshing}
+          refreshing={customerList.loading}
           onRefresh={onRefresh}
           tintColor={colors123.primary}
           colors={[colors123.primary]} />
@@ -141,7 +102,7 @@ export default function CustomerSelectionScreen({ navigation }) {
         <IconInput icon="magnify" placeholder={t("auto_search_customers")} value={customerSearch} onChangeText={setCustomerSearch} />
 
         {/* Loading State */}
-        {loadingCustomers ?
+        {customerList.loading && !filteredCustomers.length ?
         <ActivityIndicator
           size="large"
           color={colors123.primary}
@@ -153,9 +114,9 @@ export default function CustomerSelectionScreen({ navigation }) {
             <Ionicons name="people-outline" size={48} color={colors123.border} />
             <Text style={styles.emptyText}>{t("auto_no_customers_found")}</Text>
             <Text style={styles.emptySubtext}>{t("auto_add_a_customer_first")}</Text>
-            <TouchableOpacity accessibilityRole="button" onPress={() => setShowNewCustomer(true)} style={{ marginTop: spacing.md }}>
+            {can("customers:write") && (<TouchableOpacity accessibilityRole="button" onPress={() => setShowNewCustomer(true)} style={{ marginTop: spacing.md }}>
               <Text style={{ color: colors123.primary, fontFamily: fonts.semibold, fontSize: 15 }}>+ {t("addCustomerTitle")}</Text>
-            </TouchableOpacity>
+            </TouchableOpacity>)}
           </View>) : (
 
         /* Customers List - Optimized with FlatList */
@@ -172,6 +133,7 @@ export default function CustomerSelectionScreen({ navigation }) {
           windowSize={10} />)
 
         }
+      <PagedListFooter list={customerList} />
       </ScrollView>
       <CustomerFormSheet visible={showNewCustomer} onClose={() => setShowNewCustomer(false)} onSubmit={handleNewCustomer} />
     </View>);
@@ -226,3 +188,4 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
   },
 });
+

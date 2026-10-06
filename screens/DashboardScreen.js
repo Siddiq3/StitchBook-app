@@ -76,6 +76,7 @@ export default function DashboardScreen({ navigation }) {
   const {
     isBooting,
     orders,
+    ordersSummary,
     fetchOrders,
     subscription,
     fetchSubscription,
@@ -130,6 +131,7 @@ export default function DashboardScreen({ navigation }) {
   );
 
   const workStats = useMemo(() => {
+    if (ordersSummary) return ordersSummary;
     const rows = Array.isArray(orders) ? orders : [];
     const count = (fn) => rows.filter(fn).length;
     return {
@@ -138,7 +140,7 @@ export default function DashboardScreen({ navigation }) {
       ready: count((order) => order.status === "ready"),
       pending: count((order) => !order.status || order.status === "pending" || order.status === "new")
     };
-  }, [orders]);
+  }, [orders, ordersSummary]);
   const isTrialActive = subscription?.status === "trial" && subscription?.isActive;
   const isTrialExpired = isAccountInactive(subscription);
   const shopName = cleanDisplayText(shop?.name, t("yourShop"));
@@ -265,7 +267,7 @@ export default function DashboardScreen({ navigation }) {
         </ResponsiveGrid>
       </AppCard>
 
-      {can("dashboard:read") &&
+      {can("dashboard:read") && can("payments:read") &&
       <Pressable accessibilityRole="button"
         onPress={() => navigation.navigate("Reports")}
         style={({ pressed }) => [styles.reportsRow, pressed && styles.productionTilePressed]}>
@@ -703,3 +705,4 @@ const styles = StyleSheet.create({
     color: colors123.primary,
   },
 });
+

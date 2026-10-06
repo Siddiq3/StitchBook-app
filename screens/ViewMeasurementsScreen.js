@@ -1,7 +1,10 @@
+import { useFocusEffect } from '@react-navigation/native';
+import { useStitchPro } from '../context/StitchProContext';
+import { customerApi } from '../services/api';
 import InlineAlert from "../components/InlineAlert";
 import { ListSkeleton } from "../components/SkeletonBlock";
 import ResponsiveGrid from "../components/ResponsiveGrid";
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   ScrollView,
@@ -28,24 +31,28 @@ export default function ViewMeasurementsScreen({
   route: { params = {} } = {},
 }) {
   const { t } = useLanguage();
+  const { can } = useStitchPro();
   const { customerId, customerName, customerGender = "male" } = params;
   const { showToast } = useToast();
 
+  const loadVersion = useRef(0);
   const [measurements, setMeasurements] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [expandedOutfits, setExpandedOutfits] = useState({});
 
   // Load measurements on mount
-  useEffect(() => {
-    loadMeasurements();
-  }, [customerId]);
 
   const loadMeasurements = useCallback(async () => {
+    const version=++loadVersion.current;
     try {
       setIsLoading(true);
       setLoadError("");
+      setMeasurements([]);
+      // Recheck current assignment before displaying locally saved profiles.
+      await customerApi.getById(customerId);
       const data = await storage.getMeasurementsByCustomer(customerId);
+      if(version!==loadVersion.current) return;
       setMeasurements(
         data.map((item) => ({
           ...item._measurementsData,
@@ -54,11 +61,15 @@ export default function ViewMeasurementsScreen({
         }))
       );
     } catch (error) {
+      if(version!==loadVersion.current) return;
+      setMeasurements([]);
       setLoadError(t("auto_failed_to_load_measurements"));
     } finally {
-      setIsLoading(false);
+      if(version===loadVersion.current) setIsLoading(false);
     }
   }, [customerId, showToast]);
+
+  useFocusEffect(useCallback(() => {loadMeasurements();return ()=>{loadVersion.current++;};}, [loadMeasurements]));
 
   // Group measurements by outfit type
   const groupedMeasurements = useMemo(() => {
@@ -179,7 +190,7 @@ export default function ViewMeasurementsScreen({
           title={t("auto_no_measurements")}
         />
 
-        <AppButton
+        {can('measurements:write') && (<AppButton
           label={t("auto_record_measurement")}
           icon="plus"
           onPress={() => {
@@ -190,7 +201,7 @@ export default function ViewMeasurementsScreen({
             });
           }}
           style={styles.actionButton}
-        />
+        />)}
       </ScrollView>
     );
   }
@@ -315,7 +326,7 @@ export default function ViewMeasurementsScreen({
                             </Text>
                           </View>
                           <View style={styles.versionCardActions}>
-                            <Pressable
+                            {can('measurements:write') && (<Pressable
                               accessibilityRole="button"
                               onPress={() => handleEditMeasurement(measurement)}
                               style={({ pressed }) => [
@@ -328,8 +339,8 @@ export default function ViewMeasurementsScreen({
                                 size={18}
                                 color={colors123.primary}
                               />
-                            </Pressable>
-                            <Pressable
+                            </Pressable>)}
+                            {can('measurements:write') && (<Pressable
                               accessibilityRole="button"
                               onPress={() =>
                                 handleDeleteMeasurement(measurement)
@@ -344,7 +355,7 @@ export default function ViewMeasurementsScreen({
                                 size={18}
                                 color="#EF4444"
                               />
-                            </Pressable>
+                            </Pressable>)}
                           </View>
                         </View>
 
@@ -377,7 +388,7 @@ export default function ViewMeasurementsScreen({
                   </View>
 
                   {/* Record new button */}
-                  <AppButton
+                  {can('measurements:write') && (<AppButton
                     label={`Record ${outfit.label}`}
                     icon="plus"
                     variant="secondary"
@@ -392,7 +403,7 @@ export default function ViewMeasurementsScreen({
                       });
                     }}
                     style={styles.recordButton}
-                  />
+                  />)}
                 </View>
               )}
             </View>
@@ -401,7 +412,7 @@ export default function ViewMeasurementsScreen({
       )}
 
       {/* Record new outfit button */}
-      <AppButton
+      {can('measurements:write') && (<AppButton
         label={t("auto_record_new_outfit")}
         icon="plus"
         style={styles.newOutfitButton}
@@ -412,7 +423,7 @@ export default function ViewMeasurementsScreen({
             customerGender,
           });
         }}
-      />
+      />)}
     </ScrollView>
   );
 }
@@ -597,3 +608,4 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
 });
+

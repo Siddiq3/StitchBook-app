@@ -1,8 +1,10 @@
+import usePagedList from '../hooks/usePagedList';
+import PagedListFooter from '../components/PagedListFooter';
+import { customerApi } from '../services/api';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InlineAlert from "../components/InlineAlert";
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl, Alert } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
@@ -24,8 +26,7 @@ import { colors123, radius, shadows, spacing, fonts } from "../utils/theme";
 export default function CustomersScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
-  const { customersError } = useStitchPro();
-  const { customers, orders, isBooting, customersLoading, addCustomer, fetchCustomers, deleteCustomer, fetchOrders } = useStitchPro();
+  const { isBooting, addCustomer, deleteCustomer } = useStitchPro();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateSheet, setShowCreateSheet] = useState(false);
@@ -39,65 +40,17 @@ export default function CustomersScreen({ navigation }) {
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Search the server so customers beyond the first loaded page are findable
-  useEffect(() => {
-    const query = debouncedQuery.trim();
-    if (query.length >= 2) fetchCustomers({ search: query });
-    else if (!query) fetchCustomers();
-  }, [debouncedQuery, fetchCustomers]);
+  const customerList = usePagedList(customerApi.getAll, 'customers', {search:debouncedQuery.trim()});
+  const {items:customers,loading:customersLoading,error:customersError} = customerList;
+  const onRefresh = customerList.reload;
+  const {can} = useStitchPro();
 
-  // Auto-refresh when screen comes into focus (user navigates back)
-  useFocusEffect(
-    useCallback(() => {
-
-      fetchCustomers();
-      fetchOrders();
-    }, [fetchCustomers, fetchOrders])
-  );
-
-  // Handle pull-to-refresh
-  const onRefresh = useCallback(async () => {
-
-    await Promise.all([fetchCustomers({ force: true }), fetchOrders({ force: true })]);
-  }, [fetchCustomers, fetchOrders]);
-
-  const filteredCustomers = useMemo(() => {
-    if (!customers || !Array.isArray(customers)) return [];
-
-    // Create a map of order counts by customerId
-    const orderCountMap = {};
-    if (Array.isArray(orders)) {
-      orders.forEach((order) => {
-        // Check both camelCase and snake_case field names
-        const cid = order.customerId || order.customer_id;
-        if (cid) {
-          orderCountMap[cid] = (orderCountMap[cid] || 0) + 1;
-        }
-      });
-    }
-
-    // Enhance customers with orderCount
-    const customersWithOrderCount = customers.map((customer) => ({
-      ...customer,
-      orderCount: orderCountMap[customer.id] || 0
-    }));
-
-    const query = debouncedQuery.trim().toLowerCase();
-    if (!query) {
-      return customersWithOrderCount;
-    }
-    return customersWithOrderCount.filter(
-      (customer) =>
-      customer.name && customer.name.toLowerCase().includes(query) ||
-      customer.phone && customer.phone.includes(query) ||
-      customer.address && customer.address.toLowerCase().includes(query)
-    );
-  }, [customers, debouncedQuery, orders]);
-
+  const filteredCustomers = customers;
 
   const handleCreateCustomer = async (form) => {
     try {
       await addCustomer(form);
+      await customerList.reload();
       setShowCreateSheet(false);
       showToast(`${form.name} ${t("customerAddedSuffix")}`);
       return true;
@@ -110,7 +63,7 @@ export default function CustomersScreen({ navigation }) {
 
       const message = err.message === 'DUPLICATE_PHONE' ?
       t("duplicatePhone") :
-      t("customerCreateFailed");
+      err.response?.data?.message || err.message || t("customerCreateFailed");
       showToast(message, 'error');
       return false;
     }
@@ -128,6 +81,7 @@ export default function CustomersScreen({ navigation }) {
         onPress: async () => {
           try {
             await deleteCustomer(customer.id);
+            await customerList.reload();
             showToast(`${customer.name} ${t("customerRemovedSuffix")}`);
           } catch (err) {
             showToast(t("customerDeleteFailed"), 'error');
@@ -154,7 +108,7 @@ export default function CustomersScreen({ navigation }) {
 
         <ScreenHeader
           title={t("customersTitle")}
-          action={
+          action={can("customers:write") &&
           <AppButton
             icon="account-plus-outline"
             label={t("add")}
@@ -180,7 +134,7 @@ export default function CustomersScreen({ navigation }) {
           description={searchQuery ? t("noCustomerMatchesDescription") : t("noCustomersYetDescription")}
           icon={searchQuery ? "account-search-outline" : "account-plus-outline"}
           title={searchQuery ? t("noCustomerMatches") : t("noCustomersYet")}
-          action={searchQuery ? null : <AppButton icon="account-plus" label={t("addCustomerTitle")} onPress={() => setShowCreateSheet(true)} />} /> :
+          action={searchQuery || !can("customers:write") ? null : <AppButton icon="account-plus" label={t("addCustomerTitle")} onPress={() => setShowCreateSheet(true)} />} /> :
 
         <View style={styles.list}>
             {filteredCustomers.map((customer, index) =>
@@ -202,7 +156,7 @@ export default function CustomersScreen({ navigation }) {
               }
               accessibilityRole="button"
               accessibilityLabel={`${customer.name}, ${customer.phone}`}
-              onLongPress={() => handleDeleteCustomer(customer)}
+              onLongPress={can("customers:write") ? () => handleDeleteCustomer(customer) : undefined}
               style={({ pressed }) => [
               styles.customerCard,
               pressed && styles.pressedCard]
@@ -244,6 +198,7 @@ export default function CustomersScreen({ navigation }) {
           )}
           </View>
         }
+      <PagedListFooter list={customerList} />
       </ScrollView>
 
       <CustomerFormSheet
@@ -373,3 +328,4 @@ const styles = StyleSheet.create({
     color: colors123.textSoft,
   },
 });
+

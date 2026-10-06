@@ -1,3 +1,6 @@
+import usePagedList from '../hooks/usePagedList';
+import PagedListFooter from '../components/PagedListFooter';
+import { orderApi } from '../services/api';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import SegmentedControl from "../components/SegmentedControl";
 import InlineAlert from "../components/InlineAlert";
@@ -62,9 +65,9 @@ const getOrderQuantity = (order) => {
 export default function OrdersScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
-  const { ordersError, ordersLoading } = useStitchPro();
+
   const { customerId, status: routeStatus } = route?.params || {};
-  const { orders, customers, isBooting, addOrder, fetchOrders, fetchCustomers, can } =
+  const { customers, isBooting, addOrder, fetchOrders, fetchCustomers, can } =
   useStitchPro();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
@@ -84,76 +87,15 @@ export default function OrdersScreen({ navigation, route }) {
     delivered: t("delivered")
   }), [t]);
 
-  // Fetch orders and customers on mount
-  useEffect(() => {
-    fetchOrders();
-    if (can("customers:read")) fetchCustomers();
-  }, [fetchOrders, fetchCustomers]);
+  const [debouncedSearch,setDebouncedSearch] = useState('');
+  useEffect(() => {const timer=setTimeout(()=>setDebouncedSearch(searchQuery.trim()),300);return ()=>clearTimeout(timer);},[searchQuery]);
+  const orderList = usePagedList(orderApi.getAll,'orders',{customerId,status:activeFilter === 'All' ? undefined : activeFilter,search:debouncedSearch});
+  const {items:orders,loading:ordersLoading,error:ordersError} = orderList;
+  const onRefresh = orderList.reload;
 
-  // Pull to refresh
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await Promise.all([fetchOrders({ force: true }), can("customers:read") ? fetchCustomers({ force: true }) : null]);
-    setRefreshing(false);
-  }, [fetchOrders, fetchCustomers]);
-
-  const filteredOrders = useMemo(() => {
-    if (!orders || !Array.isArray(orders)) return [];
-
-    const query = searchQuery.trim().toLowerCase();
-
-    // Create a map of customers by ID for quick lookup
-    const customersMap = {};
-    if (Array.isArray(customers)) {
-      customers.forEach((customer) => {
-        customersMap[customer.id] = customer.name;
-      });
-    }
-
-    return orders.filter((order) => {
-      // Filter by customer if customerId is provided
-      if (customerId && String(getOrderCustomerId(order)) !== String(customerId)) {
-        return false;
-      }
-
-      const matchesFilter =
-      activeFilter === "All" ||
-      order.status === activeFilter ||
-      activeFilter === "cutting" && order.status === "in_progress";
-      const matchesQuery =
-      !query ||
-      (order.customerName || "").toLowerCase().includes(query) ||
-      (customersMap[getOrderCustomerId(order)] || "").toLowerCase().includes(query) ||
-      getOrderSearchText(order).includes(query);
-
-      return matchesFilter && matchesQuery;
-    }).map((order) => {
-      const resolvedName = order.customerName || order.customer_name || customersMap[getOrderCustomerId(order)] || 'Unknown Customer';
-      return {
-        ...order,
-        customerName: resolvedName
-      };
-    });
-  }, [activeFilter, customerId, orders, searchQuery, customers]);
-
+  const filteredOrders = orders.map(order => ({...order,customerName:order.customerName || order.customer_name || 'Unknown Customer'}));
 
   const handleAddOrderPress = () => {
-    if (!customers || customers.length === 0) {
-      Alert.alert(
-        t("noCustomersTitle"),
-        t("noCustomersForOrder"),
-        [
-        { text: t("cancel"), style: "cancel" },
-        {
-          text: t("goToCustomers"),
-          onPress: () => {
-
-            navigation.navigate("Customers");
-          } }]
-
-      );
-      return;
-    }
     // Navigate to CustomerSelection screen first
     navigation.navigate("CustomerSelection");
   };
@@ -165,7 +107,7 @@ export default function OrdersScreen({ navigation, route }) {
         showsVerticalScrollIndicator={false}
         refreshControl={
         <RefreshControl
-          refreshing={refreshing}
+          refreshing={ordersLoading}
           onRefresh={onRefresh}
           tintColor={colors123.primary}
           colors={[colors123.primary]} />
@@ -187,15 +129,15 @@ export default function OrdersScreen({ navigation, route }) {
         <View style={styles.miniStats}>
           <AppCard style={styles.miniStatCard} variant="muted">
             <Text style={styles.miniStatLabel}>{t("inQueue")}</Text>
-            <Text style={styles.miniStatValue}>{(orders || []).filter((o) => !["ready", "delivered", "cancelled"].includes(o.status)).length}</Text>
+            <Text style={styles.miniStatValue}>{orderList.summary?.queued ?? 0}</Text>
           </AppCard>
           <AppCard style={styles.miniStatCard} variant="muted">
             <Text style={styles.miniStatLabel}>{t("pickupReady")}</Text>
-            <Text style={styles.miniStatValue}>{(orders || []).filter((o) => o.status === "ready").length}</Text>
+            <Text style={styles.miniStatValue}>{orderList.summary?.ready ?? 0}</Text>
           </AppCard>
           <AppCard style={styles.miniStatCard} variant="muted">
             <Text style={styles.miniStatLabel}>{t("delivered")}</Text>
-            <Text style={styles.miniStatValue}>{(orders || []).filter((o) => o.status === "delivered").length}</Text>
+            <Text style={styles.miniStatValue}>{orderList.summary?.delivered ?? 0}</Text>
           </AppCard>
         </View>
 
@@ -280,14 +222,14 @@ export default function OrdersScreen({ navigation, route }) {
                       </View>
                       <View style={{ alignItems: "flex-end", gap: spacing.xs }}>
                         <StatusBadge status={order.status} />
-                        <StatusBadge compact status={paymentStatus} />
-                        <Text style={styles.orderAmount}>
+                        {can("payments:read") && (<StatusBadge compact status={paymentStatus} />)}
+                        {can("payments:read") && (<Text style={styles.orderAmount}>
                           {formatCurrency(total)}
-                        </Text>
+                        </Text>)}
                       </View>
                     </View>
 
-                    <View style={styles.amountPanel}>
+                    {can("payments:read") && (<View style={styles.amountPanel}>
                       <View style={styles.amountInfo}>
                         <Text style={styles.amountLabel}>{t("paid")}</Text>
                         <Text style={styles.amountValue}>{formatCurrency(paid)}</Text>
@@ -299,7 +241,7 @@ export default function OrdersScreen({ navigation, route }) {
                           {formatCurrency(balance)}
                         </Text>
                       </View>
-                    </View>
+                    </View>)}
 
                     <View style={styles.deliveryRow}>
                         <MaterialCommunityIcons
@@ -317,6 +259,7 @@ export default function OrdersScreen({ navigation, route }) {
           })}
           </View>
         }
+      <PagedListFooter list={orderList} />
       </ScrollView>
     </>);
 
@@ -525,3 +468,4 @@ const styles = StyleSheet.create({
     color: colors123.primary,
   },
 });
+

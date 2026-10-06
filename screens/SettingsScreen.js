@@ -274,7 +274,7 @@ export default function SettingsScreen({ navigation }) {
           {[
             can("staff:read") && hasStaffManagement && { key: "staff", title: t("staffManagement"), icon: "account-multiple-outline", onPress: () => navigation.navigate("Staff") },
             can("measurements:read") && { key: "measurements", title: t("measurements"), icon: "ruler", onPress: () => navigation.navigate("Measurements") },
-            { key: "notifications", title: t("notifications"), icon: "bell-outline", onPress: () => navigation.navigate("Notifications") },
+            can("payments:read") && { key: "notifications", title: t("notifications"), icon: "bell-outline", onPress: () => navigation.navigate("Notifications") },
           ].filter(Boolean).map(item => <ListRow key={item.key} title={item.title}
             leading={<MaterialCommunityIcons name={item.icon} size={20} color={colors123.textSecondary} />}
             trailing={<MaterialCommunityIcons name="chevron-right" size={20} color={colors123.textMuted} />}
@@ -840,3 +840,4 @@ const styles = StyleSheet.create({
     fontFamily: fonts.semibold,
   },
 });
+

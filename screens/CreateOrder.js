@@ -1,3 +1,6 @@
+import usePagedList from '../hooks/usePagedList';
+import PagedListFooter from '../components/PagedListFooter';
+import { customerApi } from '../services/api';
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
@@ -21,8 +24,8 @@ import CreateItemDetail from "./CreateItemDetail";
 export default function CreateOrder({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
-  const { customersError } = useStitchPro();
-  const { addOrder, recordPayment, customers, fetchCustomers } = useStitchPro();
+
+  const { addOrder, recordPayment, can } = useStitchPro();
   const { showToast } = useToast();
 
   // Get customerId from route params (if coming from CustomerDetail or CustomerSelection)
@@ -34,7 +37,6 @@ export default function CreateOrder({ navigation, route }) {
   // ========== STATE MACHINE: Single source of truth is `currentStep` (1-5) ==========
   const [currentStep, setCurrentStep] = useState(initialStep); // 1-5 - Controls entire UI flow
   const [loading, setLoading] = useState(false);
-  const [loadingCustomers, setLoadingCustomers] = useState(false);
 
   // Step 1: Customer Selection
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -54,52 +56,20 @@ export default function CreateOrder({ navigation, route }) {
   const [advance, setAdvance] = useState("");
   const [notes, setNotes] = useState("");
 
-  // If customerId provided, find and select that customer immediately
+  const [debouncedSearch,setDebouncedSearch] = useState('');
+  useEffect(() => {const timer=setTimeout(()=>setDebouncedSearch(customerSearch.trim()),300);return ()=>clearTimeout(timer);},[customerSearch]);
+  const customerList = usePagedList(customerApi.getAll,'customers',{search:debouncedSearch});
+  const customers = customerList.items;
+  const customersError = customerList.error;
   useEffect(() => {
-    if (routeCustomerId && customers.length > 0) {
-      const customer = customers.find((c) => c.id === routeCustomerId);
-      if (customer) {
-        setSelectedCustomer(customer);
-      }
-    }
-  }, [routeCustomerId, customers]);
+    let active=true;
+    setSelectedCustomer(null);
+    if(routeCustomerId) customerApi.getById(routeCustomerId).then(response=>{if(active)setSelectedCustomer(response.data?.data);}).catch(err=>{if(active){setCurrentStep(1);showToast(err.response?.data?.message || t('loadCustomersFailed'),'error');}});
+    return ()=>{active=false;};
+  },[routeCustomerId]);
 
-  // Load customers on mount (once only)
-  useEffect(() => {
-    const loadInitial = async () => {
-      setLoadingCustomers(true);
-      try {
-        await fetchCustomers({ search: "", page: 1, limit: 100 });
-      } catch (err) {
 
-      } finally {
-        setLoadingCustomers(false);
-      }
-    };
-    loadInitial();
-  }, []); // Empty deps - runs once on mount
-
-  // Debounced search effect
-  useEffect(() => {
-    if (customerSearch.length === 0) return; // Don't search on empty string (initial state)
-
-    const timer = setTimeout(() => {
-      if (customerSearch.length >= 2) {
-        setLoadingCustomers(true);
-        fetchCustomers({ search: customerSearch, page: 1, limit: 100 }).
-        catch((err) => {}).
-        finally(() => setLoadingCustomers(false));
-      }
-    }, 400); // debounce 400ms for search only
-    return () => clearTimeout(timer);
-  }, [customerSearch, fetchCustomers]);
-
-  const filteredCustomers =
-  customerSearch.length > 0 ?
-  customers.filter((c) =>
-  c.name.toLowerCase().includes(customerSearch.toLowerCase())
-  ) :
-  customers;
+  const filteredCustomers = customers;
 
   const handleSelectCustomer = (customer) => {
     setSelectedCustomer(customer);
@@ -198,7 +168,7 @@ export default function CreateOrder({ navigation, route }) {
 
   const resetForm = () => {
     setCurrentStep(routeCustomerId ? 2 : 1);
-    setSelectedCustomer(routeCustomerId ? customers.find((c) => c.id === routeCustomerId) || null : null);
+    setSelectedCustomer(routeCustomerId ? selectedCustomer : null);
     setCustomerSearch("");
     setCurrentOutfitType(null);
     setTempItem(null);
@@ -281,7 +251,7 @@ export default function CreateOrder({ navigation, route }) {
         return;
       }
 
-      showToast(err.message || t("orderCreateFailed"), "error");
+      showToast(err.response?.data?.message || err.message || t("orderCreateFailed"), "error");
     } finally {
       setLoading(false);
     }
@@ -346,8 +316,8 @@ export default function CreateOrder({ navigation, route }) {
 
           </View>
 
-<InlineAlert message={customersError ? t("loadCustomersFailed") : null} onRetry={fetchCustomers} retryLabel={t("retry")} />
-          {loadingCustomers ?
+<InlineAlert message={customersError ? t("loadCustomersFailed") : null} onRetry={customerList.reload} retryLabel={t("retry")} />
+          {customerList.loading && !customers.length ?
           <ActivityIndicator
             size="large"
             color={colors123.primary}
@@ -388,6 +358,7 @@ export default function CreateOrder({ navigation, route }) {
             } />
 
           }
+        <PagedListFooter list={customerList} />
         </ScrollView>
       </View>);
 
@@ -1079,3 +1050,4 @@ const styles = StyleSheet.create({
     ...shadows.soft,
   },
 });
+
