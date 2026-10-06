@@ -41,7 +41,7 @@ function provider({shopError, subscriptionError, profileError, cachedUser, profi
     '../services/authService':{authService:{refreshProfile:async () => {if(profileError) throw profileError; savedUser = profileUser || {id:1,role:'owner',permissions:['*']};return savedUser;},restoreSession:async () => session,loginWithGoogle:async () => session,registerWithPassword:async () => session}},
     '../services/storage':{storage:{saveShop:async shop=>{savedShop=shop;},clearAll:async()=>{cleared++;}}},
     '../services/api':api,
-    '../utils/formHelpers':{toLocalDateKey:()=>'2026-01-01'},
+    '../utils/formHelpers':{toLocalDateKey:()=>'2026-01-01',cleanMeasurementValues:(d)=>d},
   });
   const value = module.StitchProProvider({children:null}).value;
   return {value, effects, state:()=>state, cleared:()=>cleared, savedShop:()=>savedShop, orderCalls:()=>orderCalls, savedUser:()=>savedUser, createCalls:()=>createCalls, render:()=>module.StitchProProvider({children:null}).value};

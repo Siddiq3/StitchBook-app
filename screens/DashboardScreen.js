@@ -3,8 +3,8 @@ import ScreenHeader from "../components/ScreenHeader";
 import AppButton from "../components/AppButton";
 import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
-import React, { useEffect, useMemo, useCallback } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
+import React, { useEffect, useMemo, useCallback, useState } from "react";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { format, parseISO } from "date-fns";
 import { MotiView } from "../components/AccessibleMotionView";
@@ -13,6 +13,7 @@ import StatusBadge from "../components/ui/StatusBadge";
 import { DashboardSkeleton } from "../components/SkeletonBlock";
 import { useLanguage } from "../context/LanguageContext";
 import { useStitchPro } from "../context/StitchProContext";
+import { orderApi, staffApi } from "../services/api";
 import { getAccountStatusText, isAccountInactive } from "../utils/accountStatus";
 import { getDeliveryDateKey, getOrderCustomerId, getOrderItemsText, toLocalDateKey } from "../utils/formHelpers";
 import {
@@ -22,7 +23,7 @@ import {
   radius,
   spacing,
   fonts,
-  } from
+  formatCurrency } from
 "../utils/theme";
 
 const formatTrialDate = (value) => {
@@ -41,6 +42,39 @@ const cleanDisplayText = (value, fallback) => {
   }
   return text;
 };
+
+// Staff home: the items assigned to me and what I have earned this month
+function MyWorkCard({ t, work, onOpen, onDone }) {
+  const assigned = work?.assigned || [];
+  const earned = Number(work?.summary?.total_amount || 0);
+  return (
+    <AppCard style={styles.checklistCard}>
+      <View style={styles.sectionRow}>
+        <Text style={styles.sectionTitle}>{t("myWork")}</Text>
+        <Text style={styles.sectionSubtitle}>{t("thisMonthPay")}: {formatCurrency(earned)}</Text>
+      </View>
+      {assigned.length === 0 ?
+      <Text style={styles.sectionSubtitle}>{t("noAssignedWork")}</Text> :
+      assigned.map((item) =>
+      <Pressable
+        key={`${item.order_id}-${item.item_type}-${item.task}`}
+        accessibilityRole="button"
+        onPress={() => onOpen(item.order_id)}
+        style={({ pressed }) => [styles.deliveryRow, pressed && styles.productionTilePressed]}>
+
+          <View style={{ flex: 1 }}>
+            <Text style={styles.deliveryTitle}>{item.quantity} × {item.item_type}</Text>
+            <Text style={styles.deliveryMeta}>{item.customer_name} · {t(item.task === "cutter" ? "cutting" : "stitching")}</Text>
+          </View>
+          <View style={styles.deliveryRight}>
+            <Text style={styles.deliveryDate}>{item.delivery_date ? format(parseISO(String(item.delivery_date).slice(0, 10)), "dd MMM") : t("noDate")}</Text>
+            <AppButton size="sm" variant="ghost" icon="check" label={t("markDone")} onPress={() => onDone(item)} />
+          </View>
+        </Pressable>
+      )}
+    </AppCard>);
+
+}
 
 function SetupChecklist({ t, steps }) {
   const doneCount = steps.filter((step) => step.done).length;
@@ -88,6 +122,22 @@ export default function DashboardScreen({ navigation }) {
     ordersLoading,
     ordersError
   } = useStitchPro();
+  const [myWork, setMyWork] = useState(null);
+  const showMyWork = !isOwner && can("work:read");
+  const loadMyWork = useCallback(() => {
+    if (!showMyWork) return Promise.resolve();
+    return staffApi.getMyWork().then((res) => setMyWork(res.data?.data || null)).catch(() => {});
+  }, [showMyWork]);
+  useEffect(() => {
+    loadMyWork();
+  }, [loadMyWork]);
+  const confirmDone = (item) => {
+    Alert.alert(t("markDone"), `${item.quantity} × ${item.item_type} · ${item.customer_name}`, [
+    { text: t("cancel"), style: "cancel" },
+    { text: t("confirm"), onPress: () => orderApi.markItemDone(item.order_id, item.item_index, item.task).then(loadMyWork).catch(() => Alert.alert(t("markDone"), t("markDoneFailed"))) }]
+    );
+  };
+
   useEffect(() => {
     fetchOrders();
     if (can("customers:read")) fetchCustomers?.();
@@ -106,7 +156,7 @@ export default function DashboardScreen({ navigation }) {
   }, [fetchSubscription, subscription]);
 
   // Handle pull-to-refresh
-  const onRefresh = useCallback(() => fetchOrders({ force: true }), [fetchOrders]);
+  const onRefresh = useCallback(() => Promise.all([fetchOrders({ force: true }), loadMyWork()]), [fetchOrders, loadMyWork]);
 
   const overdueOrders = useMemo(() => {
     if (!orders || !Array.isArray(orders)) return [];
@@ -171,6 +221,7 @@ export default function DashboardScreen({ navigation }) {
       }>
 
       <ScreenHeader title={shopName} action={can("orders:write") ? <AppButton icon="plus" label={t("newOrder")} size="sm" onPress={() => navigation.navigate("CustomerSelection")} /> : null} />
+      {showMyWork && <MyWorkCard t={t} work={myWork} onOpen={(orderId) => navigation.navigate("OrderDetail", { orderId })} onDone={confirmDone} />}
       {isOwner && (isTrialActive || isTrialExpired) && (
         <AppCard variant="muted">
           <View style={styles.announcementTopRow}>

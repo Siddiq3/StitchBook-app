@@ -248,6 +248,9 @@ export default function OrderDetail({ route, navigation }) {
   };
 
   const getOrderTotals = (targetOrder = order) => getOrderAmounts(targetOrder);
+  // Staff only see what their role covers: no customer messaging or money for a stitcher
+  const canMessageCustomer = can("customers:read");
+  const canSeeMoney = can("payments:read");
   // One name per status everywhere (badge, steps, dialogs)
   const statusName = (status) => t(getStatusTone(status).labelKey || status);
 
@@ -882,6 +885,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
         <View style={styles.card}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: spacing.md }}>
             <Text style={styles.cardTitle}>{t("auto_order_status")}</Text>
+            {canMessageCustomer &&
             <TouchableOpacity accessibilityRole="button"
               onPress={handleOpenWhatsAppModal}
               style={styles.whatsappButton}>
@@ -889,6 +893,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               <MaterialCommunityIcons name="whatsapp" size={18} color="white" />
               <Text style={styles.whatsappButtonText}>{t("auto_message")}</Text>
             </TouchableOpacity>
+            }
           </View>
 
           <View style={styles.statusPipeline}>
@@ -953,6 +958,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
         </View>
 
         {/* WhatsApp Automation */}
+        {canMessageCustomer &&
         <View style={styles.card}>
           <View style={styles.sectionHeaderRow}>
             <View>
@@ -978,6 +984,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             )}
           </ResponsiveGrid>
         </View>
+        }
 
         {/* Items List */}
         <View style={styles.card}>
@@ -1000,11 +1007,11 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   </View>
                   <View style={styles.itemMetaStack}>
                     <Text style={styles.itemMetaText}>Qty {item.quantity}</Text>
-                    <Text style={styles.itemPriceText}>{formatCurrency(item.price * item.quantity)}</Text>
+                    {canSeeMoney && <Text style={styles.itemPriceText}>{formatCurrency(item.price * item.quantity)}</Text>}
                   </View>
                   </View>
 
-                {hasStaffManagement &&
+                {hasStaffManagement && can("orders:write") &&
                 <View style={styles.assignmentPanel}>
                   <View style={styles.assignmentHeader}>
                     <View>
@@ -1094,6 +1101,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             </View> :
           null}
 
+          {canSeeMoney && <>
           <View style={styles.totalsContainer}>
             <View style={styles.totalRow}>
               <Text style={styles.totalLabel}>{t("auto_subtotal")}</Text>
@@ -1152,6 +1160,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
               style={styles.invoiceActionButton} />
 
           </View>
+          </>}
         </View>
 
         {/* Activity Timeline */}

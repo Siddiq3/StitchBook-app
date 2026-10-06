@@ -15,7 +15,7 @@ import StatusBadge from "../components/StatusBadge";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
 
-import { measurementApi } from "../services/api";
+import { customerApi, measurementApi, orderApi } from "../services/api";
 import { colors123, fonts, formatCurrency, getOrderAmounts, radius, shadows, spacing } from "../utils/theme";
 import { useLanguage } from "../context/LanguageContext";
 import { formatPhone, getDeliveryDateKey, getMeasurementEntries, getOrderCustomerId, getOrderItemsText, normalizePhone } from "../utils/formHelpers";
@@ -36,6 +36,10 @@ export default function CustomerDetailScreen({ navigation, route }) {
   const [measurementListLoading, setMeasurementListLoading] = useState(false);
   const [measurementListError, setMeasurementListError] = useState(false);
   const [isLoadingCustomer, setIsLoadingCustomer] = useState(true);
+  // This screen loads its own customer + order history: the shared lists only
+  // hold the latest page, so older customers (found via search) were missing.
+  const [customerRecord, setCustomerRecord] = useState(null);
+  const [ownOrders, setOwnOrders] = useState(null);
 
   const normalizeOutfitType = (value) => {
     if (!value) return "";
@@ -87,9 +91,9 @@ export default function CustomerDetailScreen({ navigation, route }) {
       setIsLoadingCustomer(true);
       try {
         await Promise.all([
-        fetchCustomers(),
+        customerApi.getById(customerId).then((res) => setCustomerRecord(res.data?.data || null)).catch(() => {}),
+        orderApi.getAll({ customerId, limit: 100 }).then((res) => setOwnOrders(res.data?.data?.orders || [])).catch(() => {}),
         fetchMeasurements(customerId),
-        fetchOrders(),
         loadMeasurementList(customerId)]
         );
       } catch (error) {
@@ -101,18 +105,19 @@ export default function CustomerDetailScreen({ navigation, route }) {
     if (customerId) {
       loadCustomerData();
     }
-  }, [customerId, fetchCustomers, fetchMeasurements, fetchOrders]);
+  }, [customerId, fetchMeasurements]);
 
   const customer = useMemo(
-    () => customers && customers.find((entry) => entry.id === customerId),
-    [customerId, customers]
+    () => customerRecord || customers?.find((entry) => String(entry.id) === String(customerId)),
+    [customerId, customerRecord, customers]
   );
   const customerOrders = useMemo(
     () => {
-      if (!orders || !Array.isArray(orders)) return [];
-      return orders.filter((entry) => String(getOrderCustomerId(entry)) === String(customerId));
+      // Prefer this customer's own order history; fall back to the shared list while it loads
+      const source = Array.isArray(ownOrders) ? ownOrders : Array.isArray(orders) ? orders : [];
+      return source.filter((entry) => String(getOrderCustomerId(entry)) === String(customerId));
     },
-    [customerId, orders]
+    [customerId, orders, ownOrders]
   );
   const sortedMeasurements = useMemo(() => {
     if (!Array.isArray(customerMeasurements)) return [];
@@ -158,13 +163,19 @@ export default function CustomerDetailScreen({ navigation, route }) {
     setShowMeasurementSheet(true);
   };
 
+  // The sheet edits measurement values only; passing the whole record made
+  // id/customer_id/timestamps get saved back as "measurements".
+  const measurementSheetValues = useMemo(() => {
+    if (!selectedMeasurement) return {};
+    return {
+      outfitType: selectedMeasurement.outfitType || selectedMeasurement.outfit_type,
+      outfitLabel: selectedMeasurement.outfitLabel || selectedMeasurement.outfit_label,
+      ...Object.fromEntries(getMeasurementEntries(selectedMeasurement.measurementsData || selectedMeasurement.measurements_data))
+    };
+  }, [selectedMeasurement]);
+
   const openEditMeasurementSheet = (measurement) => {
-    setSelectedMeasurement({
-      ...measurement,
-      ...measurement.measurementsData,
-      outfitType: measurement.outfitType || measurement.outfit_type,
-      outfitLabel: measurement.outfitLabel || measurement.outfit_label
-    });
+    setSelectedMeasurement(measurement);
     setMeasurementSheetMode("edit");
     setShowMeasurementSheet(true);
   };
@@ -474,7 +485,7 @@ export default function CustomerDetailScreen({ navigation, route }) {
 
           <MeasurementSheet
           customer={customer}
-          initialValues={selectedMeasurement || {}}
+          initialValues={measurementSheetValues}
           onClose={() => {
             setShowMeasurementSheet(false);
             setSelectedMeasurement(null);

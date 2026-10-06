@@ -25,7 +25,7 @@ export default function CustomersScreen({ navigation }) {
   const insets = useSafeAreaInsets();
   const { t } = useLanguage();
   const { customersError } = useStitchPro();
-  const { customers, orders, isBooting, customersLoading, addCustomer, fetchCustomers, deleteCustomer, fetchOrders } = useStitchPro();
+  const { customers, orders, isBooting, customersLoading, customersPagination, addCustomer, fetchCustomers, deleteCustomer, fetchOrders } = useStitchPro();
   const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateSheet, setShowCreateSheet] = useState(false);
@@ -242,6 +242,11 @@ export default function CustomersScreen({ navigation }) {
                 </Pressable>
               </MotiView>
           )}
+          {!searchQuery && customersPagination?.total > customers.length &&
+          <Text style={styles.moreHint}>
+            {t("showingCustomersOf").replace("{shown}", customers.length).replace("{total}", customersPagination.total)}
+          </Text>
+          }
           </View>
         }
       </ScrollView>
@@ -256,6 +261,7 @@ export default function CustomersScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
+  moreHint: { textAlign: "center", paddingVertical: spacing.md, fontFamily: fonts.regular, fontSize: 13, color: colors123.textMuted },
   content: {
     paddingHorizontal: spacing.md,
     paddingTop: spacing.md,

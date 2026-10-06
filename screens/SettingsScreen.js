@@ -99,9 +99,8 @@ export default function SettingsScreen({ navigation }) {
     );
   };
 
-  const shopInitials = shop?.name ?
-  shop.name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) :
-  user?.name?.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2) || 'S';
+  // The badge sits next to the user's name, so use their initials
+  const shopInitials = (user?.name || shop?.name || 'S').split(' ').filter(Boolean).map((n) => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>

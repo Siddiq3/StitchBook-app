@@ -43,7 +43,12 @@ export const formatPhone = (phone) => {
 };
 
 // Profile metadata stored alongside body measurements; never shown as a measurement row
-const MEASUREMENT_META_KEYS = new Set(['outfitType', 'outfit_type', 'outfitLabel', 'outfit_label', 'unit', 'notes']);
+const MEASUREMENT_META_KEYS = new Set([
+  'outfitType', 'outfit_type', 'outfitLabel', 'outfit_label', 'unit', 'notes',
+  // record fields that must never be stored or shown as body measurements
+  'id', 'customer_id', 'customerId', 'shop_id', 'created_at', 'updated_at', 'createdAt', 'updatedAt',
+  'measurements_data', 'measurementsData',
+]);
 
 export const getMeasurementEntries = (data) =>
   Object.entries(data || {}).filter(
@@ -65,6 +70,15 @@ export const getOrderItemsText = (order) => {
 export const getOrderSearchText = (order) =>
   [getOrderItemsText(order), order?.fabric, ...(Array.isArray(order?.items) ? order.items.map((item) => item.fabric) : [])]
     .filter(Boolean).join(' ').toLowerCase();
+
+// Body measurements only, as positive numbers: drops profile labels
+// (outfitType/outfitLabel), blanks and anything non-numeric before saving.
+export const cleanMeasurementValues = (data) =>
+  Object.fromEntries(
+    getMeasurementEntries(data)
+      .map(([key, value]) => [key, parseFloat(value)])
+      .filter(([, value]) => Number.isFinite(value) && value > 0)
+  );
 
 // Currency formatter
 export const formatCurrency = (amount, currency = '₹') => {

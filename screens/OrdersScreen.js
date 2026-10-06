@@ -214,7 +214,7 @@ export default function OrdersScreen({ navigation, route }) {
         filteredOrders.length === 0 && ordersError ? null :
         filteredOrders.length === 0 ?
         <EmptyState
-          description={t("noOrdersMatchDescription")}
+          description={t(can("orders:write") ? "noOrdersMatchDescription" : "noOrdersMatchStaff")}
           icon="clipboard-search-outline"
           title={t("noOrdersMatch")} /> :
 

@@ -192,3 +192,8 @@ test("compact amounts read naturally in Indian units", () => {
   assert.equal(theme.formatCompactCurrency(150000), "₹1.5L");
   assert.equal(theme.formatCompactCurrency(20000000), "₹2Cr");
 });
+test("measurement payloads keep only positive numeric body measurements", () => {
+  const h = loadModule("utils/formHelpers.js", { "../services/outfitTypes": { getOutfitLabel: (id) => id } });
+  const out = h.cleanMeasurementValues({ id: 1, customer_id: 5, createdAt: "2026-10-06T10:00:00Z", outfitType: "kurta", outfitLabel: "Kurta", Chest: "40", Waist: "", Hip: "abc", Neck: 0, Sleeve: "22.5" });
+  assert.equal(JSON.stringify(out), JSON.stringify({ Chest: 40, Sleeve: 22.5 }));
+});

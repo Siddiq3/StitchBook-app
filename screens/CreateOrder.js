@@ -13,6 +13,7 @@ import { colors123, fonts, formatCurrency, radius, shadows, spacing } from "../u
 import AvatarCircle from "../components/AvatarCircle";
 import AppButton from "../components/AppButton";
 import StepProgress from "../components/StepProgress";
+import { customerApi } from "../services/api";
 import { showAccountInactiveAlert } from "../utils/accountStatus";
 import { formatPhone, toLocalDateKey } from "../utils/formHelpers";
 import MeasurementPickerModal from "../components/MeasurementPickerModal";
@@ -56,12 +57,16 @@ export default function CreateOrder({ navigation, route }) {
 
   // If customerId provided, find and select that customer immediately
   useEffect(() => {
-    if (routeCustomerId && customers.length > 0) {
-      const customer = customers.find((c) => c.id === routeCustomerId);
-      if (customer) {
-        setSelectedCustomer(customer);
-      }
+    if (!routeCustomerId) return;
+    const found = customers.find((c) => String(c.id) === String(routeCustomerId));
+    if (found) {
+      setSelectedCustomer(found);
+      return;
     }
+    // Customers beyond the loaded page (e.g. found via search) are fetched directly
+    customerApi.getById(routeCustomerId).
+    then((res) => res.data?.data && setSelectedCustomer(res.data.data)).
+    catch(() => {});
   }, [routeCustomerId, customers]);
 
   // Load customers on mount (once only)
@@ -198,7 +203,7 @@ export default function CreateOrder({ navigation, route }) {
 
   const resetForm = () => {
     setCurrentStep(routeCustomerId ? 2 : 1);
-    setSelectedCustomer(routeCustomerId ? customers.find((c) => c.id === routeCustomerId) || null : null);
+    if (!routeCustomerId) setSelectedCustomer(null);
     setCustomerSearch("");
     setCurrentOutfitType(null);
     setTempItem(null);

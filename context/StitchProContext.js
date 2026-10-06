@@ -25,7 +25,7 @@ import {
   subscriptionApi } from
 "../services/api";
 
-import { toLocalDateKey } from "../utils/formHelpers";
+import { cleanMeasurementValues, toLocalDateKey } from "../utils/formHelpers";
 
 const StitchProContext = createContext(null);
 
@@ -800,10 +800,7 @@ export const StitchProProvider = ({ children }) => {
     measurementsData
   }) => {
     invalidateLists();
-    const clean = {};
-    Object.keys(measurementsData).forEach((k) => {
-      clean[k] = parseFloat(measurementsData[k]) || 0;
-    });
+    const clean = cleanMeasurementValues(measurementsData);
     try {
       await measurementApi.create({
         customerId,
@@ -1048,7 +1045,14 @@ export const StitchProProvider = ({ children }) => {
     try {
 
       const res = await notificationApi.getAll();
-      const items = res.data.data.items || res.data.data.notifications || [];
+      // Map API fields (message, is_read, created_at, data.orderId) to what the screen shows
+      const items = (res.data.data.items || res.data.data.notifications || []).map((n) => ({
+        ...n,
+        body: n.body ?? n.message,
+        read: n.read ?? n.is_read ?? false,
+        createdAt: n.createdAt ?? n.created_at,
+        orderId: n.orderId ?? n.data?.orderId ?? null
+      }));
       const unreadCount = items.filter((n) => !n.read).length;
 
 

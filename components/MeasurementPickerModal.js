@@ -18,7 +18,7 @@ import MeasurementSheet from "./MeasurementSheet";
 import { measurementApi } from "../services/api";
 import { useToast } from "../context/ToastContext";
 import { useLanguage } from "../context/LanguageContext";
-import { getMeasurementEntries } from "../utils/formHelpers";
+import { cleanMeasurementValues, getMeasurementEntries } from "../utils/formHelpers";
 import { colors123, fonts, spacing } from "../utils/theme";
 
 export default function MeasurementPickerModal({
@@ -134,7 +134,7 @@ export default function MeasurementPickerModal({
     try {
       const payload = {
         customer_id: customerId,
-        measurements_data: measurementsData,
+        measurements_data: cleanMeasurementValues(measurementsData),
         outfit_type: outfitType?.id || outfitType?.label || "",
         outfit_label: `${outfitType?.label || t("items")} - ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}`
       };

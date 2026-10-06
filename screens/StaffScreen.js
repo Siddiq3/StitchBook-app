@@ -3,6 +3,7 @@ import InlineAlert from "../components/InlineAlert";
 import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { getMeasurementEntries, toLocalDateKey } from "../utils/formHelpers";
+import { getOutfitLabel } from "../services/outfitTypes";
 import {
   ScrollView,
   StyleSheet,
@@ -53,13 +54,13 @@ const PRIMARY_STAFF_ROLES = [
 
 const today = () => toLocalDateKey();
 
-const money = (value) => `₹${Number(value || 0).toFixed(0)}`;
+const money = (value) => `₹${Math.round(Number(value || 0)).toLocaleString("en-IN")}`;
 
 const paymentTypeLabel = (type, t) =>
 t(PAYMENT_TYPES.find((item) => item.id === type)?.labelKey || "staffMonthly");
 
 const orderItemLabel = (item = {}) =>
-item.typeLabel || item.type || item.name || item.item_name || "Item";
+item.typeLabel || (item.type && getOutfitLabel(item.type)) || item.name || item.item_name || "Item";
 
 const orderLabel = (order = {}) =>
 order.order_number || order.orderNumber || `Order #${order.id}`;
@@ -114,7 +115,7 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.staffName}>{staff.name}</Text>
-            <Text style={styles.staffPhone}>{staff.phone || t("noPhone")}</Text>
+            <Text style={styles.staffPhone}>{staff.phone || staff.email || t("noPhone")}</Text>
           </View>
           <View
             style={[
@@ -658,7 +659,7 @@ export default function StaffScreen() {const { t } = useLanguage();
           style={styles.textInput}
           value={formData.password}
           onChangeText={(text) => setFormData({ ...formData, password: text })}
-          placeholder={t("staffPasswordRule")}
+          placeholder={t("createPassword")}
           placeholderTextColor={colors123.textMuted}
           secureTextEntry
           autoCapitalize="none"
@@ -1712,12 +1713,15 @@ const styles = StyleSheet.create({
     color: colors123.text,
     marginTop: 2,
   },
+  // Five actions do not fit one phone row; wrap to two rows instead of clipping labels
   staffActions: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: spacing.sm,
   },
   actionButton: {
-    flex: 1,
+    flexGrow: 1,
+    flexBasis: "30%",
     minHeight: 44,
     flexDirection: "row",
     alignItems: "center",

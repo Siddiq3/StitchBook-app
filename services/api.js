@@ -2,6 +2,7 @@ import axios from "axios";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 import storage from "./authStorage";
+import { cleanMeasurementValues } from "../utils/formHelpers";
 
 const PRODUCTION_API_BASE_URL = "https://stitchbook-backend.onrender.com/api";
 
@@ -216,6 +217,8 @@ export const customerApi = {
 
 // ── ORDER ─────────────────────────────
 export const orderApi = {
+  // Assigned staff mark their cutting/stitching part of an item as finished
+  markItemDone: (orderId, index, task) => api.put(`/order/${orderId}/items/${index}/done`, { task }),
   create: (data) => api.post("/order", data),
   getAll: (params) => api.get("/order", { params }),
   getById: (id) => api.get(`/order/${id}`),
@@ -237,8 +240,12 @@ export const measurementApi = {
   create: (data) => api.post("/measurement", data),
   getByCustomer: (customerId) => api.get(`/measurement/customer/${customerId}`),
   getById: (id) => api.get(`/measurement/${id}`),
+  // Backend expects { measurements_data: { Chest: 40, ... } }; callers pass either the
+  // bare values or an object that wraps them, so normalise here once.
   update: (id, data) =>
-  api.put(`/measurement/${id}`, { measurementsData: data }),
+  api.put(`/measurement/${id}`, {
+    measurements_data: cleanMeasurementValues(data?.measurements_data || data?.measurementsData || data)
+  }),
   delete: (id) => api.delete(`/measurement/${id}`)
 };
 
@@ -293,6 +300,8 @@ export const dashboardApi = {
 
 // ── STAFF (NEW) ────────────────────────
 export const staffApi = {
+  // Logged-in staff member's own assigned items and monthly pay
+  getMyWork: () => api.get("/staff/me/work"),
   create: (data) => api.post("/staff", data),
   getAll: (params) => api.get("/staff", { params }),
   getById: (id) => api.get(`/staff/${id}`),
@@ -308,7 +317,8 @@ export const staffApi = {
 // ── NOTIFICATION (NEW) ─────────────────
 export const notificationApi = {
   create: (data) => api.post("/notification", data),
-  getAll: (params) => api.get("/notification", { params }),
+  // Each user reads their own notifications (staff must not see the owner's payment alerts)
+  getAll: (params) => api.get("/notification/my", { params }),
   getByUser: (userId) => api.get(`/notification/user/${userId}`),
   markAsRead: (id) => api.put(`/notification/${id}/read`),
   markAllAsRead: () => api.put("/notification/read-all"),
