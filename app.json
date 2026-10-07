@@ -42,7 +42,10 @@
       "googleIosClientId": "",
       "enableMobileOtpLogin": false,
       "msg91WidgetId": "",
-      "msg91WidgetTokenAuth": ""
+      "msg91WidgetTokenAuth": "",
+      "eas": {
+        "projectId": "b4aa0d7f-2dfe-4276-ab27-5dea5ab554ca"
+      }
     }
   }
 }
