@@ -793,6 +793,28 @@ export const StitchProProvider = ({ children }) => {
     }
   }, []);
 
+  // One request for the Measurements overview instead of one per customer
+  const fetchLatestMeasurements = useCallback(async () => {
+    set({ measurementsLoading: true, measurementsError: null });
+    try {
+      const res = await measurementApi.getLatest();
+      const rows = res.data?.data?.measurements || [];
+      const latest = Object.fromEntries(rows.map((row) => [row.customer_id ?? row.customerId, {
+        ...(row.measurementsData || row.measurements_data || {}),
+        outfitType: row.outfitType || row.outfit_type,
+        outfitLabel: row.outfitLabel || row.outfit_label,
+        updatedAt: row.updatedAt || row.updated_at || row.createdAt || row.created_at
+      }]));
+      setState((prev) => ({
+        ...prev,
+        measurements: { ...(prev.measurements && !Array.isArray(prev.measurements) ? prev.measurements : {}), ...latest },
+        measurementsLoading: false
+      }));
+    } catch (err) {
+      set({ measurementsLoading: false, measurementsError: err.message || "Unable to load data" });
+    }
+  }, []);
+
   const addMeasurement = async ({
     customerId,
     outfitType,
@@ -1229,6 +1251,7 @@ export const StitchProProvider = ({ children }) => {
 
         // Measurements
         fetchMeasurements,
+        fetchLatestMeasurements,
         addMeasurement,
         updateMeasurement,
         deleteMeasurement,

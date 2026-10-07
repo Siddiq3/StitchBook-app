@@ -33,7 +33,18 @@ function getMeasurementValue(values, key, translatedLabel) {
     return normalizedField === normalizedKey || normalizedField === normalizedLabel;
   });
 
-  return match?.[1];
+  if (match) return match[1];
+
+  // Outfit fields carry fuller names ("Shoulder Width", "Sleeve Length", "Hip
+  // Circumference", "Shirt Length"); map them onto the figure's short spots.
+  const stem = normalizedKey.replace(/s$/, "");
+  const related = Object.entries(values).find(([fieldKey, value]) => {
+    if (value === "" || value === null || value === undefined || typeof value === "object") return false;
+    const field = String(fieldKey).toLowerCase().replace(/[^a-z0-9]/g, "");
+    if (stem === "length") return field.endsWith("length") && !/^(sleeve|blouse)/.test(field);
+    return field.startsWith(stem);
+  });
+  return related?.[1];
 }
 
 export default function MeasurementFigure({ values = {}, compact = false }) {

@@ -12,63 +12,57 @@ import MeasurementSheet from "../components/MeasurementSheet";
 import { ListSkeleton } from "../components/SkeletonBlock";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
-import { measurementFields } from "../utils/mockData";
-import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";import { useLanguage } from "../context/LanguageContext";
+import measurementFieldsConfig from "../configs/measurementFieldsConfig";
+import { getMeasurementEntries } from "../utils/formHelpers";
+import { colors123, fonts, radius, shadows, spacing } from "../utils/theme";
+import { useLanguage } from "../context/LanguageContext";
 
-function countFilledFields(values) {
-  return measurementFields.filter((field) => values?.[field.key]).length;
+// Saved values are keyed by the outfit's own field labels ("Chest", "Blouse Length"),
+// so coverage is measured against that outfit's field list, not a fixed demo list.
+function summarizeProfile(profile) {
+  const entries = getMeasurementEntries(profile).filter(([, value]) => Number(value) > 0);
+  const expected = measurementFieldsConfig[profile?.outfitType]?.fields?.length || entries.length;
+  return {
+    entries,
+    expected,
+    completion: expected ? Math.min(100, Math.round(entries.length / expected * 100)) : 0,
+  };
 }
 
 export default function MeasurementsScreen({ navigation }) {const { t } = useLanguage();
   const { measurementsError } = useStitchPro();
-  const { customers, measurements, addMeasurement, fetchMeasurements, measurementsLoading, fetchCustomers } =
+  const { customers, measurements, addMeasurement, fetchLatestMeasurements, measurementsLoading, fetchCustomers } =
   useStitchPro();
   const { showToast } = useToast();
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [sheetVisible, setSheetVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Fetch customers and their measurements on mount
+  // Customers and every customer's latest measurement, in two requests total
   useEffect(() => {
-    async function loadData() {
-      await fetchCustomers();
-    }
-    loadData();
-  }, []);
+    fetchCustomers();
+    fetchLatestMeasurements();
+  }, [fetchCustomers, fetchLatestMeasurements]);
 
-  useEffect(() => {
-    if (!customers || customers.length === 0) return;
-    Promise.all(
-      customers.map((customer) =>
-        fetchMeasurements(customer.id).catch(() => null)
-      )
-    );
-  }, [customers, fetchMeasurements]);
-
-  // Pull to refresh
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await fetchCustomers();
-    const customerList = customers && customers.length > 0 ? customers : [];
-    await Promise.all(
-      customerList.map((customer) =>
-      fetchMeasurements(customer.id).catch(() => null)
-      )
-    );
+    await Promise.all([fetchCustomers({ force: true }), fetchLatestMeasurements()]);
     setRefreshing(false);
-  }, [fetchCustomers, fetchMeasurements, customers]);
+  }, [fetchCustomers, fetchLatestMeasurements]);
 
   const measurementRecords = useMemo(
     () => {
       if (!customers || !Array.isArray(customers)) return [];
       return customers.map((customer) => {
         const profile = measurements[customer.id] || {};
-        const count = countFilledFields(profile);
+        const { entries, expected, completion } = summarizeProfile(profile);
         return {
           customer,
           profile,
-          completion: Math.round(count / measurementFields.length * 100),
-          filledFields: count
+          entries,
+          expected,
+          completion,
+          filledFields: entries.length
         };
       });
     },
@@ -78,14 +72,10 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
   const completedProfiles = measurementRecords.filter(
     (record) => record.filledFields > 0
   ).length;
-  const averageCoverage =
-  measurementRecords.length > 0 ?
-  Math.round(
-    measurementRecords.reduce(
-      (sum, record) => sum + record.completion,
-      0
-    ) / measurementRecords.length
-  ) :
+  // Coverage of the profiles that exist; customers without one are counted above
+  const savedRecords = measurementRecords.filter((record) => record.filledFields > 0);
+  const averageCoverage = savedRecords.length ?
+  Math.round(savedRecords.reduce((sum, record) => sum + record.completion, 0) / savedRecords.length) :
   0;
 
   const openSheet = (customer) => {
@@ -175,7 +165,7 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
                       </Text>
                       <Text style={styles.recordMeta}>
                         {record.filledFields > 0 ?
-                    `${record.filledFields}/${measurementFields.length} key values captured` :
+                    `${record.profile.outfitLabel || record.profile.outfitType || ""} · ${record.filledFields}/${record.expected}` :
                     "No measurements captured yet"}
                       </Text>
                     </View>
@@ -201,25 +191,15 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
 
                   </View>
 
+                  {record.entries.length > 0 &&
                   <View style={styles.snapshotRow}>
-                    {["chest", "waist", "sleeve"].map((key) => {
-                  const field = measurementFields.find(
-                    (entry) => entry.key === key
-                  );
-                  return (
-                    <View key={key} style={styles.snapshotPill}>
-                          <Text style={styles.snapshotLabel}>
-                            {field?.shortLabel || key}
-                          </Text>
-                          <Text style={styles.snapshotValue}>
-                            {record.profile[key] ?
-                        `${record.profile[key]}"` :
-                        "--"}
-                          </Text>
-                        </View>);
-
-                })}
-                  </View>
+                    {record.entries.slice(0, 3).map(([label, value]) =>
+                    <View key={label} style={styles.snapshotPill}>
+                          <Text style={styles.snapshotLabel} numberOfLines={1}>{label}</Text>
+                          <Text style={styles.snapshotValue}>{`${value}"`}</Text>
+                        </View>
+                    )}
+                  </View>}
 
                   <View style={styles.recordFooter}>
                     <Text style={styles.recordFootnote}>

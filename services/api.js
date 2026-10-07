@@ -239,6 +239,8 @@ export const subscriptionApi = {
 export const measurementApi = {
   create: (data) => api.post("/measurement", data),
   getByCustomer: (customerId) => api.get(`/measurement/customer/${customerId}`),
+  // Latest record per customer for the whole shop, in one request
+  getLatest: () => api.get("/measurement/latest"),
   getById: (id) => api.get(`/measurement/${id}`),
   // Backend expects { measurements_data: { Chest: 40, ... } }; callers pass either the
   // bare values or an object that wraps them, so normalise here once.
