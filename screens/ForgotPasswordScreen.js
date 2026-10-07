@@ -1,18 +1,16 @@
 import React,{useMemo,useState} from 'react';
-import {KeyboardAvoidingView,Platform,ScrollView,StyleSheet,Text,TouchableOpacity,View} from 'react-native';
-import {StatusBar} from 'expo-status-bar';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {StyleSheet,Text,TouchableOpacity,View} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {authService} from '../services/authService';
 import {useToast} from '../context/ToastContext';
 import IconInput from '../components/IconInput';
 import AppButton from '../components/AppButton';
-import {colors123,fonts,radius,spacing,typography,shadows} from '../utils/theme';
+import AuthShell from '../components/AuthShell';
+import {colors123,fonts,spacing,typography} from '../utils/theme';
 
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ForgotPasswordScreen({navigation}){
-  const insets=useSafeAreaInsets();
   const {showToast}=useToast();
   const [step,setStep]=useState('email');
   const [email,setEmail]=useState('');
@@ -66,18 +64,13 @@ export default function ForgotPasswordScreen({navigation}){
       ? 'Enter the 6-digit code sent to '+cleanEmail+'.'
       : 'Create a new password for your StitchBook account.';
 
-  return <KeyboardAvoidingView style={s.container} behavior={Platform.OS==='ios'?'padding':'height'}>
-    <StatusBar style="dark"/>
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[s.scroll,{paddingTop:insets.top+16,paddingBottom:insets.bottom+spacing.xl}]}>
-      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back to sign in" onPress={()=>navigation.goBack()} style={s.back}>
-        <Ionicons name="arrow-back" size={21} color={colors123.text}/>
-      </TouchableOpacity>
+  const stepNumber={email:1,code:2,password:3}[step];
 
-      <View style={s.iconWrap}><Ionicons name="key-outline" size={28} color={colors123.primary}/></View>
-      <Text style={s.title}>Reset your password</Text>
-      <Text style={s.subtitle}>{subtitle}</Text>
-
-      <View style={s.card}>
+  return <AuthShell title="Reset your password" subtitle={subtitle} step={`Step ${stepNumber} of 3`} onBack={()=>navigation.goBack()}>
+    <View style={s.progress}>
+      {[1,2,3].map((n)=><View key={n} style={[s.progressBar,n<=stepNumber&&s.progressBarActive]}/>)}
+    </View>
+    <View style={s.form}>
         {step==='email'?<>
           <IconInput
             label="Email address"
@@ -153,19 +146,15 @@ export default function ForgotPasswordScreen({navigation}){
             <Text style={s.link}>Back to verification code</Text>
           </TouchableOpacity>
         </>:null}
-      </View>
-    </ScrollView>
-  </KeyboardAvoidingView>;
+    </View>
+  </AuthShell>;
 }
 
 const s=StyleSheet.create({
-  container:{flex:1,backgroundColor:colors123.background},
-  scroll:{flexGrow:1,paddingHorizontal:20},
-  back:{width:44,height:44,borderRadius:radius.sm,alignItems:'center',justifyContent:'center'},
-  iconWrap:{marginTop:spacing.lg,width:48,height:48,borderRadius:radius.sm,alignItems:'center',justifyContent:'center',backgroundColor:colors123.primarySoft},
-  title:{...typography.h1,color:colors123.text,marginTop:spacing.md},
-  subtitle:{...typography.small,color:colors123.textMuted,marginTop:6,maxWidth:380},
-  card:{marginTop:spacing.md,gap:spacing.md,padding:20,borderRadius:radius.xl,backgroundColor:colors123.surface,...shadows.card},
+  form:{gap:spacing.md},
+  progress:{flexDirection:'row',gap:6},
+  progressBar:{flex:1,height:4,borderRadius:2,backgroundColor:colors123.borderLight},
+  progressBarActive:{backgroundColor:colors123.primary},
   helper:{...typography.caption,color:colors123.textMuted},
   error:{...typography.small,color:colors123.danger},
   linkButton:{minHeight:44,alignItems:'center',justifyContent:'center'},
