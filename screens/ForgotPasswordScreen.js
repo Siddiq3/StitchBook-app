@@ -50,7 +50,7 @@ export default function ForgotPasswordScreen({navigation}){
     try{
       await authService.resetPassword(cleanEmail,otp.trim(),password);
       showToast('Password reset. Sign in with your new password.','success');
-      navigation.reset({index:0,routes:[{name:'Login'}]});
+      navigation.reset({index:1,routes:[{name:'Welcome'},{name:'Login'}]});
     }catch(err){
       const message=err.response?.data?.message||err.message||'Invalid or expired verification code.';
       setError(message);showToast(message,'error');

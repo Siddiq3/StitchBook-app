@@ -33,6 +33,7 @@ export default function LoginScreen({navigation}){
   return <AuthShell
     title="Welcome back"
     subtitle="Sign in to manage orders, measurements and staff for your shop."
+    onBack={navigation.canGoBack()?()=>navigation.goBack():undefined}
     footer={<TouchableOpacity accessibilityRole="button" style={s.alt} onPress={()=>navigation.navigate('Register')}>
       <Text style={s.altMuted}>New to StitchBook? </Text><Text style={s.altLink}>Create account</Text>
     </TouchableOpacity>}>

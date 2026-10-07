@@ -1,4 +1,5 @@
 import AccountRecoveryScreen from '../screens/AccountRecoveryScreen';
+import WelcomeScreen from '../screens/WelcomeScreen';
 import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -58,7 +59,8 @@ const StitchProNavigator = () => {
   if (!isAuthenticated) {
     return (
       <NavigationContainer theme={activeTheme}>
-        <AuthStack.Navigator screenOptions={{ headerShown: false, animation: 'fade_from_bottom' }}>
+        <AuthStack.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+          <AuthStack.Screen name="Welcome" component={WelcomeScreen} />
           <AuthStack.Screen name="Login" component={LoginScreen} />
           <AuthStack.Screen name="Register" component={RegisterScreen} />
           <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
