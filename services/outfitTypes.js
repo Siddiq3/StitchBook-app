@@ -179,6 +179,29 @@ export const OUTFIT_TYPES = [
     fields: ['Length','Chest','Waist','Shoulder Width'] },
 ];
 
+// Shared garment silhouettes for outfit selection and item configuration.
+const OUTFIT_ICON_TYPES = {
+  shirt: 'shirt', pants: 'pants', 'kurta-pajama': 'set', 'mens-suit': 'suit',
+  sherwani: 'kurta', 'indo-western': 'kurta', blazer: 'jacket', kurta: 'kurta',
+  'nehru-jacket': 'vest', 'waist-coat': 'vest', 't-shirt': 'tshirt',
+  pajama: 'pants', dhoti: 'drape', 'coord-set-men': 'set',
+  'safari-suit': 'suit', 'nigerian-suit': 'set', bandi: 'vest',
+  blouse: 'blouse', lehenga: 'lehenga', 'ladies-suit': 'set', sharara: 'set',
+  gown: 'dress', kurti: 'kurta', saree: 'saree', dress: 'dress',
+  'under-skirt': 'skirt', rida: 'dress', 'coord-set-women': 'set',
+  'womens-blazer': 'jacket', 'women-pants': 'pants', kaftan: 'dress',
+  cape: 'cape', shrug: 'jacket', skirt: 'skirt', slip: 'camisole',
+  nighty: 'dress', jacket: 'jacket', 'ethnic-jackets': 'jacket', camisole: 'camisole',
+};
+
+export const getOutfitIconType = (outfit) => {
+  const value = typeof outfit === 'string' ? outfit : outfit?.id || outfit?.outfitType || outfit?.outfit_type || outfit?.label;
+  const normalized = String(value || '').trim().toLowerCase();
+  const aliases = { pant: 'pants', trouser: 'pants', salwar: 'ladies-suit', saree_blouse: 'saree', waistcoat: 'waist-coat' };
+  const id = aliases[normalized] || OUTFIT_TYPES.find(item => item.label.toLowerCase() === normalized)?.id || normalized;
+  return OUTFIT_ICON_TYPES[id] || 'hanger';
+};
+
 /**
  * Order status configuration with display colors123 and transitions
  */

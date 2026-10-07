@@ -12,7 +12,9 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import AppButton from "../components/AppButton";
 import MeasurementFieldThumb from "../components/MeasurementFieldThumb";
 import MeasurementPickerModal from "../components/MeasurementPickerModal";
-import { getMeasurementEntries } from "../utils/formHelpers";
+import MeasurementSheet from "../components/MeasurementSheet";
+import OutfitIcon from "../components/OutfitIcon";
+import { cleanMeasurementValues, getMeasurementEntries } from "../utils/formHelpers";
 import StitchOptionsSheet from "../components/StitchOptionsSheet";
 
 export default function CreateItemDetail({
@@ -30,7 +32,7 @@ export default function CreateItemDetail({
   const [itemType, setItemType] = useState("stitching"); // stitching or alteration
   const [selectedMeasurement, setSelectedMeasurement] = useState(null);
   const [showMeasurementPicker, setShowMeasurementPicker] = useState(false);
-  const [measurementLoading, setMeasurementLoading] = useState(false);
+  const [showMeasurementEditor, setShowMeasurementEditor] = useState(false);
   const [measurementExpanded, setMeasurementExpanded] = useState(false);
 
   // Item details
@@ -112,6 +114,22 @@ export default function CreateItemDetail({
     setShowMeasurementPicker(false);
   };
 
+  const handleMeasurementEdit = (form) => {
+    const measurementsData = cleanMeasurementValues(form);
+    if (Object.keys(measurementsData).length === 0) {
+      showToast(t("auto_please_enter_at_least_one_measurement_value"), "error");
+      return;
+    }
+    // Keep edits in the item draft; the order stores its own measurement snapshot.
+    setSelectedMeasurement((current) => ({
+      ...current,
+      outfitLabel: form.outfitLabel?.trim() || current.outfitLabel || current.outfit_label,
+      measurementsData,
+    }));
+    setMeasurementExpanded(true);
+    setShowMeasurementEditor(false);
+  };
+
   const isMandatory = itemType === "stitching";
   const saveButtonDisabled = itemType === "stitching" && !selectedMeasurement;
   const selectedMeasurementData =
@@ -157,8 +175,8 @@ export default function CreateItemDetail({
       >
         {/* Outfit Type Header */}
         <View style={styles.outfitCard}>
-          <Ionicons
-            name="shirt"
+          <OutfitIcon
+            outfit={outfitType}
             size={32}
             color={colors123.primary}
             style={{ marginRight: spacing.md }}
@@ -303,6 +321,13 @@ export default function CreateItemDetail({
 
               <TouchableOpacity accessibilityRole="button"
                 style={styles.changeButton}
+                onPress={() => setShowMeasurementEditor(true)}
+              >
+                <Text style={styles.changeButtonText}>{t("editOrderMeasurements")}</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity accessibilityRole="button"
+                style={styles.changeButton}
                 onPress={() => setShowMeasurementPicker(true)}
               >
                 <Text style={styles.changeButtonText}>{t("change")}</Text>
@@ -438,6 +463,15 @@ export default function CreateItemDetail({
         onClose={() => setShowMeasurementPicker(false)}
         onSelect={handleMeasurementSelected}
         onSkip={() => setShowMeasurementPicker(false)}
+      />
+
+      <MeasurementSheet
+        visible={showMeasurementEditor}
+        initialValues={selectedMeasurement}
+        outfitType={outfitType}
+        orderOnly
+        onClose={() => setShowMeasurementEditor(false)}
+        onSubmit={handleMeasurementEdit}
       />
 
       {/* Stitch Options Sheet */}

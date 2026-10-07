@@ -1,5 +1,8 @@
 export const translations = {
   en: {
+    editOrderMeasurements: "Edit measurements",
+    orderMeasurementEditHelper: "Changes apply to this order item only. The customer's saved measurements stay unchanged.",
+    applyMeasurements: "Apply measurements",
     enterCustomerName: "Enter customer name",
     enterCustomerPhone: "Enter customer phone number",
     enterCustomerEmail: "Enter customer email",
@@ -669,6 +672,9 @@ export const translations = {
     itemSaveFailed: 'आइटम सेव नहीं हो सका',
     enterFabric: 'कृपया कपड़ा दर्ज करें',
     enterValidPrice: 'कृपया सही कीमत दर्ज करें',
+    editOrderMeasurements: 'माप संपादित करें',
+    orderMeasurementEditHelper: 'बदलाव केवल इस ऑर्डर आइटम पर लागू होंगे। ग्राहक के सेव किए गए माप नहीं बदलेंगे।',
+    applyMeasurements: 'माप लागू करें',
     addMeasurementsContinue: 'जारी रखने के लिए माप जोड़ें',
     selectMeasurements: 'माप चुनें',
     selectMeasurementsSubtitle: 'इस ग्राहक के लिए सेव प्रोफाइल चुनें या नया माप बनाएं।',

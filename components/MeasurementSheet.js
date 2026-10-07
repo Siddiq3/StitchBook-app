@@ -20,6 +20,7 @@ export default function MeasurementSheet({
   onClose,
   onSubmit,
   visible,
+  orderOnly = false,
 }) {
   const { t } = useLanguage();
   const [form, setForm] = useState({});
@@ -81,8 +82,9 @@ export default function MeasurementSheet({
   useEffect(() => {
     const initialForm = { ...(initialValues || {}) };
 
-    if (initialValues?.measurementsData && typeof initialValues.measurementsData === "object") {
-      Object.entries(initialValues.measurementsData).forEach(([key, value]) => {
+    const measurementData = initialValues?.measurementsData || initialValues?.measurements_data;
+    if (measurementData && typeof measurementData === "object") {
+      Object.entries(measurementData).forEach(([key, value]) => {
         if (!(key in initialForm)) {
           initialForm[key] = value;
         }
@@ -221,7 +223,7 @@ export default function MeasurementSheet({
       </AppCard>
 
       <Text style={styles.helper}>
-        {t("measurementReuseHelper")}
+        {t(orderOnly ? "orderMeasurementEditHelper" : "measurementReuseHelper")}
       </Text>
 
       <View style={styles.formHeader}>
@@ -377,7 +379,7 @@ export default function MeasurementSheet({
         />
         <AppButton
           icon="content-save-outline"
-          label={t("saveProfile")}
+          label={t(orderOnly ? "applyMeasurements" : "saveProfile")}
           onPress={handleSubmit}
           style={styles.action}
           disabled={!activeConfig}

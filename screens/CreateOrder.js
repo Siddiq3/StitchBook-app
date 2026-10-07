@@ -18,6 +18,7 @@ import { showAccountInactiveAlert } from "../utils/accountStatus";
 import { formatPhone, toLocalDateKey } from "../utils/formHelpers";
 import MeasurementPickerModal from "../components/MeasurementPickerModal";
 import CreateItemDetail from "./CreateItemDetail";
+import OutfitIcon from "../components/OutfitIcon";
 
 export default function CreateOrder({ navigation, route }) {
   const insets = useSafeAreaInsets();
@@ -498,12 +499,8 @@ export default function CreateOrder({ navigation, route }) {
                     isSelected && styles.outfitIconContainerSelected]
                     }>
 
-                    <Ionicons
-                      name={
-                      outfit.category === "alteration" ?
-                      "construct-outline" :
-                      "shirt-outline"
-                      }
+                    <OutfitIcon
+                      outfit={outfit}
                       size={30}
                       color={isSelected ? colors123.surface : colors123.primary} />
 
