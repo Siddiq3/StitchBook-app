@@ -20,10 +20,10 @@ function OrdersArt({ t }) {
       <View style={styles.paper}>
         <View style={styles.rowBetween}>
           <View style={styles.row}>
-            <View style={[styles.dot, { backgroundColor: "#EDE7FF" }]}><Text style={styles.glyph}>👚</Text></View>
+            <View style={[styles.dot, { backgroundColor: "#DDEEFF" }]}><Text style={styles.glyph}>👔</Text></View>
             <View>
-              <Text style={styles.strong}>Blouse × 2</Text>
-              <Text style={styles.muted}>Lakshmi</Text>
+              <Text style={styles.strong}>Shirt × 2</Text>
+              <Text style={styles.muted}>Rahul</Text>
             </View>
           </View>
           <View style={styles.dueChip}><Text style={styles.dueText}>Fri</Text></View>
