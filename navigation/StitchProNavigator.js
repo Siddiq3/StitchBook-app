@@ -38,7 +38,8 @@ const StitchProNavigator = () => {
   const activeTheme = navigationTheme;
 
   useEffect(() => {
-    const timer = setTimeout(() => setIsSplashReady(true), 2400);
+    // Just long enough to avoid a flash; the loader itself shows progress after that
+    const timer = setTimeout(() => setIsSplashReady(true), 1000);
     return () => clearTimeout(timer);
   }, []);
 

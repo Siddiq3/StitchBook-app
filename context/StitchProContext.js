@@ -175,9 +175,9 @@ export const StitchProProvider = ({ children }) => {
         shop: session.shop || null
       });
 
-      // Fetch shop to decide: onboarding or main app
-      await fetchShopSilently();
-      await fetchSubscription().catch(() => {});
+      // Shop decides onboarding vs main app; the subscription check is independent,
+      // so both run at once (the API client queues requests behind one token refresh)
+      await Promise.all([fetchShopSilently(), fetchSubscription().catch(() => {})]);
     } catch (err) {
 
       set({ authError: "Could not restore your account. Please try again.", isAuthenticated: false });

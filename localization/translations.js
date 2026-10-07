@@ -2537,6 +2537,10 @@ const appTranslationExtensions = {
     "ankle": "घोट्याचा"
   },
   "te": {
+    "loaderTagline": "మీ కోసం కుట్టి సిద్ధం చేస్తున్నాం",
+    "loaderOpening": "మీ షాప్ తెరుస్తున్నాం…",
+    "loaderFetching": "మీ ఆర్డర్లు, కస్టమర్లను తెస్తున్నాం…",
+    "loaderSlow": "దాదాపు అయిపోయింది — నెమ్మది కనెక్షన్‌లో మరికొన్ని సెకన్లు పట్టవచ్చు.",
     "welcomeOrdersTitle": "ప్రతి ఆర్డర్‌ను ట్రాక్ చేయండి",
     "welcomeOrdersBody": "కటింగ్, కుట్టడం, సిద్ధం — డెలివరీ తేదీతో సహా ఒక్క చూపులో.",
     "welcomeMeasureTitle": "కొలతలు భద్రంగా",
@@ -3613,6 +3617,10 @@ const appTranslationExtensions = {
     "ankle": "গোড়ালি"
   },
   "hi": {
+    "loaderTagline": "आपके लिए सब सिल रहे हैं",
+    "loaderOpening": "आपकी दुकान खोल रहे हैं…",
+    "loaderFetching": "आपके ऑर्डर और ग्राहक ला रहे हैं…",
+    "loaderSlow": "बस हो गया — धीमे कनेक्शन पर कुछ सेकंड और लग सकते हैं।",
     "welcomeOrdersTitle": "हर ऑर्डर ट्रैक करें",
     "welcomeOrdersBody": "कटिंग, सिलाई, तैयार — डिलीवरी की तारीख के साथ, एक नज़र में।",
     "welcomeMeasureTitle": "नाप सुरक्षित",
@@ -3928,6 +3936,10 @@ const appTranslationExtensions = {
     "ankle": "टखना"
   },
   "en": {
+    "loaderTagline": "Stitching it together for you",
+    "loaderOpening": "Opening your shop…",
+    "loaderFetching": "Fetching your orders and customers…",
+    "loaderSlow": "Almost there — a slow connection can take a few more seconds.",
     "welcomeOrdersTitle": "Track every order",
     "welcomeOrdersBody": "Cutting, stitching, ready — and the delivery date, at a glance.",
     "welcomeMeasureTitle": "Measurements, saved",

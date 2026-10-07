@@ -2,6 +2,7 @@ import SessionsScreen from '../screens/SessionsScreen';
 import DeleteAccountScreen from '../screens/DeleteAccountScreen';
 import PasswordScreen from '../screens/PasswordScreen';
 import AccountRecoveryScreen from '../screens/AccountRecoveryScreen';
+import SplashScreen from '../screens/SplashScreen';
 import RecordMeasurementScreen from "../screens/RecordMeasurementScreen";
 import ViewMeasurementsScreen from "../screens/ViewMeasurementsScreen";
 import MeasurementsScreen from "../screens/MeasurementsScreen";
@@ -149,12 +150,9 @@ export default function MainTabNavigator() {
     }
   }, [fetchSubscription, subscription, subscriptionLoading]);
 
+  // Same stitching loader as the splash, so startup reads as one continuous step
   if (subscriptionLoading && !subscription) {
-    return (
-      <View style={styles.loadingScreen}>
-        <ActivityIndicator size="large" color={colors123.primary} />
-      </View>);
-
+    return <SplashScreen />;
   }
 
   if (subscriptionState === "error") {
@@ -218,12 +216,6 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: colors123.background,
-  },
-  loadingScreen: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     backgroundColor: colors123.background,
   },
   tabIconWrap: {
