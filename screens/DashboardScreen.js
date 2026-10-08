@@ -2,10 +2,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ScreenHeader from "../components/ScreenHeader";
 import Reveal from "../components/Reveal";
 import PressableScale from "../components/PressableScale";
-import { LinearGradient } from "expo-linear-gradient";
 import AppButton from "../components/AppButton";
 import InlineAlert from "../components/InlineAlert";
-import ResponsiveGrid from "../components/ResponsiveGrid";
 import React, { useEffect, useMemo, useCallback, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -26,15 +24,6 @@ import {
   fonts,
   formatCurrency } from
 "../utils/theme";
-
-const formatTrialDate = (value) => {
-  if (!value) return "-";
-  try {
-    return format(parseISO(value), "dd MMM yyyy");
-  } catch {
-    return String(value);
-  }
-};
 
 const cleanDisplayText = (value, fallback) => {
   const text = String(value || "").trim();
@@ -230,48 +219,55 @@ export default function DashboardScreen({ navigation }) {
 
       }>
 
-      <Reveal>
-        <LinearGradient colors={["#1A8CFF", colors123.primary, "#0057B8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
-          <View style={styles.heroGlow} />
-          <Text style={styles.heroDate}>{format(new Date(), "EEEE, d MMM")}</Text>
-          <Text accessibilityRole="header" numberOfLines={2} style={styles.heroTitle}>{shopName}</Text>
-          <View style={styles.heroStats}>
-            {[
-            { key: "today", label: t("dueToday"), value: heroStats.dueToday },
-            { key: "overdue", label: t("overdue"), value: heroStats.overdue },
-            { key: "active", label: t("inProgress"), value: heroStats.active }].
-            map((stat) =>
-            <View key={stat.key} accessible accessibilityLabel={`${stat.label}: ${stat.value}`} style={styles.heroStat}>
-                <Text style={styles.heroStatValue}>{stat.value}</Text>
-                <Text numberOfLines={2} style={styles.heroStatLabel}>{stat.label}</Text>
-              </View>
-            )}
+      <Reveal style={styles.band}>
+        <View style={styles.bandTop}>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={styles.bandDate}>{format(new Date(), "EEEE, d MMM")}</Text>
+            <Text accessibilityRole="header" numberOfLines={1} style={styles.bandTitle}>{shopName}</Text>
           </View>
           {can("orders:write") &&
-          <PressableScale accessibilityRole="button" onPress={() => navigation.navigate("CustomerSelection")} style={styles.heroButton}>
-              <MaterialCommunityIcons name="plus" size={20} color={colors123.primary} />
-              <Text style={styles.heroButtonText}>{t("newOrder")}</Text>
+          <PressableScale accessibilityRole="button" onPress={() => navigation.navigate("CustomerSelection")} style={styles.bandButton}>
+              <MaterialCommunityIcons name="plus" size={18} color={colors123.primary} />
+              <Text style={styles.bandButtonText}>{t("newOrder")}</Text>
             </PressableScale>
           }
-        </LinearGradient>
+        </View>
+        <View style={styles.todayRow}>
+          {[
+          { key: "today", label: t("dueToday"), value: heroStats.dueToday },
+          { key: "overdue", label: t("overdue"), value: heroStats.overdue, alert: heroStats.overdue > 0 },
+          { key: "active", label: t("inProgress"), value: heroStats.active }].
+          map((stat) =>
+          <PressableScale
+            key={stat.key}
+            accessibilityRole="button"
+            accessibilityLabel={`${stat.label}: ${stat.value}`}
+            onPress={() => navigation.navigate("Orders")}
+            style={[styles.todayChip, stat.alert && styles.todayChipAlert]}>
+              <Text style={[styles.todayValue, stat.alert && styles.todayValueAlert]}>{stat.value}</Text>
+              <Text numberOfLines={1} style={[styles.todayLabel, stat.alert && styles.todayValueAlert]}>{stat.label}</Text>
+            </PressableScale>
+          )}
+        </View>
       </Reveal>
       {showMyWork && <Reveal index={1}><MyWorkCard t={t} work={myWork} onOpen={(orderId) => navigation.navigate("OrderDetail", { orderId })} onDone={confirmDone} /></Reveal>}
-      {isOwner && (isTrialActive || isTrialExpired) && (
-        <AppCard variant="muted">
+      {isOwner && isTrialExpired &&
+      <AppCard variant="muted">
           <View style={styles.announcementTopRow}>
-            <MaterialCommunityIcons
-              name={isTrialExpired ? "alert-circle-outline" : "clock-outline"}
-              size={22}
-              color={isTrialExpired ? colors123.danger : colors123.primary} />
+            <MaterialCommunityIcons name="alert-circle-outline" size={22} color={colors123.danger} />
             <View style={{ flex: 1, minWidth: 0 }}>
               <Text style={styles.deliveryTitle}>{getAccountStatusText(subscription, t)}</Text>
-              <Text style={styles.deliveryMeta}>
-                {isTrialExpired ? t("accountInactiveMessage") : `${t("trialEndsOn")} ${formatTrialDate(subscription?.trialEndDate || subscription?.endDate)}`}
-              </Text>
+              <Text style={styles.deliveryMeta}>{t("accountInactiveMessage")}</Text>
             </View>
           </View>
         </AppCard>
-      )}
+      }
+      {isOwner && isTrialActive &&
+      <View style={styles.trialLine} accessible>
+          <MaterialCommunityIcons name="clock-outline" size={16} color={colors123.textMuted} />
+          <Text style={styles.trialText} numberOfLines={1}>{getAccountStatusText(subscription, t)}</Text>
+        </View>
+      }
       {isOwner && !ordersLoading && !ordersError && !(orders?.length > 0) &&
       <SetupChecklist
         t={t}
@@ -281,70 +277,29 @@ export default function DashboardScreen({ navigation }) {
         { key: "order", label: t("setupCreateOrder"), done: false, onPress: () => navigation.navigate("CustomerSelection") }]
         } />
       }
-      {/* Overdue Orders Alert */}
-      {overdueOrders.length > 0 &&
-      <Reveal index={1}>
-          <PressableScale accessibilityRole="button"
-          style={styles.alertCard}
-          onPress={() => navigation.navigate("Orders")}>
-
-            <View style={styles.alertIcon}>
-              <MaterialCommunityIcons
-              color={colors123.surface}
-              name="alert-circle"
-              size={20} />
-
-            </View>
-            <View style={styles.alertContent}>
-              <Text style={styles.alertTitle}>
-                {overdueOrders.length} {overdueOrders.length > 1 ? t("overdueOrders") : t("overdueOrder")}
-              </Text>
-              <Text style={styles.alertSubtitle}>
-                {overdueOrders[0] ? customerName(overdueOrders[0]) : ""}
-                {overdueOrders.length > 1 ? ` +${overdueOrders.length - 1} more` : ""}
-              </Text>
-            </View>
-            <MaterialCommunityIcons
-            color={colors123.surface}
-            name="chevron-right"
-            size={20} />
-
-          </PressableScale>
-        </Reveal>
-      }
 
       <Reveal index={2}>
       <AppCard style={styles.productionCard}>
         <View style={styles.sectionRow}>
           <Text style={styles.sectionTitle}>{t("workInProgress")}</Text>
-          <MaterialCommunityIcons name="clipboard-list-outline" size={22} color={colors123.primary} />
         </View>
-        <ResponsiveGrid minItemWidth={140} style={styles.productionGrid}>
+        <View style={styles.stageRow}>
           {[
-          { key: "new", label: t("pending"), value: workStats.pending, icon: "clipboard-text-outline", color: colors123.info, status: "pending" },
-          { key: "cutting", label: t("cutting"), value: workStats.cutting, icon: "content-cut", color: colors123.warning, status: "cutting" },
-          { key: "stitching", label: t("stitching"), value: workStats.stitching, icon: "needle", color: colors123.primary, status: "stitching" },
-          { key: "ready", label: t("readyForPickupTile"), value: workStats.ready, icon: "cube-send", color: colors123.success, status: "ready" }].
-          map((item) =>
+          { key: "new", label: t("pending"), value: workStats.pending, color: colors123.textSecondary, status: "pending" },
+          { key: "cutting", label: t("cutting"), value: workStats.cutting, color: colors123.warning, status: "cutting" },
+          { key: "stitching", label: t("stitching"), value: workStats.stitching, color: colors123.primary, status: "stitching" },
+          { key: "ready", label: t("ready"), value: workStats.ready, color: colors123.success, status: "ready" }].
+          map((item, index) =>
           <PressableScale accessibilityRole="button"
             accessibilityLabel={`${item.label}: ${item.value}`}
             key={item.key}
             onPress={() => navigation.navigate("Orders", { status: item.status })}
-            style={({ pressed }) => [
-            styles.productionTile,
-            pressed && styles.productionTilePressed]
-            }>
-
-              <View style={[styles.productionIcon, { backgroundColor: `${item.color}18` }]}>
-                <MaterialCommunityIcons name={item.icon} size={18} color={item.color} />
-              </View>
-              <View style={{ flex: 1, minWidth: 0 }}>
-                <Text style={styles.productionLabel}>{item.label}</Text>
-                <Text style={styles.productionValue}>{item.value}</Text>
-              </View>
+            style={[styles.stageCell, index > 0 && styles.stageDivider]}>
+              <Text style={[styles.stageValue, item.value > 0 && { color: item.color }]}>{item.value}</Text>
+              <Text numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.85} style={styles.stageLabel}>{item.label}</Text>
             </PressableScale>
           )}
-        </ResponsiveGrid>
+        </View>
       </AppCard>
       </Reveal>
 
@@ -358,8 +313,8 @@ export default function DashboardScreen({ navigation }) {
           <MaterialCommunityIcons name="chart-box-outline" size={22} color={colors123.primary} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.sectionTitle}>{t("viewReports")}</Text>
-          <Text style={styles.sectionSubtitle}>{t("viewReportsSubtitle")}</Text>
+          <Text style={styles.reportsTitle}>{t("viewReports")}</Text>
+          <Text style={styles.reportsSubtitle} numberOfLines={1}>{t("viewReportsSubtitle")}</Text>
         </View>
         <MaterialCommunityIcons name="chevron-right" size={22} color={colors123.textMuted} />
       </PressableScale>
@@ -438,91 +393,53 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: spacing.sm,
   },
-  hero: {
-    borderRadius: radius.xl,
-    padding: spacing.lg,
-    gap: spacing.xs,
-    overflow: "hidden",
-    ...shadows.floating,
-    shadowColor: colors123.primary,
-    shadowOpacity: 0.3,
+  band: {
+    borderRadius: radius.lg,
+    padding: spacing.md,
+    gap: spacing.sm,
+    backgroundColor: colors123.primary,
   },
-  heroGlow: {
-    position: "absolute",
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    right: -70,
-    top: -90,
-    backgroundColor: "rgba(255,255,255,0.12)",
-  },
-  heroDate: { fontFamily: fonts.medium, fontSize: 13, color: "rgba(255,255,255,0.8)" },
-  heroTitle: { fontFamily: fonts.bold, fontSize: 26, lineHeight: 32, letterSpacing: -0.5, color: colors123.surface },
-  heroStats: { flexDirection: "row", gap: spacing.xs, marginTop: spacing.sm },
-  heroStat: {
-    flex: 1,
-    borderRadius: radius.md,
-    paddingVertical: spacing.sm,
+  bandTop: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  bandDate: { fontFamily: fonts.medium, fontSize: 13, color: "rgba(255,255,255,0.82)" },
+  bandTitle: { fontFamily: fonts.bold, fontSize: 22, lineHeight: 28, letterSpacing: -0.3, color: colors123.surface },
+  bandButton: {
+    minHeight: 44,
     paddingHorizontal: spacing.sm,
-    backgroundColor: "rgba(255,255,255,0.14)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-  },
-  heroStatValue: { fontFamily: fonts.bold, fontSize: 22, color: colors123.surface },
-  heroStatLabel: { fontFamily: fonts.medium, fontSize: 12, lineHeight: 16, color: "rgba(255,255,255,0.85)" },
-  heroButton: {
-    marginTop: spacing.sm,
-    minHeight: 48,
-    borderRadius: radius.pill,
+    borderRadius: radius.md,
     backgroundColor: colors123.surface,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    gap: spacing.xs,
+    gap: 4,
   },
-  heroButtonText: { fontFamily: fonts.semibold, fontSize: 15, color: colors123.primary },
+  bandButtonText: { fontFamily: fonts.semibold, fontSize: 14, color: colors123.primary },
+  todayRow: { flexDirection: "row", gap: spacing.xs },
+  todayChip: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: 6,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    justifyContent: "center",
+  },
+  todayChipAlert: { backgroundColor: colors123.surface },
+  todayValue: { fontFamily: fonts.bold, fontSize: 18, color: colors123.surface },
+  todayValueAlert: { color: colors123.danger },
+  todayLabel: { fontFamily: fonts.medium, fontSize: 12, color: "rgba(255,255,255,0.88)" },
+  trialLine: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 4 },
+  trialText: { flex: 1, fontFamily: fonts.regular, fontSize: 13, color: colors123.textMuted },
+  stageRow: { flexDirection: "row" },
+  stageCell: { flex: 1, minHeight: 56, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
+  stageDivider: { borderLeftWidth: StyleSheet.hairlineWidth, borderLeftColor: colors123.border },
+  stageValue: { fontFamily: fonts.bold, fontSize: 22, color: colors123.text },
+  stageLabel: { fontFamily: fonts.medium, fontSize: 12, color: colors123.textMuted, marginTop: 2 },
+  reportsTitle: { fontFamily: fonts.semibold, fontSize: 16, color: colors123.text },
+  reportsSubtitle: { fontFamily: fonts.regular, fontSize: 13, color: colors123.textMuted, marginTop: 2 },
   productionCard: {
     gap: spacing.sm,
   },
-  productionGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  productionTile: {
-    width: "100%",
-    minHeight: 64,
-    borderWidth: 0,
-    borderColor: colors123.borderLight,
-    borderRadius: radius.md,
-    backgroundColor: colors123.surfaceMuted,
-    padding: spacing.sm,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-  },
   productionTilePressed: {
     opacity: 0.78,
-  },
-  productionIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 0,
-  },
-  productionValue: {
-    fontFamily: fonts.extrabold,
-    fontSize: 17,
-    color: colors123.text,
-  },
-  productionLabel: {
-    marginTop: 0,
-    fontFamily: fonts.medium,
-    fontSize: 13,
-    color: colors123.textMuted,
-    lineHeight: 18,
   },
   sectionRow: {
     flexDirection: "row",
@@ -600,35 +517,6 @@ const styles = StyleSheet.create({
   checklistRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm, minHeight: 44 },
   checklistLabel: { flex: 1, fontFamily: fonts.medium, fontSize: 14, color: colors123.text },
   checklistLabelDone: { color: colors123.textMuted, textDecorationLine: "line-through" },
-  alertCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors123.error,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    gap: spacing.sm,
-  },
-  alertIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.2)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  alertContent: {
-    flex: 1,
-  },
-  alertTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 14,
-    color: colors123.surface,
-  },
-  alertSubtitle: {
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
-  },
   emptyState: {
     alignItems: "center",
     paddingVertical: spacing.lg,

@@ -3,6 +3,7 @@ import {StyleSheet,Text,TouchableOpacity,View} from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {authService} from '../services/authService';
 import {useToast} from '../context/ToastContext';
+import {useLanguage} from '../context/LanguageContext';
 import IconInput from '../components/IconInput';
 import AppButton from '../components/AppButton';
 import AuthShell from '../components/AuthShell';
@@ -11,6 +12,7 @@ import {colors123,fonts,spacing,typography} from '../utils/theme';
 const EMAIL_RE=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ForgotPasswordScreen({navigation}){
+  const {t}=useLanguage();
   const {showToast}=useToast();
   const [step,setStep]=useState('email');
   const [email,setEmail]=useState('');
@@ -24,60 +26,60 @@ export default function ForgotPasswordScreen({navigation}){
   const cleanEmail=useMemo(()=>email.trim().toLowerCase(),[email]);
 
   const sendCode=async()=>{
-    if(!EMAIL_RE.test(cleanEmail)){setError('Enter a valid email address.');return;}
+    if(!EMAIL_RE.test(cleanEmail)){setError(t('authInvalidEmail'));return;}
     setLoading(true);setError('');
     try{
       await authService.requestPasswordReset(cleanEmail);
       setStep('code');
-      showToast('If an account exists, a verification code has been sent.','success');
+      showToast(t('forgotCodeSent'),'success');
     }catch(err){
-      const message=err.response?.data?.message||err.message||'Unable to request a reset code.';
+      const message=err.response?.data?.message||err.message||t('forgotRequestFailed');
       setError(message);showToast(message,'error');
     }finally{setLoading(false);}
   };
 
   const continueWithCode=()=>{
-    if(!/^\d{6}$/.test(otp.trim())){setError('Enter the 6-digit verification code.');return;}
+    if(!/^\d{6}$/.test(otp.trim())){setError(t('forgotCodeInvalid'));return;}
     setError('');setStep('password');
   };
 
   const resetPassword=async()=>{
     if(password.length<8||!/[A-Za-z]/.test(password)||!/\d/.test(password)){
-      setError('Password must be at least 8 characters and include a letter and a number.');return;
+      setError(t('authPasswordRule'));return;
     }
-    if(password!==confirm){setError('Passwords do not match.');return;}
+    if(password!==confirm){setError(t('authPasswordsMismatch'));return;}
     setLoading(true);setError('');
     try{
       await authService.resetPassword(cleanEmail,otp.trim(),password);
-      showToast('Password reset. Sign in with your new password.','success');
+      showToast(t('forgotDone'),'success');
       navigation.reset({index:1,routes:[{name:'Welcome'},{name:'Login'}]});
     }catch(err){
-      const message=err.response?.data?.message||err.message||'Invalid or expired verification code.';
+      const message=err.response?.data?.message||err.message||t('forgotCodeExpired');
       setError(message);showToast(message,'error');
       if((err.response?.data?.message||'').toLowerCase().includes('verification code')) setStep('code');
     }finally{setLoading(false);}
   };
 
   const subtitle=step==='email'
-    ? 'Enter the email linked to your StitchBook account.'
+    ? t('forgotSubtitleEmail')
     : step==='code'
-      ? 'Enter the 6-digit code sent to '+cleanEmail+'.'
-      : 'Create a new password for your StitchBook account.';
+      ? t('forgotSubtitleCode')+' '+cleanEmail
+      : t('forgotSubtitlePassword');
 
   const stepNumber={email:1,code:2,password:3}[step];
 
-  return <AuthShell title="Reset your password" subtitle={subtitle} step={`Step ${stepNumber} of 3`} onBack={()=>navigation.goBack()}>
+  return <AuthShell title={t('forgotTitle')} subtitle={subtitle} step={t('authStepOf').replace('{n}',stepNumber).replace('{total}',3)} onBack={()=>navigation.goBack()}>
     <View style={s.progress}>
       {[1,2,3].map((n)=><View key={n} style={[s.progressBar,n<=stepNumber&&s.progressBarActive]}/>)}
     </View>
     <View style={s.form}>
         {step==='email'?<>
           <IconInput
-            label="Email address"
+            label={t('authEmail')}
             icon="email-outline"
             value={email}
             onChangeText={(v)=>{setEmail(v);setError('');}}
-            placeholder="Enter your email"
+            placeholder={t('authEnterEmail')}
             autoCapitalize="none"
             autoCorrect={false}
             keyboardType="email-address"
@@ -85,18 +87,18 @@ export default function ForgotPasswordScreen({navigation}){
             returnKeyType="send"
             onSubmitEditing={sendCode}
           />
-          <Text style={s.helper}>For privacy, we show the same confirmation whether or not an account exists.</Text>
+          <Text style={s.helper}>{t('forgotPrivacyNote')}</Text>
           {error?<Text style={s.error}>{error}</Text>:null}
-          <AppButton label="Send verification code" loading={loading} onPress={sendCode}/>
+          <AppButton label={t('forgotSendCode')} loading={loading} onPress={sendCode}/>
         </>:null}
 
         {step==='code'?<>
           <IconInput
-            label="Verification code"
+            label={t('forgotCode')}
             icon="numeric"
             value={otp}
             onChangeText={(v)=>{setOtp(v.replace(/\D/g,'').slice(0,6));setError('');}}
-            placeholder="Enter the 6-digit verification code"
+            placeholder={t('forgotCodePlaceholder')}
             keyboardType="number-pad"
             maxLength={6}
             autoComplete="one-time-code"
@@ -104,34 +106,34 @@ export default function ForgotPasswordScreen({navigation}){
             onSubmitEditing={continueWithCode}
           />
           {error?<Text style={s.error}>{error}</Text>:null}
-          <AppButton label="Continue" onPress={continueWithCode}/>
-          <AppButton label="Send code again" variant="tertiary" loading={loading} onPress={sendCode}/>
+          <AppButton label={t('authContinue')} onPress={continueWithCode}/>
+          <AppButton label={t('forgotResend')} variant="tertiary" loading={loading} onPress={sendCode}/>
           <TouchableOpacity accessibilityRole="button" onPress={()=>{setStep('email');setOtp('');setError('');}} style={s.linkButton}>
-            <Text style={s.link}>Use a different email</Text>
+            <Text style={s.link}>{t('forgotDifferentEmail')}</Text>
           </TouchableOpacity>
         </>:null}
 
         {step==='password'?<>
           <IconInput
-            label="New password"
+            label={t('forgotNewPassword')}
             icon="lock-outline"
             value={password}
             onChangeText={(v)=>{setPassword(v);setError('');}}
-            placeholder="Enter your new password"
+            placeholder={t('forgotNewPasswordPlaceholder')}
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             autoCorrect={false}
             autoComplete="new-password"
-            right={<TouchableOpacity accessibilityRole="button" accessibilityLabel={showPassword?'Hide password':'Show password'} onPress={()=>setShowPassword(v=>!v)} hitSlop={10}>
+            right={<TouchableOpacity accessibilityRole="button" accessibilityLabel={showPassword?t('authHidePassword'):t('authShowPassword')} onPress={()=>setShowPassword(v=>!v)} hitSlop={10}>
               <Ionicons name={showPassword?'eye-off-outline':'eye-outline'} size={20} color={colors123.textMuted}/>
             </TouchableOpacity>}
           />
           <IconInput
-            label="Confirm new password"
+            label={t('forgotConfirmNew')}
             icon="lock-check-outline"
             value={confirm}
             onChangeText={(v)=>{setConfirm(v);setError('');}}
-            placeholder="Re-enter your new password"
+            placeholder={t('forgotConfirmNewPlaceholder')}
             secureTextEntry={!showPassword}
             autoCapitalize="none"
             autoCorrect={false}
@@ -139,11 +141,11 @@ export default function ForgotPasswordScreen({navigation}){
             returnKeyType="done"
             onSubmitEditing={resetPassword}
           />
-          <Text style={s.helper}>Use 8–128 characters with at least one letter and one number.</Text>
+          <Text style={s.helper}>{t('forgotPasswordRuleLong')}</Text>
           {error?<Text style={s.error}>{error}</Text>:null}
-          <AppButton label="Reset password" loading={loading} onPress={resetPassword}/>
+          <AppButton label={t('forgotReset')} loading={loading} onPress={resetPassword}/>
           <TouchableOpacity accessibilityRole="button" onPress={()=>{setStep('code');setError('');}} style={s.linkButton}>
-            <Text style={s.link}>Back to verification code</Text>
+            <Text style={s.link}>{t('forgotBackToCode')}</Text>
           </TouchableOpacity>
         </>:null}
     </View>

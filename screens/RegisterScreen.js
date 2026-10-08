@@ -5,6 +5,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {useStitchPro} from '../context/StitchProContext';
 import {useToast} from '../context/ToastContext';
+import {useLanguage} from '../context/LanguageContext';
 import IconInput from '../components/IconInput';
 import AppButton from '../components/AppButton';
 import Reveal from '../components/Reveal';
@@ -16,13 +17,14 @@ const validPhone=(value)=>{const d=String(value||'').replace(/\D/g,'');return d.
 const validPassword=(value)=>String(value||'').length>=8&&/[A-Za-z]/.test(value)&&/\d/.test(value);
 
 const STEPS={
-  1:{title:'Create your account',subtitle:'Start with a few details about you.'},
-  2:{title:'Secure your account',subtitle:'Choose a password you will use to sign in.'},
+  1:{title:'registerTitle1',subtitle:'registerSubtitle1'},
+  2:{title:'registerTitle2',subtitle:'registerSubtitle2'},
 };
 
 // Two short steps instead of one long form: details first, password second.
 // The action stays pinned at the bottom, near the thumb, like the rest of first run.
 export default function RegisterScreen({navigation}){
+  const {t}=useLanguage();
   const insets=useSafeAreaInsets();
   const {registerWithPassword}=useStitchPro();
   const {showToast}=useToast();
@@ -43,52 +45,52 @@ export default function RegisterScreen({navigation}){
   const back=()=>{ if(step===2){setStep(1);setError('');} else navigation.goBack(); };
 
   const next=()=>{
-    if(form.name.trim().length<2){setError('Enter your name.');return;}
-    if(!validPhone(form.phone)){setError('Enter a valid 10-digit mobile number.');return;}
-    if(!validEmail(form.email)){setError('Enter a valid email address.');return;}
+    if(form.name.trim().length<2){setError(t('registerNameMissing'));return;}
+    if(!validPhone(form.phone)){setError(t('registerMobileInvalid'));return;}
+    if(!validEmail(form.email)){setError(t('authInvalidEmail'));return;}
     setError('');setStep(2);
   };
 
   const submit=async()=>{
-    if(!validPassword(form.password)){setError('Password must be at least 8 characters with a letter and a number.');return;}
-    if(form.password!==form.confirm){setError("Passwords don't match.");return;}
+    if(!validPassword(form.password)){setError(t('authPasswordRule'));return;}
+    if(form.password!==form.confirm){setError(t('authPasswordsMismatch'));return;}
     setLoading(true);setError('');
     try{
       await registerWithPassword({name:form.name.trim(),email:form.email.trim().toLowerCase(),phone:form.phone.trim(),password:form.password});
-      showToast('Account created','success');
+      showToast(t('registerDone'),'success');
     }catch(err){
-      const message=err.response?.data?.message||err.message||'Could not create account';
+      const message=err.response?.data?.message||err.message||t('registerFailed');
       setError(message);showToast(message,'error');
       // A taken email or number is fixed on step 1
       if(/exists|already/i.test(message)) setStep(1);
     }finally{setLoading(false);}
   };
 
-  const eye=<TouchableOpacity accessibilityRole="button" accessibilityLabel={showPassword?'Hide password':'Show password'} onPress={()=>setShowPassword(v=>!v)} hitSlop={10}>
+  const eye=<TouchableOpacity accessibilityRole="button" accessibilityLabel={showPassword?t('authHidePassword'):t('authShowPassword')} onPress={()=>setShowPassword(v=>!v)} hitSlop={10}>
     <Ionicons name={showPassword?'eye-off-outline':'eye-outline'} size={20} color={colors123.textMuted}/>
   </TouchableOpacity>;
 
   return <KeyboardAvoidingView style={s.container} behavior={Platform.OS==='ios'?'padding':'height'}>
     <StatusBar style="dark"/>
     <View style={[s.topBar,{paddingTop:insets.top+spacing.xs}]}>
-      <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back" onPress={back} hitSlop={8} style={s.back}>
+      <TouchableOpacity accessibilityRole="button" accessibilityLabel={t('authBack')} onPress={back} hitSlop={8} style={s.back}>
         <Ionicons name="arrow-back" size={22} color={colors123.text}/>
       </TouchableOpacity>
       <View style={s.progress}>
         {[1,2].map((n)=><View key={n} style={[s.progressBar,n<=step&&s.progressBarActive]}/>)}
       </View>
-      <Text style={s.stepLabel}>{step} of 2</Text>
+      <Text style={s.stepLabel}>{t('authStepOf').replace('{n}',step).replace('{total}',2)}</Text>
     </View>
 
     <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[s.scroll,{paddingBottom:insets.bottom+spacing.md}]}>
       <Reveal key={step} style={s.body}>
-        <Text accessibilityRole="header" style={s.title}>{STEPS[step].title}</Text>
-        <Text style={s.subtitle}>{STEPS[step].subtitle}</Text>
+        <Text accessibilityRole="header" style={s.title}>{t(STEPS[step].title)}</Text>
+        <Text style={s.subtitle}>{t(STEPS[step].subtitle)}</Text>
 
         {step===1?<View style={s.fields}>
-          <IconInput label="Your name" icon="account-outline" value={form.name} onChangeText={set('name')} placeholder="Enter your name" autoCapitalize="words" autoComplete="name" returnKeyType="next"/>
-          <IconInput label="Mobile number" icon="phone-outline" value={form.phone} onChangeText={set('phone')} placeholder="10-digit mobile number" keyboardType="phone-pad" autoComplete="tel" maxLength={14}/>
-          <IconInput label="Email address" icon="email-outline" value={form.email} onChangeText={set('email')} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email" returnKeyType="next" onSubmitEditing={next} hint="Used to sign in and to reset your password."/>
+          <IconInput label={t('registerName')} icon="account-outline" value={form.name} onChangeText={set('name')} placeholder={t('registerNamePlaceholder')} autoCapitalize="words" autoComplete="name" returnKeyType="next"/>
+          <IconInput label={t('registerMobile')} icon="phone-outline" value={form.phone} onChangeText={set('phone')} placeholder={t('registerMobilePlaceholder')} keyboardType="phone-pad" autoComplete="tel" maxLength={14}/>
+          <IconInput label={t('authEmail')} icon="email-outline" value={form.email} onChangeText={set('email')} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email" returnKeyType="next" onSubmitEditing={next} hint={t('registerEmailHint')}/>
         </View>:<View style={s.fields}>
           <View style={s.who}>
             <View style={s.whoIcon}><Ionicons name="person" size={18} color={colors123.primary}/></View>
@@ -96,26 +98,26 @@ export default function RegisterScreen({navigation}){
               <Text style={s.whoName} numberOfLines={1}>{form.name.trim()}</Text>
               <Text style={s.whoMeta} numberOfLines={1}>{form.email.trim().toLowerCase()}</Text>
             </View>
-            <TouchableOpacity accessibilityRole="button" onPress={back} hitSlop={8}><Text style={s.link}>Edit</Text></TouchableOpacity>
+            <TouchableOpacity accessibilityRole="button" onPress={back} hitSlop={8}><Text style={s.link}>{t('edit')}</Text></TouchableOpacity>
           </View>
-          <IconInput label="Password" icon="lock-outline" value={form.password} onChangeText={set('password')} placeholder="Create a password" secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" hint="8 or more characters, with a letter and a number." right={eye}/>
-          <IconInput label="Confirm password" icon="lock-check-outline" value={form.confirm} onChangeText={set('confirm')} placeholder="Re-enter your password" secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" returnKeyType="go" onSubmitEditing={submit}/>
+          <IconInput label={t('authPassword')} icon="lock-outline" value={form.password} onChangeText={set('password')} placeholder={t('registerCreatePassword')} secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" hint={t('authPasswordHint')} right={eye}/>
+          <IconInput label={t('registerConfirm')} icon="lock-check-outline" value={form.confirm} onChangeText={set('confirm')} placeholder={t('registerConfirmPlaceholder')} secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" returnKeyType="go" onSubmitEditing={submit}/>
         </View>}
         {error?<Text accessibilityLiveRegion="polite" style={s.error}>{error}</Text>:null}
       </Reveal>
 
       <View style={s.footer}>
         {step===1
-          ?<AppButton label="Continue" size="lg" onPress={next}/>
-          :<AppButton label="Create account" size="lg" loading={loading} onPress={submit}/>}
+          ?<AppButton label={t('authContinue')} size="lg" onPress={next}/>
+          :<AppButton label={t('authCreateAccount')} size="lg" loading={loading} onPress={submit}/>}
         <TouchableOpacity accessibilityRole="button" style={s.alt} onPress={()=>navigation.navigate('Login')}>
-          <Text style={s.altMuted}>Already have an account? </Text><Text style={s.link}>Sign in</Text>
+          <Text style={s.altMuted}>{t('registerHaveAccount')}</Text><Text style={s.link}>{t('authSignIn')}</Text>
         </TouchableOpacity>
         <Text style={s.legal}>
-          By creating an account, you agree to the{' '}
-          <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(TERMS_URL)}>Terms of service</Text>
-          {' '}and{' '}
-          <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(PRIVACY_URL)}>Privacy policy</Text>.
+          {t('registerAgree')}{' '}
+          <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(TERMS_URL)}>{t('authTerms')}</Text>
+          {' '}{t('registerAnd')}{' '}
+          <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(PRIVACY_URL)}>{t('authPrivacy')}</Text>.
         </Text>
       </View>
     </ScrollView>

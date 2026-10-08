@@ -771,7 +771,10 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
             {jobSheetLoading ?
             <ActivityIndicator size="small" color={colors123.primary} /> :
 
-            <Text style={styles.headerActionText}>{t("auto_job_sheet_2")}</Text>
+            <View style={styles.headerActionInner}>
+                <MaterialCommunityIcons name="file-document-outline" size={18} color={colors123.primary} />
+                <Text style={styles.headerActionText}>{t("auto_job_sheet_2").replace("📄", "").trim()}</Text>
+              </View>
             }
           </TouchableOpacity>
 
@@ -851,9 +854,6 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                   `Profile #${profile.id}`}
                   </Text>
                 </View>
-                {profile.id ?
-              <Text style={styles.measurementMeta}>#{profile.id}</Text> :
-              null}
               </View>
               <View style={styles.divider} />
               <ResponsiveGrid minItemWidth={140} style={styles.measurementList}>
@@ -934,6 +934,9 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
 
                     }
                     <Text
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.7}
                       style={[
                       styles.statusLabel,
                       currentStatus && styles.statusLabelActive]
@@ -1006,7 +1009,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                 null}
                   </View>
                   <View style={styles.itemMetaStack}>
-                    <Text style={styles.itemMetaText}>Qty {item.quantity}</Text>
+                    <Text style={styles.itemMetaText}>{t("quantity")} {item.quantity}</Text>
                     {canSeeMoney && <Text style={styles.itemPriceText}>{formatCurrency(item.price * item.quantity)}</Text>}
                   </View>
                   </View>
@@ -1015,8 +1018,7 @@ ${balance > 0 ? "Please clear the balance at delivery/pickup." : "Payment comple
                 <View style={styles.assignmentPanel}>
                   <View style={styles.assignmentHeader}>
                     <View>
-                      <Text style={styles.assignmentTitle}>Production handoff</Text>
-                      <Text style={styles.assignmentSubtitle}>Choose who will cut and stitch this item</Text>
+                      <Text style={styles.assignmentTitle}>{t("cuttingAndStitching")}</Text>
                     </View>
                   </View>
                   <View style={styles.assignmentRow}>
@@ -1475,6 +1477,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors123.surface,
     marginRight: spacing.xs,
   },
+  headerActionInner: { flexDirection: "row", alignItems: "center", gap: 4 },
   headerActionText: {
     fontSize: fonts.xs.fontSize,
     fontFamily: fonts.semibold,
@@ -1489,16 +1492,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: spacing.xs,
     marginTop: spacing.xs,
-  },
-  statusBadge: {
-    borderRadius: radius.pill,
-    borderWidth: 1,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 4,
-  },
-  statusBadgeText: {
-    fontFamily: fonts.semibold,
-    fontSize: fonts.xs.fontSize,
   },
   typeBadge: {
     borderRadius: radius.pill,
@@ -1665,10 +1658,6 @@ const styles = StyleSheet.create({
     color: colors123.primary,
     fontFamily: fonts.bold,
   },
-  measurementMeta: {
-    fontSize: fonts.xs.fontSize,
-    color: colors123.textSoft,
-  },
   measurementList: {
     gap: spacing.sm,
   },
@@ -1794,28 +1783,20 @@ const styles = StyleSheet.create({
   },
   assignmentPanel: {
     marginTop: spacing.md,
-    borderRadius: radius.md,
-    backgroundColor: colors123.surfaceMuted,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
+    paddingTop: spacing.md,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: colors123.border,
   },
   assignmentHeader: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   assignmentTitle: {
     fontFamily: fonts.extrabold,
     fontSize: fonts.sm.fontSize,
     color: colors123.text,
-  },
-  assignmentSubtitle: {
-    marginTop: 2,
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    color: colors123.textMuted,
   },
   assignmentRow: {
     gap: spacing.sm,

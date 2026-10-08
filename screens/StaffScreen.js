@@ -18,6 +18,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { MotiView } from "../components/AccessibleMotionView";
+import PressableScale from "../components/PressableScale";
 import AppButton from "../components/AppButton";
 import AppCard from "../components/AppCard";
 import EmptyState from "../components/EmptyState";
@@ -106,126 +107,43 @@ function StaffCard({ staff, onEdit, onDelete, onLogWork, onViewLedger, onPreview
       from={{ opacity: 0, translateX: -20 }}
       transition={{ duration: 300, type: "timing" }}>
 
+      <PressableScale accessibilityRole="button" accessibilityLabel={staff.name} onPress={() => onPreview(staff)} scaleTo={0.985}>
       <AppCard style={styles.staffCard}>
         <View style={styles.staffHeader}>
           <View style={styles.staffAvatar}>
-            <Text style={styles.staffAvatarText}>
-              {staff.name.charAt(0).toUpperCase()}
+            <Text style={styles.staffAvatarText}>{staff.name.charAt(0).toUpperCase()}</Text>
+          </View>
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text style={styles.staffName} numberOfLines={1}>{staff.name}</Text>
+            <Text style={styles.staffPhone} numberOfLines={1}>
+              {roleLabel} · {paymentTypeLabel(staff.payment_type, t)} {money(payRate)}
             </Text>
           </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.staffName}>{staff.name}</Text>
-            <Text style={styles.staffPhone}>{staff.phone || staff.email || t("noPhone")}</Text>
-          </View>
-          <View
-            style={[
-            styles.statusDot,
-            {
-              backgroundColor: isActive ?
-              colors123.success :
-              colors123.textMuted
-            }]
-            } />
-
+          {!isActive && <Text style={styles.inactiveBadge}>{t("inactive")}</Text>}
         </View>
 
-        <View style={styles.staffMeta}>
-          <View style={styles.staffRole}>
-            <MaterialCommunityIcons
-              name={staff.role === "cutter" ? "content-cut" : "needle"}
-              size={14}
-              color={colors123.primary} />
-
-            <Text style={styles.staffRoleText}>
-              {roleLabel} app access
-            </Text>
-          </View>
-          <View style={styles.staffRole}>
-            <MaterialCommunityIcons
-              name="cash-multiple"
-              size={14}
-              color={colors123.primary} />
-
-            <Text style={styles.staffRoleText}>
-              {paymentTypeLabel(staff.payment_type, t)} - {money(payRate)}
-            </Text>
-          </View>
-        </View>
-
-        <Text style={styles.staffAccessText}>{roleSummaryFor(staff.role)}</Text>
-
-        <View style={styles.statsRow}>
-          <View style={styles.statPill}>
-            <Text style={styles.statLabel}>{t("thisMonth")}</Text>
-            <Text style={styles.statValue}>
-              {money(staff.current_month_earnings)}
-            </Text>
-          </View>
-          <View style={styles.statPill}>
-            <Text style={styles.statLabel}>{t("entries")}</Text>
-            <Text style={styles.statValue}>
-              {Number(staff.work_entries_count || 0)}
-            </Text>
-          </View>
+        <View style={styles.statsLine}>
+          <Text style={styles.statLabel}>{t("thisMonth")} <Text style={styles.statValue}>{money(staff.current_month_earnings)}</Text></Text>
+          <Text style={styles.statLabel}>{t("entries")} <Text style={styles.statValue}>{Number(staff.work_entries_count || 0)}</Text></Text>
         </View>
 
         <View style={styles.staffActions}>
-          <Pressable accessibilityRole="button"
-            style={[styles.actionButton, styles.editButton]}
-            onPress={() => onPreview(staff)}>
-
-            <MaterialCommunityIcons
-              name={staff.role === "cutter" ? "eye-outline" : "clipboard-list-outline"}
-              size={16}
-              color={colors123.primary} />
-
-            <Text style={styles.actionButtonText}>View</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button"
-            style={[styles.actionButton, styles.editButton]}
-            onPress={() => onEdit(staff)}>
-
-            <MaterialCommunityIcons
-              name="pencil"
-              size={16}
-              color={colors123.primary} />
-
-            <Text style={styles.actionButtonText}>{t("edit")}</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button"
-            style={[styles.actionButton, styles.editButton]}
-            onPress={() => onLogWork(staff)}>
-
-            <MaterialCommunityIcons
-              name="needle"
-              size={16}
-              color={colors123.primary} />
-
-            <Text style={styles.actionButtonText}>{t("work")}</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button"
-            style={[styles.actionButton, styles.editButton]}
-            onPress={() => onViewLedger(staff)}>
-
-            <MaterialCommunityIcons
-              name="clipboard-text-clock-outline"
-              size={16}
-              color={colors123.primary} />
-
-            <Text style={styles.actionButtonText}>{t("ledger")}</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button"
-            style={[styles.actionIconButton, styles.deleteButton]}
-            onPress={() => onDelete(staff)}>
-
-            <MaterialCommunityIcons
-              name="trash-can-outline"
-              size={16}
-              color={colors123.danger} />
-
+          {[
+          { key: "work", icon: "needle", label: t("work"), onPress: () => onLogWork(staff) },
+          { key: "ledger", icon: "clipboard-text-clock-outline", label: t("ledger"), onPress: () => onViewLedger(staff) },
+          { key: "edit", icon: "pencil-outline", label: t("edit"), onPress: () => onEdit(staff) }].
+          map((action) =>
+          <Pressable key={action.key} accessibilityRole="button" style={[styles.actionButton, styles.editButton]} onPress={action.onPress}>
+              <MaterialCommunityIcons name={action.icon} size={16} color={colors123.primary} />
+              <Text style={styles.actionButtonText}>{action.label}</Text>
+            </Pressable>
+          )}
+          <Pressable accessibilityRole="button" accessibilityLabel={t("delete")} style={[styles.actionIconButton, styles.deleteButton]} onPress={() => onDelete(staff)}>
+            <MaterialCommunityIcons name="trash-can-outline" size={18} color={colors123.danger} />
           </Pressable>
         </View>
       </AppCard>
+      </PressableScale>
     </MotiView>);
 
 }
@@ -1660,39 +1578,8 @@ const styles = StyleSheet.create({
     color: colors123.textMuted,
     marginTop: 2,
   },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  staffMeta: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  staffAccessText: {
-    marginBottom: spacing.md,
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    lineHeight: 18,
-    color: colors123.textMuted,
-  },
-  staffRole: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: spacing.xs,
-    backgroundColor: colors123.primarySoft,
-    borderRadius: radius.sm,
-  },
-  staffRoleText: {
-    fontSize: 12,
-    fontFamily: fonts.semibold,
-    color: colors123.primary,
-  },
+  statsLine: { flexDirection: "row", gap: spacing.lg, marginTop: spacing.sm },
+  inactiveBadge: { fontFamily: fonts.semibold, fontSize: 12, color: colors123.textMuted, backgroundColor: colors123.surfaceMuted, paddingHorizontal: 8, paddingVertical: 3, borderRadius: radius.pill, overflow: "hidden" },
   statsRow: {
     flexDirection: "row",
     gap: spacing.sm,
@@ -1718,12 +1605,11 @@ const styles = StyleSheet.create({
   // Five actions do not fit one phone row; wrap to two rows instead of clipping labels
   staffActions: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
+    gap: spacing.xs,
+    marginTop: spacing.md,
   },
   actionButton: {
-    flexGrow: 1,
-    flexBasis: "30%",
+    flex: 1,
     minHeight: 44,
     flexDirection: "row",
     alignItems: "center",

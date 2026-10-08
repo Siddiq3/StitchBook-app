@@ -149,9 +149,9 @@ export const SIZES = {
   xl3: 48,
 
   radiusSm: 10,
-  radiusMd: 14,
-  radiusLg: 18,
-  radiusXl: 22,
+  radiusMd: 12,
+  radiusLg: 16,
+  radiusXl: 20,
   radiusFull: 999,
 
   inputH: 48,
@@ -172,12 +172,14 @@ export const spacing = {
   xxxl: 64,
 };
 
+// Shape rule: controls (buttons, inputs, segmented) md, surfaces (cards, sheets) lg,
+// chips and badges pill. xl is reserved for sheets and the auth card.
 export const radius = {
   xs: 6,
   sm: 10,
-  md: 14,
-  lg: 18,
-  xl: 22,
+  md: 12,
+  lg: 16,
+  xl: 20,
   pill: 999,
 };
 

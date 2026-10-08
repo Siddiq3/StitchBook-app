@@ -2,32 +2,31 @@ import React from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { BrandMark } from "./BrandLogo";
 import Reveal from "./Reveal";
+import { useLanguage } from "../context/LanguageContext";
 import { colors123, fonts, radius, spacing, typography, shadows } from "../utils/theme";
 
 const FEATURES = [
-  { icon: "receipt-outline", label: "Orders & delivery dates" },
-  { icon: "resize-outline", label: "Customer measurements" },
-  { icon: "people-outline", label: "Staff work & pay" },
+  { icon: "receipt-outline", label: 'authFeatureOrders' },
+  { icon: "resize-outline", label: 'authFeatureMeasure' },
+  { icon: "people-outline", label: 'authFeatureStaff' },
 ];
 
 // Shared frame for sign in, sign up and password reset: gradient brand header,
 // the form on a raised card, and a feature strip that fills the space below.
 export default function AuthShell({ title, subtitle, onBack, step, children, footer }) {
+  const { t } = useLanguage();
   const insets = useSafeAreaInsets();
   return (
     <KeyboardAvoidingView style={s.container} behavior={Platform.OS === "ios" ? "padding" : "height"}>
       <StatusBar style="light" />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[s.scroll, { paddingBottom: insets.bottom + spacing.lg }]}>
-        <LinearGradient colors={["#1A8CFF", colors123.primary, "#0057B8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[s.hero, { paddingTop: insets.top + spacing.md }]}>
-          <View style={s.glow} />
-          <View style={s.glowSmall} />
+        <View style={[s.hero, { paddingTop: insets.top + spacing.md }]}>
           <View style={s.topRow}>
             {onBack ? (
-              <TouchableOpacity accessibilityRole="button" accessibilityLabel="Back" onPress={onBack} hitSlop={8} style={s.back}>
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel={t('authBack')} onPress={onBack} hitSlop={8} style={s.back}>
                 <Ionicons name="arrow-back" size={22} color={colors123.surface} />
               </TouchableOpacity>
             ) : (
@@ -35,12 +34,12 @@ export default function AuthShell({ title, subtitle, onBack, step, children, foo
             )}
             <View style={s.secure}>
               <Ionicons name="shield-checkmark" size={14} color={colors123.surface} />
-              <Text style={s.secureText}>{step || "Secure"}</Text>
+              <Text style={s.secureText}>{step || t('authSecure')}</Text>
             </View>
           </View>
           <Text accessibilityRole="header" style={s.title}>{title}</Text>
           {subtitle ? <Text style={s.subtitle}>{subtitle}</Text> : null}
-        </LinearGradient>
+        </View>
 
         <Reveal style={s.card}>{children}</Reveal>
         {footer ? <Reveal index={1}>{footer}</Reveal> : null}
@@ -52,11 +51,11 @@ export default function AuthShell({ title, subtitle, onBack, step, children, foo
               <View style={s.featureIcon}>
                 <Ionicons name={item.icon} size={18} color={colors123.primary} />
               </View>
-              <Text style={s.featureText}>{item.label}</Text>
+              <Text style={s.featureText}>{t(item.label)}</Text>
             </View>
           ))}
         </Reveal>
-        <Text style={s.brandFoot}>StitchBook · Made for tailoring shops</Text>
+        <Text style={s.brandFoot}>{t('authFooter')}</Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -69,11 +68,10 @@ const s = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 72,
     overflow: "hidden",
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
+    borderBottomLeftRadius: radius.xl,
+    borderBottomRightRadius: radius.xl,
+    backgroundColor: colors123.primary,
   },
-  glow: { position: "absolute", width: 280, height: 280, borderRadius: 140, right: -100, top: -90, backgroundColor: "rgba(255,255,255,0.12)" },
-  glowSmall: { position: "absolute", width: 140, height: 140, borderRadius: 70, left: -50, bottom: -60, backgroundColor: "rgba(255,255,255,0.08)" },
   topRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", minHeight: 44 },
   back: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.16)" },
   secure: {

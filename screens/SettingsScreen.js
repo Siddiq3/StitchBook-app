@@ -140,59 +140,18 @@ export default function SettingsScreen({ navigation }) {
             }
           </View>
 
-          {/* Shop Info Card */}
-          {shop &&
-          <>
-              <View style={styles.shopInfoCard}>
-                <View style={styles.shopInfoRow}>
-                  <MaterialCommunityIcons name="store" size={18} color={colors123.primary} />
-                  <Text style={styles.shopInfoLabel}>{t('shopName')}:</Text>
-                  <Text style={styles.shopInfoValue}>{shop.name}</Text>
-                </View>
-                {shop.phone &&
-              <View style={styles.shopInfoRow}>
-                    <MaterialCommunityIcons name="phone" size={18} color={colors123.primary} />
-                    <Text style={styles.shopInfoLabel}>{t('phone')}:</Text>
-                    <Text style={styles.shopInfoValue}>{formatPhone(shop.phone)}</Text>
-                  </View>
-              }
-                {shop.location &&
-              <View style={styles.shopInfoRow}>
-                    <MaterialCommunityIcons name="map-marker" size={18} color={colors123.primary} />
-                    <Text style={styles.shopInfoLabel}>{t('address')}:</Text>
-                    <Text style={styles.shopInfoValue} numberOfLines={1}>{shop.location}</Text>
-                  </View>
-              }
-              </View>
-            </>
+          {shop && (shop.phone || shop.location) &&
+          <Text style={styles.profileMeta} numberOfLines={2}>
+              {[shop.phone && formatPhone(shop.phone), shop.location].filter(Boolean).join(" · ")}
+            </Text>
           }
         </View>
 
-        {/* Language Section */}
-        <View style={styles.languageSection}>
-          <Text style={styles.sectionTitle}>{t('changeLanguage')}</Text>
-          <TouchableOpacity accessibilityRole="button"
-            style={styles.languageItem}
-            onPress={() => setLanguageModalVisible(true)}
-            activeOpacity={0.7}>
-
-            <View style={styles.languageIconContainer}>
-              <MaterialCommunityIcons
-                name="earth"
-                size={20}
-                color={colors123.primary} />
-
-            </View>
-            <View style={styles.languageInfo}>
-              <Text style={styles.languageLabel}>{t('language')}</Text>
-              <Text style={styles.languageValue}>{currentLanguageName}</Text>
-            </View>
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={24}
-              color={colors123.textSoft} />
-
-          </TouchableOpacity>
+        <View style={styles.groupCard}>
+          <ListRow title={t('language')} meta={currentLanguageName}
+            leading={<MaterialCommunityIcons name="translate" size={20} color={colors123.textSecondary} />}
+            trailing={<MaterialCommunityIcons name="chevron-right" size={20} color={colors123.textMuted} />}
+            onPress={() => setLanguageModalVisible(true)} />
         </View>
 
         {/* Login Methods Section - disabled in this build */}
@@ -283,7 +242,7 @@ export default function SettingsScreen({ navigation }) {
         <View style={styles.groupCard}>
           <Text style={styles.groupTitle}>{t("account")}</Text>
           {isOwner &&
-          <ListRow title={t("accountStatus")} meta={getAccountStatusText(subscription, t) || "—"}
+          <ListRow title={t("accountStatus")} meta={getAccountStatusText(subscription, t) || undefined}
             leading={<MaterialCommunityIcons name="shield-check-outline" size={20} color={colors123.textSecondary} />} />
           }
           {[
@@ -298,26 +257,11 @@ export default function SettingsScreen({ navigation }) {
             onPress={item.onPress} />)}
         </View>
 
-        {/* Logout Button */}
-        <TouchableOpacity accessibilityRole="button"
-          style={styles.logoutButton}
-          onPress={handleLogout}
-          activeOpacity={0.7}>
-
-          <View style={[styles.iconContainer, { backgroundColor: colors123.danger }]}>
-            <MaterialCommunityIcons
-              name="logout"
-              size={20}
-              color={colors123.surface} />
-
-          </View>
-          <Text style={styles.logoutLabel}>{t('logout')}</Text>
-          <MaterialCommunityIcons
-            name="chevron-right"
-            size={24}
-            color={colors123.textSoft} />
-
-        </TouchableOpacity>
+        <View style={styles.groupCard}>
+          <ListRow title={t('logout')} titleStyle={{ color: colors123.danger }}
+            leading={<MaterialCommunityIcons name="logout" size={20} color={colors123.danger} />}
+            onPress={handleLogout} />
+        </View>
       </ScrollView>
 
       {/* Shop Edit Modal */}
@@ -477,8 +421,9 @@ const styles = StyleSheet.create({
     paddingTop: spacing.md,
     backgroundColor: colors123.background,
   },
-  groupCard: { marginTop: spacing.md, marginHorizontal: spacing.md, paddingHorizontal: spacing.md, paddingTop: spacing.sm, backgroundColor: colors123.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors123.borderSubtle, ...shadows.card },
-  groupTitle: { fontSize: 14, color: colors123.textMuted, fontFamily: fonts.semibold, paddingTop: spacing.xs },
+  groupCard: { marginTop: spacing.sm, marginHorizontal: spacing.md, paddingHorizontal: spacing.md, backgroundColor: colors123.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors123.borderSubtle, ...shadows.card },
+  groupTitle: { fontSize: 13, color: colors123.textMuted, fontFamily: fonts.semibold, paddingTop: spacing.sm },
+  profileMeta: { marginTop: spacing.sm, fontSize: 14, lineHeight: 20, color: colors123.textSecondary, fontFamily: fonts.regular },
   profileSection: {
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
@@ -533,116 +478,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  shopInfoCard: {
-    marginTop: spacing.md,
-    padding: spacing.md,
-    backgroundColor: "transparent",
-    borderRadius: radius.md,
-    borderWidth: 0,
-    borderColor: colors123.borderLight,
-    gap: spacing.sm,
-    paddingHorizontal: 0,
-  },
-  shopInfoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing.sm,
-  },
-  shopInfoLabel: {
-    fontSize: 13,
-    color: colors123.textMuted,
-    fontFamily: fonts.regular,
-  },
-  shopInfoValue: {
-    fontSize: 13,
-    color: colors123.text,
-    fontFamily: fonts.medium,
-    flex: 1,
-  },
-  settingsMenu: {
-    marginTop: spacing.md,
-    marginHorizontal: spacing.md,
-    backgroundColor: colors123.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    overflow: "hidden",
-    shadowColor: colors123.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0,
-    shadowRadius: 10,
-    elevation: 0,
-  },
-  menuItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors123.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors123.borderLight,
-    gap: spacing.sm,
-  },
-  iconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: radius.sm,
-    backgroundColor: colors123.surfaceMuted,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  menuLabel: {
-    flex: 1,
-    fontSize: 15,
-    color: colors123.text,
-    fontFamily: fonts.medium,
-  },
-  languageSection: {
-    marginTop: spacing.md,
-    paddingHorizontal: spacing.md,
-    marginBottom: spacing.md,
-  },
   sectionTitle: {
     fontSize: 14,
 
     color: colors123.textMuted,
     fontFamily: fonts.semibold,
     marginBottom: spacing.sm,
-  },
-  languageItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors123.surface,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors123.borderSubtle,
-    gap: spacing.md,
-    ...shadows.card,
-  },
-  languageIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: radius.md,
-    backgroundColor: colors123.primarySoft,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  languageInfo: {
-    flex: 1,
-  },
-  languageLabel: {
-    fontSize: 14,
-    color: colors123.textMuted,
-    fontFamily: fonts.regular,
-  },
-  languageValue: {
-    fontSize: 16,
-
-    color: colors123.text,
-    fontFamily: fonts.semibold,
-    marginTop: 2,
   },
   modalOverlay: {
     flex: 1,
@@ -718,44 +559,6 @@ const styles = StyleSheet.create({
     color: colors123.primary,
     fontFamily: fonts.semibold,
   },
-  logoutButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.md,
-    backgroundColor: colors123.dangerSoft,
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors123.borderLight,
-    gap: spacing.md,
-    marginHorizontal: spacing.md,
-    marginTop: spacing.md,
-    marginBottom: spacing.xl,
-    shadowColor: colors123.text,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0,
-    shadowRadius: 4,
-    elevation: 0,
-  },
-  logoutLabel: {
-    flex: 1,
-    fontSize: 15,
-    color: colors123.danger,
-    fontFamily: fonts.medium,
-  },
-  editShopButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    marginTop: spacing.md,
-    gap: spacing.sm,
-  },
-  editShopButtonText: {
-    fontSize: 14,
-    color: colors123.primary,
-    fontFamily: fonts.semibold,
-  },
   modalContent: {
     backgroundColor: colors123.background,
     borderTopLeftRadius: radius.xl,
@@ -777,12 +580,6 @@ const styles = StyleSheet.create({
 
     color: colors123.text,
     fontFamily: fonts.bold,
-  },
-  modalSubtitle: {
-    marginTop: 4,
-    fontSize: 13,
-    color: colors123.textMuted,
-    fontFamily: fonts.regular,
   },
   modalBody: {
     padding: spacing.lg,

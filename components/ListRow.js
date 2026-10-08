@@ -10,12 +10,13 @@ export default function ListRow({
   onPress,
   accessibilityLabel,
   style,
+  titleStyle,
 }) {
   const content = (
     <>
       <View>{leading}</View>
       <View style={{ flex: 1, minWidth: 0 }}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={[styles.title, titleStyle]}>{title}</Text>
         {meta ? <Text style={styles.meta}>{meta}</Text> : null}
       </View>
       {trailing}

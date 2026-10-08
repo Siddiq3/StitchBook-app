@@ -25,7 +25,8 @@ export const LanguageProvider = ({ children }) => {
       try {
         const saved = await AsyncStorage.getItem('app_language');
 
-        if (saved) {
+        // A language no longer offered (partial translations) falls back to English
+        if (saved && languages.some((lang) => lang.code === saved)) {
           setLanguage(saved);
         } else {
           await AsyncStorage.setItem('app_language', 'en');

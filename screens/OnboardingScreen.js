@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { BackHandler, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useStitchPro } from "../context/StitchProContext";
 import { useToast } from "../context/ToastContext";
@@ -90,25 +89,23 @@ export default function OnboardingScreen() {
         <View style={s.progress}>
           {[1, 2, 3].map((n) => <View key={n} style={[s.progressBar, n <= step && s.progressBarActive]} />)}
         </View>
-        <Text style={s.stepLabel}>{step} of 3</Text>
+        <Text style={s.stepLabel}>{t('authStepOf').replace('{n}', step).replace('{total}', 3)}</Text>
       </View>
 
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[s.scroll, { paddingBottom: insets.bottom + spacing.md }]}>
         <Reveal>
-          <LinearGradient colors={["#1A8CFF", colors123.primary, "#0057B8"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={s.preview}>
-            <View style={s.previewGlow} />
+          <View style={s.preview}>
             <View style={s.previewAvatar}>
               <Text style={s.previewInitials}>{initialsOf(form.name)}</Text>
             </View>
             <View style={{ flex: 1, minWidth: 0 }}>
-              <Text style={s.previewEyebrow}>{t("yourShop")}</Text>
               <Text style={s.previewName} numberOfLines={1}>{form.name.trim() || t("royalTailorsPlaceholder")}</Text>
               <View style={s.previewMeta}>
                 {form.phone.trim() ? <Text style={s.previewMetaText} numberOfLines={1}>{formatPhone(form.phone)}</Text> : null}
                 {form.location.trim() ? <Text style={s.previewMetaText} numberOfLines={1}>· {form.location.trim()}</Text> : null}
               </View>
             </View>
-          </LinearGradient>
+          </View>
         </Reveal>
 
         <Reveal key={step} index={1} style={s.body}>
@@ -179,15 +176,10 @@ const s = StyleSheet.create({
     gap: spacing.md,
     padding: spacing.lg,
     borderRadius: radius.xl,
-    overflow: "hidden",
-    ...SHADOWS.lg,
-    shadowColor: colors123.primary,
-    shadowOpacity: 0.25,
+    backgroundColor: colors123.primary,
   },
-  previewGlow: { position: "absolute", width: 180, height: 180, borderRadius: 90, right: -60, top: -80, backgroundColor: "rgba(255,255,255,0.12)" },
   previewAvatar: { width: 56, height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", backgroundColor: colors123.surface },
   previewInitials: { fontFamily: fonts.bold, fontSize: 20, color: colors123.primary },
-  previewEyebrow: { fontFamily: fonts.semibold, fontSize: 12, color: "rgba(255,255,255,0.75)", textTransform: "uppercase", letterSpacing: 0.4 },
   previewName: { fontFamily: fonts.bold, fontSize: 20, lineHeight: 26, color: colors123.surface, marginTop: 2 },
   previewMeta: { flexDirection: "row", gap: 4, marginTop: 2 },
   previewMetaText: { fontFamily: fonts.regular, fontSize: 13, color: "rgba(255,255,255,0.85)", flexShrink: 1 },

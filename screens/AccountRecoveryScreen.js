@@ -4,10 +4,12 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AppButton from '../components/AppButton';
 import Reveal from '../components/Reveal';
 import { useStitchPro } from '../context/StitchProContext';
+import { useLanguage } from '../context/LanguageContext';
 import DeleteAccountScreen from './DeleteAccountScreen';
 import { colors123, fonts, radius, SHADOWS, spacing } from '../utils/theme';
 
 export default function AccountRecoveryScreen({ message, onRetry }) {
+  const { t } = useLanguage();
   const [deleting,setDeleting] = useState(false);
   const { logout } = useStitchPro();
   if (deleting) return <DeleteAccountScreen />;
@@ -18,17 +20,17 @@ export default function AccountRecoveryScreen({ message, onRetry }) {
           <MaterialCommunityIcons name="wifi-off" size={34} color={colors123.primary} />
         </View>
       </View>
-      <Text accessibilityRole="header" style={styles.title}>We couldn’t connect</Text>
+      <Text accessibilityRole="header" style={styles.title}>{t('recoveryTitle')}</Text>
       <Text accessibilityLiveRegion="polite" style={styles.body}>{message}</Text>
       <View style={styles.actions}>
-        <AppButton label="Try again" icon="refresh" size="lg" onPress={onRetry} />
-        <AppButton label="Sign out" variant="secondary" onPress={logout} />
+        <AppButton label={t('recoveryRetry')} icon="refresh" size="lg" onPress={onRetry} />
+        <AppButton label={t('signOut')} variant="secondary" onPress={logout} />
       </View>
     </Reveal>
     <Reveal index={1} style={styles.footer}>
-      <AppButton label="Contact support" icon="email-outline" variant="tertiary" onPress={() => Linking.openURL("mailto:stitchbook3@gmail.com")} />
+      <AppButton label={t('recoverySupport')} icon="email-outline" variant="tertiary" onPress={() => Linking.openURL("mailto:stitchbook3@gmail.com")} />
       {/* Kept reachable for Play's account-deletion rule, but not a primary choice on an error screen */}
-      <AppButton label="Delete account" variant="tertiary" size="sm" textStyle={{ color: colors123.danger }} onPress={() => setDeleting(true)} />
+      <AppButton label={t("deleteAccount")} variant="tertiary" size="sm" textStyle={{ color: colors123.danger }} onPress={() => setDeleting(true)} />
     </Reveal>
   </ScrollView>;
 }

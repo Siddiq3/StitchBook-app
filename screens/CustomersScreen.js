@@ -228,11 +228,6 @@ export default function CustomersScreen({ navigation }) {
                       </View>
                     </View>
                     <Text style={styles.customerMeta}>{formatPhone(customer.phone)}</Text>
-                    <View style={styles.customerFooter}>
-                      <Text style={styles.footerText}>
-                        {customer.orderCount || 0} {t("orders")}
-                      </Text>
-                    </View>
                   </View>
                   <MaterialCommunityIcons
                 color={colors123.textSoft}
@@ -272,35 +267,6 @@ const styles = StyleSheet.create({
   addButton: {
     minHeight: 44,
     paddingHorizontal: spacing.sm,
-  },
-  insightCard: {
-    flexDirection: "row",
-    gap: spacing.sm,
-    alignItems: "center",
-    borderRadius: 0,
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    padding: 0,
-  },
-  insightIcon: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors123.primarySoft,
-  },
-  insightTitle: {
-    fontFamily: fonts.semibold,
-    fontSize: 15,
-    color: colors123.text,
-  },
-  insightSubtitle: {
-    marginTop: spacing.xs,
-    fontFamily: fonts.regular,
-    fontSize: 13,
-    lineHeight: 20,
-    color: colors123.textMuted,
   },
   list: {
     gap: 0,
@@ -368,16 +334,5 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     fontSize: 13,
     color: colors123.textSecondary,
-  },
-  customerFooter: {
-    marginTop: 6,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: spacing.sm,
-  },
-  footerText: {
-    fontFamily: fonts.medium,
-    fontSize: 12,
-    color: colors123.textSoft,
   },
 });

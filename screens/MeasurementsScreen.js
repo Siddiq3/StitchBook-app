@@ -64,7 +64,8 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
           completion,
           filledFields: entries.length
         };
-      });
+      // Saved profiles first; customers without one follow as compact rows
+      }).sort((a, b) => (b.filledFields > 0) - (a.filledFields > 0));
     },
     [customers, measurements]
   );
@@ -136,7 +137,20 @@ export default function MeasurementsScreen({ navigation }) {const { t } = useLan
         <ListSkeleton /> : measurementsError && !measurementRecords.length ? null : !measurementRecords.length ? <EmptyState title={t("auto_no_measurements")} description={t("noCustomersYetDescription")} action={<AppButton label={t("customersTitle")} variant="secondary" onPress={() => navigation.navigate("StudioTabs", { screen: "Customers" })} />} /> :
 
         <View style={styles.list}>
-            {measurementRecords.map((record, index) =>
+            {measurementRecords.map((record, index) => record.filledFields === 0 ?
+          <Pressable
+            key={record.customer.id}
+            accessibilityRole="button"
+            accessibilityLabel={`${record.customer.name}. ${t("auto_no_measurements")}`}
+            onPress={() => openSheet(record.customer)}
+            style={({ pressed }) => [styles.emptyRow, pressed && styles.pressedCard]}>
+              <AvatarBadge initials={record.customer.avatar} name={record.customer.name} size={36} />
+              <View style={{ flex: 1, minWidth: 0 }}>
+                <Text style={styles.emptyRowName} numberOfLines={1}>{record.customer.name}</Text>
+                <Text style={styles.recordMeta}>{t("auto_no_measurements")}</Text>
+              </View>
+              <MaterialCommunityIcons name="plus-circle-outline" size={22} color={colors123.primary} />
+            </Pressable> :
           <MotiView
             key={record.customer.id}
             animate={{ opacity: 1, translateY: 0 }}
@@ -276,6 +290,17 @@ const styles = StyleSheet.create({
     fontSize: 22,
     color: colors123.text,
   },
+  emptyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: spacing.sm,
+    minHeight: 56,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors123.borderLight,
+  },
+  emptyRowName: { fontFamily: fonts.semibold, fontSize: 15, color: colors123.text },
   list: {
     gap: 0,
     backgroundColor: colors123.surface,
