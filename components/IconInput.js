@@ -4,7 +4,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { colors123, fonts, radius, spacing } from "../utils/theme";
 
 export default function IconInput({
-  label, icon, error, hint, right, multiline = false, style, inputStyle, onFocus, onBlur, editable = true, ...props
+  label, icon, prefix, error, hint, right, multiline = false, style, inputStyle, onFocus, onBlur, editable = true, ...props
 }) {
   const [focused, setFocused] = useState(false);
   return (
@@ -17,6 +17,7 @@ export default function IconInput({
         !editable && styles.disabled,
       ]}>
         {icon ? <MaterialCommunityIcons color={error ? colors123.danger : focused ? colors123.primary : colors123.textMuted} name={icon} size={20} /> : null}
+        {prefix ? <Text style={styles.prefix}>{prefix}</Text> : null}
         <TextInput
           {...props}
           accessibilityLabel={props.accessibilityLabel || label || props.placeholder}
@@ -40,6 +41,7 @@ export default function IconInput({
 }
 
 const styles = StyleSheet.create({
+  prefix: { fontFamily: fonts.semibold, fontSize: 15, color: colors123.textSecondary },
   field: { gap: 6 },
   label: { fontFamily: fonts.semibold, fontSize: 13, lineHeight: 18, color: colors123.textSecondary },
   wrapper: {

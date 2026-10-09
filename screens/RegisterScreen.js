@@ -1,149 +1,124 @@
-import React,{useEffect,useState} from 'react';
-import {KeyboardAvoidingView,Platform,ScrollView,StyleSheet,Text,TouchableOpacity,View} from 'react-native';
-import {StatusBar} from 'expo-status-bar';
-import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import React,{useCallback,useState} from 'react';
+import {StyleSheet,Text,TouchableOpacity} from 'react-native';
+import {useIsFocused} from '@react-navigation/native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import {useStitchPro} from '../context/StitchProContext';
 import {useToast} from '../context/ToastContext';
 import {useLanguage} from '../context/LanguageContext';
 import IconInput from '../components/IconInput';
-import AppButton from '../components/AppButton';
-import Reveal from '../components/Reveal';
+import StepFlow from '../components/StepFlow';
+import PasswordRules from '../components/PasswordRules';
+import FillCard from '../components/FillCard';
 import {PRIVACY_URL,TERMS_URL,openLink} from '../utils/legalLinks';
-import {colors123,fonts,radius,spacing,typography} from '../utils/theme';
+import {colors123,fonts,typography} from '../utils/theme';
 
 const validEmail=(value)=>/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(value||'').trim());
-const validPhone=(value)=>{const d=String(value||'').replace(/\D/g,'');return d.length===10||(d.length===12&&d.startsWith('91'));};
+const validPhone=(value)=>String(value||'').replace(/\D/g,'').length===10;
 const validPassword=(value)=>String(value||'').length>=8&&/[A-Za-z]/.test(value)&&/\d/.test(value);
 
-const STEPS={
-  1:{title:'registerTitle1',subtitle:'registerSubtitle1'},
-  2:{title:'registerTitle2',subtitle:'registerSubtitle2'},
-};
+// One question per screen: email, name, mobile, password. Each step validates
+// only its own field; a taken email or number sends the owner back to that step.
+const STEPS=[
+  {key:'email',title:'suEmailTitle',sub:'suEmailSub'},
+  {key:'name',title:'suNameTitle',sub:'suNameSub'},
+  {key:'phone',title:'suPhoneTitle',sub:'suPhoneSub'},
+  {key:'password',title:'suPasswordTitle',sub:'suPasswordSub'},
+];
 
-// Two short steps instead of one long form: details first, password second.
-// The action stays pinned at the bottom, near the thumb, like the rest of first run.
 export default function RegisterScreen({navigation}){
   const {t}=useLanguage();
-  const insets=useSafeAreaInsets();
+  const focused=useIsFocused();
   const {registerWithPassword}=useStitchPro();
   const {showToast}=useToast();
-  const [step,setStep]=useState(1);
-  const [form,setForm]=useState({name:'',email:'',phone:'',password:'',confirm:''});
+  const [step,setStep]=useState(0);
+  const [direction,setDirection]=useState(1);
+  const [form,setForm]=useState({email:'',name:'',phone:'',password:'',confirm:''});
   const [showPassword,setShowPassword]=useState(false);
-  const [loading,setLoading]=useState(false);
+  const [errors,setErrors]=useState({});
   const [error,setError]=useState('');
-  const set=(key)=>(value)=>{setForm(prev=>({...prev,[key]:value}));setError('');};
+  const [loading,setLoading]=useState(false);
 
-  // Android back on step 2 returns to step 1 instead of leaving sign-up
-  useEffect(()=>navigation.addListener('beforeRemove',(event)=>{
-    if(step!==2||!['GO_BACK','POP'].includes(event.data.action.type)) return;
-    event.preventDefault();
-    setStep(1);setError('');
-  }),[navigation,step]);
+  const set=(key)=>(value)=>{
+    setForm(prev=>({...prev,[key]:key==='phone'?value.replace(/\D/g,'').slice(-10):value}));
+    setErrors(prev=>({...prev,[key]:undefined}));setError('');
+  };
+  const go=useCallback((next)=>{setDirection(next>step?1:-1);setErrors({});setError('');setStep(next);},[step]);
+  const back=useCallback(()=>{ if(step>0) go(step-1); else navigation.goBack(); },[step,go,navigation]);
 
-  const back=()=>{ if(step===2){setStep(1);setError('');} else navigation.goBack(); };
-
-  const next=()=>{
-    if(form.name.trim().length<2){setError(t('registerNameMissing'));return;}
-    if(!validPhone(form.phone)){setError(t('registerMobileInvalid'));return;}
-    if(!validEmail(form.email)){setError(t('authInvalidEmail'));return;}
-    setError('');setStep(2);
+  const stepErrors=(index)=>{
+    const e={};
+    if(index===0&&!validEmail(form.email))e.email=t('authInvalidEmail');
+    if(index===1&&form.name.trim().length<2)e.name=t('registerNameMissing');
+    if(index===2&&!validPhone(form.phone))e.phone=t('registerMobileInvalid');
+    if(index===3){
+      if(!validPassword(form.password))e.password=t('authPasswordRule');
+      else if(form.password!==form.confirm)e.confirm=t('authPasswordsMismatch');
+    }
+    return e;
   };
 
-  const submit=async()=>{
-    if(!validPassword(form.password)){setError(t('authPasswordRule'));return;}
-    if(form.password!==form.confirm){setError(t('authPasswordsMismatch'));return;}
+  const next=async()=>{
+    const invalid=stepErrors(step);
+    setErrors(invalid);
+    if(Object.keys(invalid).length)return;
+    if(step<STEPS.length-1){go(step+1);return;}
     setLoading(true);setError('');
     try{
-      await registerWithPassword({name:form.name.trim(),email:form.email.trim().toLowerCase(),phone:form.phone.trim(),password:form.password});
+      await registerWithPassword({name:form.name.trim(),email:form.email.trim().toLowerCase(),phone:form.phone,password:form.password});
       showToast(t('registerDone'),'success');
     }catch(err){
-      const message=err.response?.data?.message||err.message||t('registerFailed');
-      setError(message);showToast(message,'error');
-      // A taken email or number is fixed on step 1
-      if(/exists|already/i.test(message)) setStep(1);
+      const serverMessage=err.response?.data?.message||err.message||'';
+      if(/exists|already/i.test(serverMessage)){
+        // Taken email or number: back to the email step with a plain message
+        setDirection(-1);setStep(0);setErrors({email:t('registerExists')});
+        return;
+      }
+      setError(serverMessage||t('registerFailed'));
     }finally{setLoading(false);}
   };
 
+  const current=STEPS[step];
+  // Answers already given (only steps behind the current one) fill the account card
+  const done=(index,value)=>index<step?value:'';
+  const scene=<FillCard icon="person" title={t('accountCardTitle')} current={step} rows={[
+    {key:'email',icon:'mail-outline',placeholder:t('authEmail'),value:done(0,form.email.trim().toLowerCase())},
+    {key:'name',icon:'person-outline',placeholder:t('registerName'),value:done(1,form.name.trim()),big:true},
+    {key:'phone',icon:'call-outline',placeholder:t('registerMobile'),value:done(2,form.phone&&`+91 ${form.phone.slice(0,5)} ${form.phone.slice(5)}`)},
+    {key:'password',icon:'lock-closed-outline',placeholder:t('authPassword'),value:done(3,'••••••••')},
+  ]}/>;
   const eye=<TouchableOpacity accessibilityRole="button" accessibilityLabel={showPassword?t('authHidePassword'):t('authShowPassword')} onPress={()=>setShowPassword(v=>!v)} hitSlop={10}>
     <Ionicons name={showPassword?'eye-off-outline':'eye-outline'} size={20} color={colors123.textMuted}/>
   </TouchableOpacity>;
 
-  return <KeyboardAvoidingView style={s.container} behavior={Platform.OS==='ios'?'padding':'height'}>
-    <StatusBar style="dark"/>
-    <View style={[s.topBar,{paddingTop:insets.top+spacing.xs}]}>
-      <TouchableOpacity accessibilityRole="button" accessibilityLabel={t('authBack')} onPress={back} hitSlop={8} style={s.back}>
-        <Ionicons name="arrow-back" size={22} color={colors123.text}/>
+  return <StepFlow
+    step={step} total={STEPS.length} direction={direction} active={focused}
+    onBack={back} onNext={next} loading={loading}
+    nextLabel={step===STEPS.length-1?t('authCreateAccount'):t('authContinue')}
+    scene={scene} title={t(current.title)} subtitle={t(current.sub)} error={error}
+    footer={<>
+      <TouchableOpacity accessibilityRole="button" style={s.alt} onPress={()=>navigation.navigate('Login')}>
+        <Text style={s.altMuted}>{t('registerHaveAccount')}</Text><Text style={s.link}>{t('authSignIn')}</Text>
       </TouchableOpacity>
-      <View style={s.progress}>
-        {[1,2].map((n)=><View key={n} style={[s.progressBar,n<=step&&s.progressBarActive]}/>)}
-      </View>
-      <Text style={s.stepLabel}>{t('authStepOf').replace('{n}',step).replace('{total}',2)}</Text>
-    </View>
-
-    <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={[s.scroll,{paddingBottom:insets.bottom+spacing.md}]}>
-      <Reveal key={step} style={s.body}>
-        <Text accessibilityRole="header" style={s.title}>{t(STEPS[step].title)}</Text>
-        <Text style={s.subtitle}>{t(STEPS[step].subtitle)}</Text>
-
-        {step===1?<View style={s.fields}>
-          <IconInput label={t('registerName')} icon="account-outline" value={form.name} onChangeText={set('name')} placeholder={t('registerNamePlaceholder')} autoCapitalize="words" autoComplete="name" returnKeyType="next"/>
-          <IconInput label={t('registerMobile')} icon="phone-outline" value={form.phone} onChangeText={set('phone')} placeholder={t('registerMobilePlaceholder')} keyboardType="phone-pad" autoComplete="tel" maxLength={14}/>
-          <IconInput label={t('authEmail')} icon="email-outline" value={form.email} onChangeText={set('email')} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email" returnKeyType="next" onSubmitEditing={next} hint={t('registerEmailHint')}/>
-        </View>:<View style={s.fields}>
-          <View style={s.who}>
-            <View style={s.whoIcon}><Ionicons name="person" size={18} color={colors123.primary}/></View>
-            <View style={{flex:1}}>
-              <Text style={s.whoName} numberOfLines={1}>{form.name.trim()}</Text>
-              <Text style={s.whoMeta} numberOfLines={1}>{form.email.trim().toLowerCase()}</Text>
-            </View>
-            <TouchableOpacity accessibilityRole="button" onPress={back} hitSlop={8}><Text style={s.link}>{t('edit')}</Text></TouchableOpacity>
-          </View>
-          <IconInput label={t('authPassword')} icon="lock-outline" value={form.password} onChangeText={set('password')} placeholder={t('registerCreatePassword')} secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" hint={t('authPasswordHint')} right={eye}/>
-          <IconInput label={t('registerConfirm')} icon="lock-check-outline" value={form.confirm} onChangeText={set('confirm')} placeholder={t('registerConfirmPlaceholder')} secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" returnKeyType="go" onSubmitEditing={submit}/>
-        </View>}
-        {error?<Text accessibilityLiveRegion="polite" style={s.error}>{error}</Text>:null}
-      </Reveal>
-
-      <View style={s.footer}>
-        {step===1
-          ?<AppButton label={t('authContinue')} size="lg" onPress={next}/>
-          :<AppButton label={t('authCreateAccount')} size="lg" loading={loading} onPress={submit}/>}
-        <TouchableOpacity accessibilityRole="button" style={s.alt} onPress={()=>navigation.navigate('Login')}>
-          <Text style={s.altMuted}>{t('registerHaveAccount')}</Text><Text style={s.link}>{t('authSignIn')}</Text>
-        </TouchableOpacity>
-        <Text style={s.legal}>
-          {t('registerAgree')}{' '}
-          <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(TERMS_URL)}>{t('authTerms')}</Text>
-          {' '}{t('registerAnd')}{' '}
-          <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(PRIVACY_URL)}>{t('authPrivacy')}</Text>.
-        </Text>
-      </View>
-    </ScrollView>
-  </KeyboardAvoidingView>;
+      {step===STEPS.length-1&&<Text style={s.legal}>
+        {t('registerAgree')}{' '}
+        <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(TERMS_URL)}>{t('authTerms')}</Text>
+        {' '}{t('registerAnd')}{' '}
+        <Text accessibilityRole="link" style={s.legalLink} onPress={()=>openLink(PRIVACY_URL)}>{t('authPrivacy')}</Text>.
+      </Text>}
+    </>}>
+    {step===0&&<IconInput label={t('authEmail')} icon="email-outline" value={form.email} onChangeText={set('email')} error={errors.email} placeholder="you@example.com" keyboardType="email-address" autoCapitalize="none" autoCorrect={false} autoComplete="email" returnKeyType="next" onSubmitEditing={next}/>}
+    {step===1&&<IconInput label={t('registerName')} icon="account-outline" value={form.name} onChangeText={set('name')} error={errors.name} placeholder={t('registerNamePlaceholder')} autoCapitalize="words" autoComplete="name" returnKeyType="next" onSubmitEditing={next}/>}
+    {step===2&&<IconInput label={t('registerMobile')} icon="phone-outline" prefix="+91" value={form.phone} onChangeText={set('phone')} error={errors.phone} placeholder={t('registerMobilePlaceholder')} keyboardType="number-pad" autoComplete="tel" maxLength={10} returnKeyType="next" onSubmitEditing={next}/>}
+    {step===3&&<>
+      <IconInput label={t('authPassword')} icon="lock-outline" value={form.password} onChangeText={set('password')} error={errors.password} placeholder={t('registerCreatePassword')} secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" right={eye}/>
+      <PasswordRules value={form.password} t={t}/>
+      <IconInput label={t('registerConfirm')} icon="lock-check-outline" value={form.confirm} onChangeText={set('confirm')} error={errors.confirm} hint={form.confirm&&form.confirm===form.password?t('pwMatch'):undefined} placeholder={t('registerConfirmPlaceholder')} secureTextEntry={!showPassword} autoCapitalize="none" autoCorrect={false} autoComplete="new-password" returnKeyType="go" onSubmitEditing={next}/>
+    </>}
+  </StepFlow>;
 }
 
 const s=StyleSheet.create({
-  container:{flex:1,backgroundColor:colors123.background},
-  topBar:{flexDirection:'row',alignItems:'center',gap:spacing.sm,paddingHorizontal:spacing.md,paddingBottom:spacing.xs},
-  back:{width:44,height:44,borderRadius:22,alignItems:'center',justifyContent:'center',backgroundColor:colors123.surface,borderWidth:1,borderColor:colors123.borderLight},
-  progress:{flex:1,flexDirection:'row',gap:6},
-  progressBar:{flex:1,height:4,borderRadius:2,backgroundColor:colors123.borderLight},
-  progressBarActive:{backgroundColor:colors123.primary},
-  stepLabel:{...typography.caption,fontFamily:fonts.semibold,color:colors123.textMuted,minWidth:36,textAlign:'right'},
-  scroll:{flexGrow:1,paddingHorizontal:24},
-  body:{paddingTop:spacing.lg},
-  title:{fontFamily:fonts.bold,fontSize:28,lineHeight:35,letterSpacing:-0.6,color:colors123.text},
-  subtitle:{...typography.body,color:colors123.textSecondary,marginTop:6},
-  fields:{gap:spacing.md,marginTop:spacing.lg},
-  who:{flexDirection:'row',alignItems:'center',gap:spacing.sm,padding:spacing.sm,borderRadius:radius.md,backgroundColor:colors123.surface,borderWidth:1,borderColor:colors123.borderLight},
-  whoIcon:{width:36,height:36,borderRadius:18,alignItems:'center',justifyContent:'center',backgroundColor:colors123.primarySoft},
-  whoName:{fontFamily:fonts.semibold,fontSize:15,color:colors123.text},
-  whoMeta:{...typography.caption,color:colors123.textMuted},
-  error:{...typography.small,color:colors123.danger,marginTop:spacing.sm},
-  footer:{marginTop:'auto',paddingTop:spacing.lg,gap:spacing.xs},
-  alt:{minHeight:48,alignItems:'center',justifyContent:'center',flexDirection:'row'},
+  alt:{minHeight:44,alignItems:'center',justifyContent:'center',flexDirection:'row'},
   altMuted:{...typography.small,color:colors123.textMuted},
   link:{...typography.small,color:colors123.primary,fontFamily:fonts.semibold},
   legal:{...typography.caption,color:colors123.textMuted,textAlign:'center'},
